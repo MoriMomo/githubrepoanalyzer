@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "~/lib/utils";
 
@@ -7,6 +8,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        default:
+          "bg-accent text-[#04120b] font-bold hover:bg-accent-dim shadow-sm shadow-accent/20 active:translate-y-px border border-accent/40",
         primary:
           "bg-accent text-[#04120b] font-bold hover:bg-accent-dim shadow-sm shadow-accent/20 active:translate-y-px border border-accent/40",
         secondary:
@@ -17,8 +20,11 @@ const buttonVariants = cva(
           "bg-flag/10 text-flag border border-flag/30 hover:bg-flag/20 hover:border-flag/50 active:translate-y-px",
         outline:
           "border border-border text-text hover:text-text hover:bg-surface-2 hover:border-border-strong active:translate-y-px",
+        link:
+          "text-accent underline-offset-4 hover:underline p-0 h-auto",
       },
       size: {
+        default: "h-8.5 px-3.5 text-xs font-medium",
         sm: "h-7.5 px-3 text-[11px] font-medium",
         md: "h-8.5 px-3.5 text-xs font-medium",
         lg: "h-10 px-4.5 text-xs font-semibold tracking-wide",
@@ -34,12 +40,15 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
     return (
-      <button
+      <Comp
         ref={ref}
         className={cn(buttonVariants({ variant, size, className }))}
         {...props}
@@ -48,3 +57,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 Button.displayName = "Button";
+
+// eslint-disable-next-line react-refresh/only-export-components
+export { buttonVariants };

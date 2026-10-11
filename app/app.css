@@ -7,6 +7,8 @@
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
+  --font-heading: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
   /* Neutrals: Deep Obsidian & Machined Slate Surfaces */
   --color-bg: #07090d;
   --color-surface: #0e1117;
@@ -23,6 +25,21 @@
   --color-accent: #10b981;
   --color-accent-dim: #059669;
   --color-accent-glow: #34d399;
+
+  /* Shadcn compatibility tokens mapped to dark obsidian system */
+  --color-primary: #10b981;
+  --color-primary-foreground: #04120b;
+  --color-secondary: #141820;
+  --color-secondary-foreground: #eff2f7;
+  --color-destructive: #f43f5e;
+  --color-destructive-foreground: #eff2f7;
+  --color-muted: #141820;
+  --color-muted-foreground: #8b96a8;
+  --color-background: #07090d;
+  --color-foreground: #eff2f7;
+  --color-line: #1f2532;
+  --color-input: #1f2532;
+  --color-ring: #10b981;
 
   /* Semantic status colors (Grounded = Emerald, Needs drill = Amber, Fluff/Ungrounded = Rose, Info = Blue) */
   --color-ok: #10b981;
@@ -81,5 +98,50 @@ body {
   height: 1px;
   background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 50%, transparent 100%);
   pointer-events: none;
+}
+
+/* Architectural blueprint grid & screen lines */
+.border-line {
+  border-color: var(--color-line);
+}
+
+.text-line {
+  color: var(--color-line);
+}
+
+.screen-line-top,
+.screen-line-bottom {
+  position: relative;
+}
+
+.screen-line-top::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -50vw;
+  right: -50vw;
+  height: 1px;
+  background-color: var(--color-border);
+  pointer-events: none;
+}
+
+.screen-line-bottom::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: -50vw;
+  right: -50vw;
+  height: 1px;
+  background-color: var(--color-border);
+  pointer-events: none;
+}
+
+/* Utility to hide scrollbar horizontally */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
