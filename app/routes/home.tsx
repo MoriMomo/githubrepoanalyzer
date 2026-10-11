@@ -18,11 +18,10 @@ import {
   Zap,
   Copy,
 } from "lucide-react";
-import { usePuterStore } from "~/lib/puter";
 import { generateUUID } from "~/lib/utils";
 import { auditBulletRisk, type BulletAuditReport } from "~/lib/grounding";
 import { Button, Badge, Card } from "~/components/ui";
-import { CommandMenu } from "~/components/CommandMenu";
+import { Navbar } from "~/components/Navbar";
 
 const HERO_EXAMPLES = [
   {
@@ -75,7 +74,6 @@ const PRESET_AUDIT_BULLETS = [
 ];
 
 export default function HomePage() {
-  const { auth, puterReady } = usePuterStore();
   const navigate = useNavigate();
 
   const [activeHeroTab, setActiveHeroTab] = useState(0);
@@ -111,90 +109,11 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg text-text">
-      {/* Top Engineering Nav Bar */}
-      <header className="border-b border-border bg-bg/85 backdrop-blur-xl sticky top-0 z-30 top-highlight">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-7 h-7 rounded-md bg-surface-2 border border-border flex items-center justify-center text-accent group-hover:border-accent/40 group-hover:bg-accent/10 transition">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-display font-bold text-base tracking-tight text-text">
-                  Proof
-                </span>
-                <Badge variant="accent" size="sm">
-                  v1.0
-                </Badge>
-              </div>
-            </Link>
-
-            <div className="hidden lg:flex items-center gap-2 pl-2 border-l border-border text-[11px] font-mono text-text-dim">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-              <span>Anti-Fabrication Net Active (§8)</span>
-            </div>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-6 text-xs font-mono text-text-dim">
-            <a href="#reality-check" className="hover:text-text transition">
-              Reality Check
-            </a>
-            <a href="#pipeline" className="hover:text-text transition">
-              How It Works
-            </a>
-            <a href="#auditor" className="hover:text-text transition">
-              Risk Auditor
-            </a>
-            <a href="#capabilities" className="hover:text-text transition">
-              Capabilities
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-3 text-xs">
-            <CommandMenu />
-            {/* Live Puter Status Capsule */}
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-2 border border-border text-[11px] font-mono text-text-dim">
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  puterReady ? "bg-ok" : "bg-warn animate-spin"
-                }`}
-              />
-              <span>{puterReady ? "Puter v2 Client" : "Connecting..."}</span>
-            </div>
-
-            {auth.isAuthenticated ? (
-              <div className="flex items-center gap-2.5">
-                <span className="text-text-dim font-mono text-[11px] hidden sm:inline">
-                  {auth.user?.username}
-                </span>
-                <Link to="/app">
-                  <Button variant="primary" size="sm">
-                    <span>Main Workspace</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link to="/login">
-                  <Button variant="ghost" size="sm" className="font-mono text-xs">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link to="/app">
-                  <Button variant="primary" size="sm">
-                    <span>Launch Workspace</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* Top Floating Pure Notch Navbar */}
+      <Navbar mode="home" />
 
       {/* Main Content */}
-      <main className="flex-1 space-y-24 py-16 px-4 sm:px-6 max-w-6xl mx-auto w-full">
+      <main className="flex-1 space-y-24 pt-24 pb-16 px-4 sm:px-6 max-w-6xl mx-auto w-full">
         {/* HERO SECTION */}
         <section className="text-center space-y-7 max-w-3xl mx-auto pt-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-mono">

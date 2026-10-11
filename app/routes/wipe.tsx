@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { AlertTriangle, Trash2, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { usePuterStore } from "~/lib/puter";
 import { Button, Badge, Card } from "~/components/ui";
+import { Navbar } from "~/components/Navbar";
 
 export default function WipePage() {
   const { kv, auth, puterReady } = usePuterStore();
@@ -66,33 +67,11 @@ export default function WipePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg text-text">
-      {/* Header */}
-      <header className="border-b border-border bg-bg/85 backdrop-blur-md px-4 sm:px-6 h-14 flex items-center justify-between sticky top-0 z-30">
-        <Link
-          to="/"
-          className="text-xs text-text-dim hover:text-text transition-colors flex items-center gap-1.5 font-mono"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Home</span>
-        </Link>
-
-        <div className="flex items-center gap-2">
-          <span className="w-5 h-5 rounded bg-accent/15 border border-accent/30 text-accent font-mono font-bold text-xs flex items-center justify-center">
-            P
-          </span>
-          <span className="font-display font-extrabold text-sm tracking-tight text-text">
-            PROOF
-          </span>
-          <Badge variant="flag" size="sm">
-            DANGER ZONE
-          </Badge>
-        </div>
-
-        <div className="w-12" />
-      </header>
+      {/* Top Floating Pure Notch Navbar */}
+      <Navbar mode="app" />
 
       {/* Main Container */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 pt-24">
         <Card variant="default" padding="lg" className="max-w-md w-full space-y-5 border-border rounded-xl shadow-2xl">
           <div className="space-y-2">
             <Badge variant="flag" size="sm">

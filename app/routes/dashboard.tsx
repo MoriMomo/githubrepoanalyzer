@@ -11,7 +11,6 @@ import {
   FileText,
   Sparkles,
   HelpCircle,
-  ArrowLeft,
   Calendar,
   Grid,
   List as ListIcon,
@@ -21,7 +20,7 @@ import { usePuterStore } from "~/lib/puter";
 import { generateUUID } from "~/lib/utils";
 import { SessionStorageAdapter } from "~/lib/storage";
 import { Button, Badge, Card, MotionView, Tooltip } from "~/components/ui";
-import { CommandMenu } from "~/components/CommandMenu";
+import { Navbar } from "~/components/Navbar";
 import type { ProjectSession } from "~/../types";
 
 const SAMPLE_PROJECTS = [
@@ -140,76 +139,11 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg text-text">
-      {/* Navigation Header */}
-      <header className="border-b border-border bg-bg/85 backdrop-blur-xl sticky top-0 z-30 top-highlight">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/"
-              className="text-xs text-text-dim hover:text-text transition flex items-center gap-1.5 font-mono"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Home</span>
-            </Link>
-            <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-sm tracking-tight text-text">
-                Proof
-              </span>
-              <Badge variant="accent" size="sm">
-                Workspace
-              </Badge>
-            </div>
-            <span className="text-[11px] font-mono text-text-dim hidden md:inline">
-              Project Library & Audit Vault
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3 text-xs">
-            <CommandMenu />
-            <Link
-              to="/wipe"
-              className="text-text-dim hover:text-text font-mono text-[11px] transition hidden sm:inline"
-            >
-              Reset Data
-            </Link>
-            {auth.isAuthenticated ? (
-              <div className="flex items-center gap-2.5">
-                <span className="text-text-dim font-mono text-[11px] hidden sm:inline">
-                  {auth.user?.username || "Authenticated"}
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => auth.signOut()}
-                  className="font-mono text-[11px]"
-                >
-                  Sign Out
-                </Button>
-              </div>
-            ) : (
-              <Link to="/login?next=/app">
-                <Button variant="outline" size="sm">
-                  Sign In to Puter
-                </Button>
-              </Link>
-            )}
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={handleCreateNewProject}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>New Scan</span>
-            </Button>
-          </div>
-        </div>
-      </header>
+      {/* Top Floating Pure Notch Navbar */}
+      <Navbar mode="app" />
 
       {/* Main Content */}
-      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-7 flex-1">
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-24 pb-8 space-y-7 flex-1">
         {/* Guest Mode Warning if not logged in */}
         {!auth.isAuthenticated && (
           <Card

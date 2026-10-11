@@ -1,21 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, Link } from "react-router";
+import { useParams } from "react-router";
 import {
-  ArrowLeft,
   ShieldCheck,
-  RotateCcw,
   AlertTriangle,
   Loader2,
   Copy,
   CheckCircle2,
-  Lock,
   ChevronDown,
 } from "lucide-react";
 import { usePuterStore } from "~/lib/puter";
 import { parseSource } from "~/lib/parse";
 import {
   MODEL,
-  AVAILABLE_MODELS,
   DEFAULT_AI_OPTIONS,
   buildStage1Prompt,
   buildStage2Prompt,
@@ -32,8 +28,8 @@ import { StackBadges } from "~/components/StackBadges";
 import { TruthDrill } from "~/components/TruthDrill";
 import { BulletCard } from "~/components/BulletCard";
 import { BulletAuditor } from "~/components/BulletAuditor";
-import { CommandMenu } from "~/components/CommandMenu";
 import { ExportDropdown } from "~/components/ui/ExportDropdown";
+import { Navbar } from "~/components/Navbar";
 import { toast } from "sonner";
 import { Button, Badge, Card, Panel, MotionView, Tooltip } from "~/components/ui";
 import type {
@@ -65,7 +61,6 @@ export default function ProjectPage() {
   const [loadingMessage, setLoadingMessage] = useState("");
   const [statusError, setStatusError] = useState<string | null>(null);
   const [rawPastedSource, setRawPastedSource] = useState("");
-  const [isPersisting, setIsPersisting] = useState(false);
 
   // Compute grounded corpus for live anti-fabrication audits
   const activeSource = signals?.rawSource || rawPastedSource;
@@ -110,7 +105,6 @@ export default function ProjectPage() {
   // Persist current session state (always saves to localStorage; syncs to Puter KV if authenticated)
   const persistSession = useCallback(
     async (updates: Partial<ProjectSession> = {}) => {
-      setIsPersisting(true);
       versionRef.current += 1;
 
       const sessionData: ProjectSession = {
@@ -137,8 +131,6 @@ export default function ProjectPage() {
         );
       } catch (err) {
         console.error("Failed to persist session to storage", err);
-      } finally {
-        setIsPersisting(false);
       }
     },
     [
@@ -403,116 +395,23 @@ export default function ProjectPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg text-text">
-      {/* Top Application Header */}
-      <header className="border-b border-border bg-bg/85 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/app"
-              className="text-xs text-text-dim hover:text-text transition-colors flex items-center gap-1.5 font-mono"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Workspace</span>
-            </Link>
-            <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-2">
-              <span className="w-5 h-5 rounded bg-accent/15 border border-accent/30 text-accent font-mono font-bold text-xs flex items-center justify-center">
-                P
-              </span>
-              <span className="font-display font-extrabold text-sm tracking-tight text-text">
-                PROOF
-              </span>
-              <Badge variant="accent" size="sm">
-                ANALYSIS
-              </Badge>
-            </div>
+      {/* Top Floating Pure Notch Navbar */}
+      <Navbar
+        mode="project"
+        projectMeta={{
+          projectId,
+          phase,
+          selectedModel,
+          onSelectModel: (m) => {
+            setSelectedModel(m);
+            persistSession({ modelUsed: m });
+          },
+          onReset: handleStartOver,
+        }}
+      />
 
-            {/* Model Selector Dropdown */}
-            <div className="relative hidden sm:block">
-              <select
-                value={selectedModel}
-                onChange={(e) => {
-                  setSelectedModel(e.target.value);
-                  persistSession({ modelUsed: e.target.value });
-                }}
-                disabled={isLoading}
-                className="bg-surface border border-border text-[11px] font-mono text-accent rounded-md px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-accent cursor-pointer hover:border-border-strong transition-colors"
-                title="Swappable AI Model (Anti-fabrication safety net enforces grounding regardless of model)"
-              >
-                {AVAILABLE_MODELS.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name} ({m.vendor})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 text-xs">
-            <CommandMenu
-              selectedModel={selectedModel}
-              onSelectModel={(m) => {
-                setSelectedModel(m);
-                persistSession({ modelUsed: m });
-              }}
-              onCopyAll={
-                bullets.length > 0
-                  ? () => {
-                      const allText = bullets.map((b) => `• ${b.text}`).join("\n\n");
-                      navigator.clipboard.writeText(allText);
-                      toast.success(`Copied all ${bullets.length} bullets to clipboard`);
-                    }
-                  : undefined
-              }
-              onExport={
-                bullets.length > 0
-                  ? (format) => {
-                      if (format === "latex") handleExportLatex();
-                      else if (format === "markdown") handleExportMarkdown();
-                      else if (format === "txt") handleExportText();
-                      else if (format === "json") handleExportJson();
-                    }
-                  : undefined
-              }
-            />
-            {isPersisting ? (
-              <span className="text-[11px] text-accent font-mono animate-pulse flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                <span>Syncing KV...</span>
-              </span>
-            ) : auth.isAuthenticated ? (
-              <span className="text-[11px] text-text-dim font-mono hidden md:flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-ok" />
-                <span>Encrypted Vault Active</span>
-              </span>
-            ) : null}
-
-            {!auth.isAuthenticated && (
-              <Link
-                to={`/auth?next=/project/${projectId}`}
-                className="text-warn hover:underline transition-colors text-[11px] font-mono flex items-center gap-1"
-              >
-                <Lock className="w-3 h-3" />
-                <span>Sign in to save</span>
-              </Link>
-            )}
-
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleStartOver}
-              className="font-mono text-[11px]"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset Scan</span>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Sticky Horizontal Phase Stepper Bar */}
-      <div className="border-b border-border bg-surface/95 backdrop-blur-md sticky top-14 z-20 top-highlight shadow-xs">
+      {/* Horizontal Phase Stepper Bar */}
+      <div className="border-b border-border bg-bg/95 backdrop-blur-md pt-16 pb-2 sticky top-0 z-20 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-between text-xs font-mono">
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto">
             {/* Step 1: Ingest */}

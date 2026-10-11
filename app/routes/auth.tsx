@@ -3,7 +3,6 @@ import { useNavigate, useLocation, Link } from "react-router";
 import {
   Lock,
   Loader2,
-  ArrowLeft,
   ArrowRight,
   ShieldCheck,
   KeyRound,
@@ -17,6 +16,7 @@ import {
 import { usePuterStore } from "~/lib/puter";
 import { resolveNext } from "~/lib/utils";
 import { Button, Card, Badge, Divider } from "~/components/ui";
+import { Navbar } from "~/components/Navbar";
 
 export default function AuthPage() {
   const { auth, isLoading, puterReady, error, clearError } = usePuterStore();
@@ -59,43 +59,11 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg text-text">
-      {/* Top Header */}
-      <header className="border-b border-border bg-bg/85 backdrop-blur-md px-4 sm:px-6 h-14 flex items-center justify-between sticky top-0 z-30">
-        <Link
-          to="/"
-          className="text-xs text-text-dim hover:text-text transition-colors flex items-center gap-1.5 font-mono"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Home</span>
-        </Link>
-
-        <div className="flex items-center gap-2">
-          <span className="w-5 h-5 rounded bg-accent/15 border border-accent/30 text-accent font-mono font-bold text-xs flex items-center justify-center">
-            P
-          </span>
-          <span className="font-display font-extrabold text-sm tracking-tight text-text">
-            PROOF
-          </span>
-          <Badge variant="accent" size="sm">
-            PUTER AUTH
-          </Badge>
-        </div>
-
-        {/* Live Puter SDK Status Indicator */}
-        <div className="flex items-center gap-1.5 text-[11px] font-mono">
-          <span
-            className={`w-2 h-2 rounded-full ${
-              puterReady ? "bg-ok animate-pulse" : "bg-warn animate-spin"
-            }`}
-          />
-          <span className="text-text-dim hidden sm:inline">
-            {puterReady ? "Puter v2 Connected" : "Connecting SDK..."}
-          </span>
-        </div>
-      </header>
+      {/* Top Floating Pure Notch Navbar */}
+      <Navbar mode="home" />
 
       {/* Main Login Screen */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 pt-24">
         <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           {/* Left Column: Product Value Proposition */}
           <div className="space-y-6 hidden md:block">
