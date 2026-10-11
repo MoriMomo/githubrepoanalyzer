@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import {
   HelpCircle,
   ShieldCheck,
@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import type { TruthDrillQuestion, Claim } from "~/../types";
 import { Button, Badge, Card } from "~/components/ui";
-import { useGSAP, staggerFadeUp } from "~/lib/gsap";
 
 interface TruthDrillProps {
   questions: TruthDrillQuestion[];
@@ -26,20 +25,6 @@ export function TruthDrill({
 }: TruthDrillProps) {
   const [selectedChoices, setSelectedChoices] = useState<Record<string, string>>({});
   const [customText, setCustomText] = useState<Record<string, string>>({});
-  const drillFormRef = useRef<HTMLFormElement>(null);
-
-  // GSAP animation: Stagger in Truth Drill questions smoothly
-  useGSAP(
-    () => {
-      staggerFadeUp(".truth-drill-question-card", {
-        stagger: 0.07,
-        duration: 0.32,
-        y: 10,
-      });
-    },
-    [questions.length],
-    drillFormRef,
-  );
 
   const handleSelectChoice = (claimId: string, choice: string) => {
     setSelectedChoices((prev) => ({ ...prev, [claimId]: choice }));
@@ -88,7 +73,7 @@ export function TruthDrill({
         </p>
       </div>
 
-      <form ref={drillFormRef} onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {questions.map((q, idx) => {
           const matchedClaim = claims.find((c) => c.id === q.claimId);
           const currentChoice = selectedChoices[q.claimId];

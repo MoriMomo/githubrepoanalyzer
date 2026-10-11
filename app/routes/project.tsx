@@ -30,7 +30,6 @@ import {
 } from "~/lib/fallback";
 import { extractAIText, parseAIJson, formatErrorMessage } from "~/lib/utils";
 import { SessionStorageAdapter } from "~/lib/storage";
-import { useGSAP, staggerFadeUp } from "~/lib/gsap";
 import { SourceInput } from "~/components/SourceInput";
 import { StackBadges } from "~/components/StackBadges";
 import { TruthDrill } from "~/components/TruthDrill";
@@ -67,23 +66,6 @@ export default function ProjectPage() {
   const [statusError, setStatusError] = useState<string | null>(null);
   const [rawPastedSource, setRawPastedSource] = useState("");
   const [isPersisting, setIsPersisting] = useState(false);
-
-  const outputListRef = useRef<HTMLDivElement>(null);
-
-  // GSAP animation: Stagger in bullet cards when output phase is active
-  useGSAP(
-    () => {
-      if (phase === "output" && bullets.length > 0) {
-        staggerFadeUp(".bullet-card-item", {
-          stagger: 0.08,
-          duration: 0.35,
-          y: 12,
-        });
-      }
-    },
-    [phase, bullets.length],
-    outputListRef,
-  );
 
   // Compute grounded corpus for live anti-fabrication audits
   const activeSource = signals?.rawSource || rawPastedSource;
@@ -706,7 +688,7 @@ export default function ProjectPage() {
                 </div>
               </div>
 
-              <div ref={outputListRef} className="space-y-4">
+              <div className="space-y-4">
                 {bullets.map((bullet, idx) => (
                   <div key={idx} className="bullet-card-item">
                     <BulletCard

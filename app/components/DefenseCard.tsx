@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { ShieldAlert, MessageSquareCode, FileCode, Scale, ChevronDown, ChevronUp } from "lucide-react";
 import type { BulletDefense } from "~/../types";
-import { useGSAP, fadeIn } from "~/lib/gsap";
+import { MotionView } from "~/components/ui";
 
 interface DefenseCardProps {
   defense: BulletDefense;
@@ -9,18 +9,6 @@ interface DefenseCardProps {
 
 export function DefenseCard({ defense }: DefenseCardProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  // GSAP micro-animation for expanding defense script
-  useGSAP(
-    () => {
-      if (isOpen) {
-        fadeIn(".defense-content-pane", { duration: 0.22 });
-      }
-    },
-    [isOpen],
-    contentRef,
-  );
 
   return (
     <div className="rounded-md bg-surface-2/90 border border-border border-l-2 border-l-accent overflow-hidden text-xs">
@@ -48,7 +36,7 @@ export function DefenseCard({ defense }: DefenseCardProps) {
       </button>
 
       {isOpen && (
-        <div ref={contentRef} className="defense-content-pane p-3.5 space-y-3.5 border-t border-border">
+        <MotionView animationKey="defense-pane" className="p-3.5 space-y-3.5 border-t border-border">
           {/* Code Proof Lineage Anchor */}
           {defense.codeProof && (
             <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-md bg-surface border border-border">
@@ -100,7 +88,7 @@ export function DefenseCard({ defense }: DefenseCardProps) {
               </p>
             </div>
           )}
-        </div>
+        </MotionView>
       )}
     </div>
   );

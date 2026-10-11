@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router";
 import {
   Plus,
@@ -16,8 +16,7 @@ import {
 import { usePuterStore } from "~/lib/puter";
 import { generateUUID } from "~/lib/utils";
 import { SessionStorageAdapter } from "~/lib/storage";
-import { Button, Badge, Card } from "~/components/ui";
-import { useGSAP, staggerFadeUp } from "~/lib/gsap";
+import { Button, Badge, Card, MotionView } from "~/components/ui";
 import type { ProjectSession } from "~/../types";
 
 export default function DashboardPage() {
@@ -27,22 +26,6 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const statsRef = useRef<HTMLDivElement>(null);
-  const sessionListRef = useRef<HTMLDivElement>(null);
-
-  // GSAP animation: Stagger in stats on mount
-  useGSAP(
-    () => {
-      staggerFadeUp(".dashboard-stat-card", {
-        stagger: 0.05,
-        duration: 0.32,
-        y: 8,
-      });
-    },
-    [],
-    statsRef,
-  );
 
   useEffect(() => {
     async function loadSessions() {
@@ -117,21 +100,6 @@ export default function DashboardPage() {
       0,
     );
   }, [sessions]);
-
-  // GSAP animation: Stagger in project sessions when loaded
-  useGSAP(
-    () => {
-      if (!isLoading && filteredSessions.length > 0) {
-        staggerFadeUp(".dashboard-session-item", {
-          stagger: 0.05,
-          duration: 0.32,
-          y: 8,
-        });
-      }
-    },
-    [isLoading, filteredSessions.length],
-    sessionListRef,
-  );
 
   return (
     <div className="min-h-screen flex flex-col bg-bg text-text">
@@ -229,7 +197,7 @@ export default function DashboardPage() {
         )}
 
         {/* Top Stats Overview */}
-        <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <Card variant="default" padding="sm" className="dashboard-stat-card space-y-1">
             <span className="text-[11px] text-text-dim font-mono uppercase tracking-wider flex items-center gap-1.5">
               <FolderGit2 className="w-3 h-3 text-accent" />
@@ -377,7 +345,7 @@ export default function DashboardPage() {
               No saved projects match &ldquo;{searchQuery}&rdquo;.
             </div>
           ) : (
-            <div ref={sessionListRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <MotionView animationKey={filteredSessions.length} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredSessions.map((session) => {
                 const dateStr = new Date(session.createdAt).toLocaleDateString(
                   undefined,
@@ -450,7 +418,7 @@ export default function DashboardPage() {
                   </Card>
                 );
               })}
-            </div>
+            </MotionView>
           )}
         </div>
       </main>

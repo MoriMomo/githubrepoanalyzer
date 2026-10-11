@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import {
   ShieldCheck,
@@ -17,25 +16,10 @@ import {
 import { usePuterStore } from "~/lib/puter";
 import { generateUUID } from "~/lib/utils";
 import { Button, Badge, Card } from "~/components/ui";
-import { useGSAP, staggerFadeUp } from "~/lib/gsap";
 
 export default function HomePage() {
   const { auth } = usePuterStore();
   const navigate = useNavigate();
-  const heroRef = useRef<HTMLElement>(null);
-
-  // GSAP micro-animation for hero section
-  useGSAP(
-    () => {
-      staggerFadeUp(".hero-anim-item", {
-        stagger: 0.08,
-        duration: 0.4,
-        y: 12,
-      });
-    },
-    [],
-    heroRef,
-  );
 
   const handleLaunchSample = () => {
     const newId = generateUUID();
@@ -105,7 +89,7 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="flex-1 space-y-24 py-16 px-6 max-w-6xl mx-auto w-full">
         {/* Hero Section */}
-        <section ref={heroRef} className="text-center space-y-6 pt-4 max-w-3xl mx-auto">
+        <section className="text-center space-y-6 pt-4 max-w-3xl mx-auto">
           <div className="hero-anim-item inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-mono">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Architectural Extraction & Grounding Engine</span>
