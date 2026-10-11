@@ -3,8 +3,6 @@
     "app/**/*",
     "types/**/*",
     "test/**/*",
-    "packages/**/*",
-    "apps/**/*",
     ".react-router/types/**/*"
   ],
   "exclude": [
@@ -23,9 +21,7 @@
     "rootDirs": [".", "./.react-router/types"],
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./app/*"],
-      "@proof/core": ["./packages/core/src/index.ts"],
-      "@proof/contracts": ["./packages/contracts/src/index.ts"]
+      "~/*": ["./app/*"]
     },
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
