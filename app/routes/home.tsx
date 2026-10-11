@@ -121,27 +121,27 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="flex-1 space-y-24 pt-24 pb-16 px-4 sm:px-6 max-w-6xl mx-auto w-full">
-        {/* HERO SECTION - ARCHITECTURAL BLUEPRINT WITH GOLDEN RATIO */}
+        {/* HERO SECTION - REFINED DEVELOPER MINIMALISM */}
         <Hero01
-          headline={
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-mono">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Deterministic Resume Engineering &amp; Hotseat Defense</span>
-              </div>
-              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-text leading-[1.12]">
-                Turn raw repositories into{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-emerald-300 to-teal-200">
-                  interview-defensible
-                </span>{" "}
-                resume bullets.
-              </h1>
+          badge={
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-mono">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Deterministic Resume Engineering &amp; Hotseat Defense</span>
             </div>
+          }
+          headline={
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text leading-[1.12]">
+              Turn raw repositories into{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-emerald-300 to-teal-200">
+                interview-defensible
+              </span>{" "}
+              resume bullets.
+            </h1>
           }
           brandName="Proof"
           brandPronunciation="Proof /pruːf/ — evidence sufficient to establish a fact"
           description={
-            <p className="text-sm sm:text-base text-text-dim leading-relaxed font-sans">
+            <p className="text-base sm:text-lg text-text-dim leading-relaxed font-sans max-w-2xl mx-auto">
               Generic AI invents metrics like{" "}
               <span className="text-flag font-mono font-medium bg-flag/10 px-1.5 py-0.5 rounded border border-flag/20">
                 &ldquo;improved query efficiency by 40%&rdquo;
@@ -157,6 +157,7 @@ export default function HomePage() {
             label: ">_ Audit Sample Repository",
             onClick: handleLaunchSample,
           }}
+          trustNotes="Zero third-party tracking • 100% Client-side Puter.js • Anti-Fabrication Net (§8)"
           techItems={[
             { icon: <GoIcon />, title: "Go 1.22" },
             { icon: <RedisIcon />, title: "Redis Streams" },
@@ -164,37 +165,6 @@ export default function HomePage() {
             { icon: <DockerIcon />, title: "Docker" },
             { icon: <TypeScriptIcon />, title: "TypeScript" },
           ]}
-          rightSectorContent={
-            <div className="space-y-3 font-mono text-xs w-full max-w-xs mx-auto">
-              <div className="p-4 rounded-lg bg-surface-2/80 border border-border-strong/70 shadow-lg space-y-3">
-                <div className="flex items-center justify-between border-b border-border/50 pb-2">
-                  <span className="text-accent flex items-center gap-1.5 font-semibold">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    VERIFIED GROUNDING
-                  </span>
-                  <span className="text-[10px] text-text-muted">SHA-256</span>
-                </div>
-                <div className="space-y-1.5 text-[11px] text-text-dim">
-                  <div className="flex justify-between">
-                    <span>Signal Extraction</span>
-                    <span className="text-accent font-semibold">AST Verified</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Fabrication Net</span>
-                    <span className="text-ok font-semibold">Enforced (§8)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Hotseat Defense</span>
-                    <span className="text-accent font-semibold">100% Grounded</span>
-                  </div>
-                </div>
-                <div className="pt-2 border-t border-border/40 text-[10px] text-text-muted flex items-center justify-between">
-                  <span>Zero 3rd-party tracking</span>
-                  <span className="text-accent font-semibold">Puter.js</span>
-                </div>
-              </div>
-            </div>
-          }
         />
 
         {/* INTERACTIVE REALITY CHECK TERMINAL (THE PROOF OF VALUE) */}
