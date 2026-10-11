@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import {
   ShieldCheck,
@@ -12,57 +13,163 @@ import {
   Check,
   X,
   Code2,
+  CheckCircle2,
+  AlertTriangle,
+  Zap,
+  Copy,
 } from "lucide-react";
 import { usePuterStore } from "~/lib/puter";
 import { generateUUID } from "~/lib/utils";
+import { auditBulletRisk, type BulletAuditReport } from "~/lib/grounding";
 import { Button, Badge, Card } from "~/components/ui";
+import { CommandMenu } from "~/components/CommandMenu";
+
+const HERO_EXAMPLES = [
+  {
+    id: "redis-worker",
+    title: "Distributed Job Queue (Go + Redis)",
+    genericBullet:
+      "Engineered high-performance microservices architecture using Redis and Kafka, improving query efficiency by 40% across distributed workloads.",
+    genericInterviewer:
+      "How did you measure that 40%? What was your benchmark baseline? Which profiling tool did you use, and how did you configure consumer group partition offsets?",
+    genericRisk: "HIGH FABRICATION RISK",
+    genericOutcome: "Candidate freezes. Red flag for unsubstantiated metrics.",
+    proofBullet:
+      "Architected asynchronous job queue in Go using Redis streams and worker pools, handling 1,500 jobs/sec with sub-10ms dispatch latency verified via benchmark suite.",
+    proofCodeProof: "pkg/worker/pool.go:L42-L78",
+    proofDefense:
+      "When asked about the 10ms dispatch latency, explain how Redis streams XREADGROUP was coupled with buffered channels in pkg/worker/pool.go, avoiding database locking during burst traffic.",
+    proofOutcome: "Demonstrates architectural ownership and mechanical sympathy. Immediate hire signal.",
+  },
+  {
+    id: "api-service",
+    title: "E-Commerce Ingestion (Node + Postgres)",
+    genericBullet:
+      "Spearheaded database optimization and scalable REST APIs with Redis caching, boosting throughput by 300% and reducing database load.",
+    genericInterviewer:
+      "Where did the 300% number come from? Did you measure read or write throughput? What cache invalidation strategy prevented stale reads on inventory?",
+    genericRisk: "UNMEASURED METRIC",
+    genericOutcome: "Interviewer flags buzzword padding. Fails technical audit.",
+    proofBullet:
+      "Engineered idempotent webhook ingestion pipeline with Postgres advisory locks and Redis token-bucket rate limiter, guaranteeing exactly-once charge execution.",
+    proofCodeProof: "src/webhooks/ledger.ts:L18-L55",
+    proofDefense:
+      "Explain how Postgres SELECT FOR UPDATE was replaced with advisory locks to serialize concurrent webhook deliveries without table-level lock contention.",
+    proofOutcome: "Answers trade-offs with production precision. Verified pass.",
+  },
+];
+
+const PRESET_AUDIT_BULLETS = [
+  {
+    label: "Generic AI Fluff",
+    text: "Spearheaded database optimization with Redis caching, increasing query speeds by 40% and handling 10k requests/sec.",
+  },
+  {
+    label: "Vague Action",
+    text: "Leveraged cutting-edge microservices architecture to streamline cross-functional cloud workflows.",
+  },
+  {
+    label: "Defensible Grounded",
+    text: "Implemented transactional outbox pattern using Postgres CDC and Debezium, ensuring reliable event dispatch across distributed services.",
+  },
+];
 
 export default function HomePage() {
-  const { auth } = usePuterStore();
+  const { auth, puterReady } = usePuterStore();
   const navigate = useNavigate();
+
+  const [activeHeroTab, setActiveHeroTab] = useState(0);
+  const [copiedProof, setCopiedProof] = useState(false);
+
+  // Mini Risk Auditor state
+  const [auditInput, setAuditInput] = useState(PRESET_AUDIT_BULLETS[0].text);
+  const [auditResult, setAuditResult] = useState<BulletAuditReport>(() =>
+    auditBulletRisk(PRESET_AUDIT_BULLETS[0].text, ""),
+  );
 
   const handleLaunchSample = () => {
     const newId = generateUUID();
     navigate(`/project/${newId}`);
   };
 
+  const handleRunAudit = (text: string) => {
+    setAuditInput(text);
+    setAuditResult(auditBulletRisk(text, ""));
+  };
+
+  const currentExample = HERO_EXAMPLES[activeHeroTab];
+
+  const handleCopyProof = async () => {
+    try {
+      await navigator.clipboard.writeText(currentExample.proofBullet);
+      setCopiedProof(true);
+      setTimeout(() => setCopiedProof(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-bg text-text">
-      {/* Navigation Header */}
-      <header className="border-b border-border bg-bg/80 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2">
-              <span className="font-display font-bold text-base tracking-tight text-text">
-                Proof
-              </span>
-              <Badge variant="accent" size="sm">
-                v1.0
-              </Badge>
+      {/* Top Engineering Nav Bar */}
+      <header className="border-b border-border bg-bg/85 backdrop-blur-xl sticky top-0 z-30 top-highlight">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <div className="w-7 h-7 rounded-md bg-surface-2 border border-border flex items-center justify-center text-accent group-hover:border-accent/40 group-hover:bg-accent/10 transition">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-display font-bold text-base tracking-tight text-text">
+                  Proof
+                </span>
+                <Badge variant="accent" size="sm">
+                  v1.0
+                </Badge>
+              </div>
             </Link>
+
+            <div className="hidden lg:flex items-center gap-2 pl-2 border-l border-border text-[11px] font-mono text-text-dim">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              <span>Anti-Fabrication Net Active (§8)</span>
+            </div>
           </div>
 
           <nav className="hidden md:flex items-center gap-6 text-xs font-mono text-text-dim">
-            <a href="#how-it-works" className="hover:text-text transition">
-              How It Works
-            </a>
-            <a href="#comparison" className="hover:text-text transition">
+            <a href="#reality-check" className="hover:text-text transition">
               Reality Check
             </a>
-            <a href="#features" className="hover:text-text transition">
-              Features
+            <a href="#pipeline" className="hover:text-text transition">
+              How It Works
+            </a>
+            <a href="#auditor" className="hover:text-text transition">
+              Risk Auditor
+            </a>
+            <a href="#capabilities" className="hover:text-text transition">
+              Capabilities
             </a>
           </nav>
 
           <div className="flex items-center gap-3 text-xs">
+            <CommandMenu />
+            {/* Live Puter Status Capsule */}
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-2 border border-border text-[11px] font-mono text-text-dim">
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  puterReady ? "bg-ok" : "bg-warn animate-spin"
+                }`}
+              />
+              <span>{puterReady ? "Puter v2 Client" : "Connecting..."}</span>
+            </div>
+
             {auth.isAuthenticated ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <span className="text-text-dim font-mono text-[11px] hidden sm:inline">
                   {auth.user?.username}
                 </span>
                 <Link to="/app">
                   <Button variant="primary" size="sm">
-                    <span>Go to Main App</span>
+                    <span>Main Workspace</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Button>
                 </Link>
@@ -76,7 +183,7 @@ export default function HomePage() {
                 </Link>
                 <Link to="/app">
                   <Button variant="primary" size="sm">
-                    <span>Launch App</span>
+                    <span>Launch Workspace</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Button>
                 </Link>
@@ -87,30 +194,38 @@ export default function HomePage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 space-y-24 py-16 px-6 max-w-6xl mx-auto w-full">
-        {/* Hero Section */}
-        <section className="text-center space-y-6 pt-4 max-w-3xl mx-auto">
-          <div className="hero-anim-item inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-mono">
+      <main className="flex-1 space-y-24 py-16 px-4 sm:px-6 max-w-6xl mx-auto w-full">
+        {/* HERO SECTION */}
+        <section className="text-center space-y-7 max-w-3xl mx-auto pt-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-mono">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Architectural Extraction & Grounding Engine</span>
+            <span>Deterministic Resume Engineering & Hotseat Defense</span>
           </div>
 
-          <h1 className="hero-anim-item font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-text leading-[1.1]">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text leading-[1.12]">
             Turn raw repositories into{" "}
-            <span className="text-accent underline decoration-accent/40 underline-offset-8">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-emerald-300 to-teal-200">
               interview-defensible
             </span>{" "}
             resume bullets.
           </h1>
 
-          <p className="hero-anim-item text-sm sm:text-base text-text-dim leading-relaxed max-w-2xl mx-auto font-sans">
-            Generic AI invents metrics like <span className="text-flag font-mono font-medium">&ldquo;improved query efficiency by 40%&rdquo;</span> that collapse at the first senior engineering question. Proof extracts verifiable architecture signals from your code and conducts a Truth Drill to ground every single claim.
+          <p className="text-sm sm:text-base text-text-dim leading-relaxed max-w-2xl mx-auto font-sans font-normal">
+            Generic AI invents metrics like{" "}
+            <span className="text-flag font-mono font-medium bg-flag/10 px-1 py-0.5 rounded border border-flag/20">
+              &ldquo;improved query efficiency by 40%&rdquo;
+            </span>{" "}
+            that collapse at the first senior interview question. Proof extracts verifiable architecture signals from your code and executes a Truth Drill to ground every claim with verbatim code proof.
           </p>
 
-          <div className="hero-anim-item flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link to="/app" className="w-full sm:w-auto">
-              <Button variant="primary" size="lg" className="w-full shadow-lg shadow-(--color-accent)/15">
-                <span>Open Main App</span>
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full sm:w-auto shadow-md shadow-accent/20"
+              >
+                <span>Launch Main Workspace</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
@@ -121,208 +236,371 @@ export default function HomePage() {
               onClick={handleLaunchSample}
               className="w-full sm:w-auto"
             >
-              <Terminal className="w-4 h-4" />
-              <span>Try Live Demo</span>
+              <Terminal className="w-4 h-4 text-accent" />
+              <span>Audit Sample Repository</span>
             </Button>
           </div>
 
-          <p className="hero-anim-item text-[11px] text-text-dim font-mono pt-2">
-            Zero third-party tracking &bull; Free AI synthesis via Puter.js &bull; 100% Anti-Fabrication Guarantee (§8)
+          <p className="text-[11px] text-text-dim font-mono pt-1">
+            Zero third-party tracking &bull; 100% Client-side Puter.js &bull; Anti-Fabrication Net (§8)
           </p>
         </section>
 
-        {/* Pillars / Trust Signals Banner */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-y border-border py-8">
-          <div className="space-y-1">
-            <span className="text-xs font-mono font-semibold text-accent uppercase tracking-wider">
-              0% Hallucinations
-            </span>
-            <p className="text-xs text-text-dim">
-              Strict deterministic validation rejects invented benchmarks.
-            </p>
-          </div>
-          <div className="space-y-1">
-            <span className="text-xs font-mono font-semibold text-ok uppercase tracking-wider">
-              Google X-Y-Z
-            </span>
-            <p className="text-xs text-text-dim">
-              Accomplished [X] measured by [Y] by doing [Z] standard.
-            </p>
-          </div>
-          <div className="space-y-1">
-            <span className="text-xs font-mono font-semibold text-warn uppercase tracking-wider">
-              Hotseat Scripts
-            </span>
-            <p className="text-xs text-text-dim">
-              Pre-computed spoken defense for senior interviewer challenges.
-            </p>
-          </div>
-          <div className="space-y-1">
-            <span className="text-xs font-mono font-semibold text-text uppercase tracking-wider">
-              Client-Side Privacy
-            </span>
-            <p className="text-xs text-text-dim">
-              Zero backend database. Stored safely in your private Puter KV.
-            </p>
-          </div>
-        </section>
+        {/* INTERACTIVE REALITY CHECK TERMINAL (THE PROOF OF VALUE) */}
+        <section id="reality-check" className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <Badge variant="warn" size="sm">
+                  <Flame className="w-3 h-3" />
+                  <span>The Technical Reality Check</span>
+                </Badge>
+                <span className="text-xs font-mono text-text-dim hidden sm:inline">
+                  Interactive Side-by-Side Comparison
+                </span>
+              </div>
+              <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-text mt-1">
+                Why Senior Interviewers Reject Generic AI Bullets
+              </h2>
+            </div>
 
-        {/* The Technical Interview Reality Check (Side-by-Side) */}
-        <section id="comparison" className="space-y-8">
-          <div className="text-center space-y-2 max-w-xl mx-auto">
-            <Badge variant="warn" size="sm">
-              The Reality Check
-            </Badge>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-text">
-              Why Senior Engineers Reject Generic AI Bullets
-            </h2>
-            <p className="text-xs text-text-dim">
-              Engineering hiring managers spot ChatGPT-generated resumes within 10 seconds of the technical interview.
-            </p>
+            {/* Example Tabs */}
+            <div className="flex items-center gap-1.5 p-0.5 rounded-md bg-surface-2 border border-border">
+              {HERO_EXAMPLES.map((ex, idx) => (
+                <button
+                  key={ex.id}
+                  type="button"
+                  onClick={() => setActiveHeroTab(idx)}
+                  className={`px-2.5 py-1 rounded text-[11px] font-mono transition cursor-pointer ${
+                    activeHeroTab === idx
+                      ? "bg-surface text-accent font-semibold border border-border shadow-xs"
+                      : "text-text-dim hover:text-text"
+                  }`}
+                >
+                  {idx === 0 ? "Redis Worker" : "E-Commerce Webhooks"}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Generic AI halluncination card */}
-            <Card variant="default" padding="lg" className="border-flag/40 bg-flag/5 space-y-5 flex flex-col justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+            {/* LEFT PANE: Generic AI / ChatGPT Fluff */}
+            <Card
+              variant="default"
+              padding="lg"
+              className="border-flag/30 bg-flag/[0.03] space-y-4 flex flex-col justify-between rounded-lg glow-card"
+            >
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between border-b border-flag/20 pb-2.5">
                   <Badge variant="flag" size="sm">
                     <X className="w-3 h-3" />
                     <span>Generic AI / ChatGPT Resume Bullet</span>
                   </Badge>
-                  <span className="text-[11px] font-mono text-flag">HIGH INTERVIEW RISK</span>
+                  <span className="text-xs font-mono font-medium text-flag">
+                    {currentExample.genericRisk}
+                  </span>
                 </div>
 
-                <div className="p-3.5 rounded bg-bg border border-flag/20 font-mono text-xs text-text leading-relaxed">
-                  &ldquo;Engineered high-performance microservices architecture using Redis and Kafka, improving query efficiency by 40% across distributed workloads.&rdquo;
+                <div className="p-3.5 rounded-md bg-bg/90 border border-flag/25 font-mono text-xs text-text leading-relaxed">
+                  &ldquo;{currentExample.genericBullet}&rdquo;
                 </div>
 
                 <div className="space-y-2 text-xs">
-                  <div className="flex items-center gap-2 text-flag font-semibold font-mono text-[11px]">
+                  <div className="flex items-center gap-1.5 text-flag font-medium font-sans text-xs">
                     <Flame className="w-3.5 h-3.5" />
-                    <span>The Hotseat Question You Will Face:</span>
+                    <span>Anticipated challenge:</span>
                   </div>
-                  <p className="text-text-dim italic bg-bg/50 p-3 rounded border border-border">
-                    &ldquo;How did you measure that 40%? What was your benchmark baseline? Which profiling tool did you use, and how did you configure consumer group partition offsets?&rdquo;
+                  <p className="text-text-dim italic bg-surface-2/60 p-3 rounded-md border border-border leading-relaxed font-sans">
+                    &ldquo;{currentExample.genericInterviewer}&rdquo;
                   </p>
                 </div>
               </div>
 
-              <div className="p-3 rounded bg-flag/10 border border-flag/20 text-flag text-xs font-mono">
-                Outcome: Candidate freezes. Red flag for unsubstantiated metrics and resume fabrication.
+              <div className="p-3 rounded-md bg-flag/10 border border-flag/25 text-flag text-xs font-mono flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>Outcome: {currentExample.genericOutcome}</span>
               </div>
             </Card>
 
-            {/* Proof Grounded Defensible card */}
-            <Card variant="default" padding="lg" className="border-accent/40 bg-accent/5 space-y-5 flex flex-col justify-between">
+            {/* RIGHT PANE: Proof Defensible Bullet */}
+            <Card
+              variant="default"
+              padding="lg"
+              className="border-accent/40 bg-accent/[0.03] space-y-4 flex flex-col justify-between rounded-lg glow-card top-highlight"
+            >
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between border-b border-accent/20 pb-2.5">
                   <Badge variant="ok" size="sm">
                     <Check className="w-3 h-3" />
-                    <span>Proof Defensible Bullet (§8 Grounded)</span>
+                    <span>Proof Grounded Bullet (§8 Net)</span>
                   </Badge>
-                  <span className="text-[11px] font-mono text-accent">100% DEFENDED</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-medium text-accent">
+                      Verified Grounding
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopyProof}
+                      className="p-1 rounded text-text-dim hover:text-accent transition cursor-pointer"
+                      title="Copy bullet"
+                    >
+                      {copiedProof ? (
+                        <Check className="w-3.5 h-3.5 text-accent" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="p-3.5 rounded bg-bg border border-accent/20 font-mono text-xs text-text leading-relaxed">
-                  &ldquo;Architected asynchronous job queue in Go using Redis streams and worker pools, handling 1,500 jobs/sec with sub-10ms dispatch latency verified via benchmark suite.&rdquo;
+                <div className="p-3.5 rounded-md bg-bg/90 border border-accent/30 font-mono text-xs text-text leading-relaxed">
+                  &ldquo;{currentExample.proofBullet}&rdquo;
                 </div>
 
                 <div className="space-y-2 text-xs">
-                  <div className="flex items-center gap-2 text-accent font-semibold font-mono text-[11px]">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>Your Pre-Computed Spoken Defense:</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-accent font-semibold font-mono text-[11px]">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>Verifiable Spoken Defense Script:</span>
+                    </div>
+                    <span className="font-mono text-[10px] text-accent/80 bg-accent/10 px-1.5 py-0.5 rounded border border-accent/20">
+                      {currentExample.proofCodeProof}
+                    </span>
                   </div>
-                  <p className="text-text-dim bg-bg/50 p-3 rounded border border-border">
-                    &ldquo;When asked about the 10ms dispatch latency, explain how Redis streams XREADGROUP was coupled with buffered channels in <code className="text-accent font-mono">pkg/worker/pool.go</code>, avoiding database locking during burst traffic.&rdquo;
+                  <p className="text-text bg-surface-2/60 p-3 rounded-md border border-border leading-relaxed font-sans">
+                    &ldquo;{currentExample.proofDefense}&rdquo;
                   </p>
                 </div>
               </div>
 
-              <div className="p-3 rounded bg-ok/10 border border-ok/20 text-ok text-xs font-mono">
-                Outcome: Candidate demonstrates deep architectural ownership. Immediate hire signal.
+              <div className="p-3 rounded-md bg-ok/10 border border-ok/25 text-ok text-xs font-mono flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>Outcome: {currentExample.proofOutcome}</span>
               </div>
             </Card>
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section id="how-it-works" className="space-y-8">
+        {/* TRUST PILLARS / ENGINEERING STANDARDS */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
+            <div className="flex items-center justify-between">
+              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+              <Badge variant="accent" size="sm">§8 Standard</Badge>
+            </div>
+            <h3 className="text-sm font-semibold font-sans text-text">
+              0% Hallucinations
+            </h3>
+            <p className="text-xs text-text-dim leading-relaxed font-sans">
+              Strict deterministic validation pass strips ungrounded numbers or invented benchmarks before you copy.
+            </p>
+          </Card>
+
+          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
+            <div className="flex items-center justify-between">
+              <span className="w-2 h-2 rounded-full bg-ok" />
+              <Badge variant="ok" size="sm">Format</Badge>
+            </div>
+            <h3 className="text-sm font-semibold font-sans text-text">
+              Google X-Y-Z Standard
+            </h3>
+            <p className="text-xs text-text-dim leading-relaxed font-sans">
+              Every bullet is structured as: Accomplished [X], measured by [Y], by implementing [Z].
+            </p>
+          </Card>
+
+          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
+            <div className="flex items-center justify-between">
+              <span className="w-2 h-2 rounded-full bg-warn" />
+              <Badge variant="warn" size="sm">Interviews</Badge>
+            </div>
+            <h3 className="text-sm font-semibold font-sans text-text">
+              Hotseat Scripts
+            </h3>
+            <p className="text-xs text-text-dim leading-relaxed font-sans">
+              Pre-computed spoken scripts and verbatim code proof anchors for senior interviewer challenges.
+            </p>
+          </Card>
+
+          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
+            <div className="flex items-center justify-between">
+              <span className="w-2 h-2 rounded-full bg-info" />
+              <Badge variant="neutral" size="sm">Privacy</Badge>
+            </div>
+            <h3 className="text-sm font-semibold font-sans text-text">
+              Client-Only Storage
+            </h3>
+            <p className="text-xs text-text-dim leading-relaxed font-sans">
+              Zero centralized backend database. Stored safely in your browser and personal Puter cloud KV.
+            </p>
+          </Card>
+        </section>
+
+        {/* HOW IT WORKS / 4-STAGE PIPELINE */}
+        <section id="pipeline" className="space-y-8">
           <div className="text-center space-y-2 max-w-xl mx-auto">
             <Badge variant="accent" size="sm">
-              The 4-Stage Pipeline
+              The 4-Stage Architectural Pipeline
             </Badge>
             <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-text">
-              How Proof Builds Defensible Bullets
+              From Raw Manifests to Interview Receipts
             </h2>
             <p className="text-xs text-text-dim">
-              From raw codebase files to grounded, interview-tested claims in under 60 seconds.
+              Grounded, defensible resume points generated in under 60 seconds with zero hallucination.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card variant="default" padding="md" className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-accent font-bold text-xs">01</span>
-                <GitBranch className="w-4 h-4 text-text-dim" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+            <Card variant="default" padding="md" className="space-y-3 relative group hover:border-accent/40 transition">
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <span className="font-mono text-accent font-bold text-xs">STAGE 01</span>
+                <GitBranch className="w-4 h-4 text-text-dim group-hover:text-accent transition" />
               </div>
               <h3 className="font-display font-semibold text-sm text-text">
                 Ingestion & Manifests
               </h3>
               <p className="text-xs text-text-dim font-sans leading-relaxed">
-                Paste your README or connect a public GitHub repository. Proof extracts package manifests without cloning the repo.
+                Paste your README or link a public GitHub repo. Proof reads package manifests (package.json, go.mod, Cargo.toml) via raw CDN without cloning.
               </p>
+              <div className="pt-2 text-[10px] font-mono text-accent/80">
+                &bull; Zero auth needed for public repos
+              </div>
             </Card>
 
-            <Card variant="default" padding="md" className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-accent font-bold text-xs">02</span>
-                <Cpu className="w-4 h-4 text-text-dim" />
+            <Card variant="default" padding="md" className="space-y-3 relative group hover:border-accent/40 transition">
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <span className="font-mono text-accent font-bold text-xs">STAGE 02</span>
+                <Cpu className="w-4 h-4 text-text-dim group-hover:text-accent transition" />
               </div>
               <h3 className="font-display font-semibold text-sm text-text">
-                Signal Parsing
+                Deterministic Parsing
               </h3>
               <p className="text-xs text-text-dim font-sans leading-relaxed">
-                Deterministic regex pipelines identify languages, frameworks, databases, cache layers, and message brokers with zero hallucination.
+                Deterministic regex pipelines detect languages, frameworks, cache layers, databases, and message brokers with verifiable accuracy.
               </p>
+              <div className="pt-2 text-[10px] font-mono text-accent/80">
+                &bull; Footprint detection: Docker, CI, Migrations
+              </div>
             </Card>
 
-            <Card variant="default" padding="md" className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-accent font-bold text-xs">03</span>
-                <HelpCircle className="w-4 h-4 text-text-dim" />
+            <Card variant="default" padding="md" className="space-y-3 relative group hover:border-warn/40 transition">
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <span className="font-mono text-warn font-bold text-xs">STAGE 03</span>
+                <HelpCircle className="w-4 h-4 text-text-dim group-hover:text-warn transition" />
               </div>
               <h3 className="font-display font-semibold text-sm text-text">
                 Ground Truth Drill
               </h3>
               <p className="text-xs text-text-dim font-sans leading-relaxed">
-                A Socratic interview drill asks the 2-3 critical questions that expose weak claims: scale, trade-offs, and failure recovery.
+                A Socratic interview drill asks 2–3 questions about your real trade-offs: failure recovery, rate limits, and unverified boilerplate.
               </p>
+              <div className="pt-2 text-[10px] font-mono text-warn/80">
+                &bull; 1-click purge for template boilerplate
+              </div>
             </Card>
 
-            <Card variant="default" padding="md" className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-accent font-bold text-xs">04</span>
-                <ShieldCheck className="w-4 h-4 text-text-dim" />
+            <Card variant="default" padding="md" className="space-y-3 relative group hover:border-ok/40 transition">
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <span className="font-mono text-ok font-bold text-xs">STAGE 04</span>
+                <ShieldCheck className="w-4 h-4 text-text-dim group-hover:text-ok transition" />
               </div>
               <h3 className="font-display font-semibold text-sm text-text">
                 Grounded Synthesis
               </h3>
               <p className="text-xs text-text-dim font-sans leading-relaxed">
-                Synthesizes Google X-Y-Z bullets, complete with verbatim evidence lineage badges and a spoken technical defense script.
+                Synthesizes Google X-Y-Z bullets, complete with verbatim evidence lineage badges, code proof anchors, and spoken defense scripts.
               </p>
+              <div className="pt-2 text-[10px] font-mono text-ok/80">
+                &bull; Anti-Fabrication Net validates output
+              </div>
             </Card>
           </div>
         </section>
 
-        {/* Feature Grid */}
-        <section id="features" className="space-y-8">
+        {/* INTERACTIVE MINI RISK AUDITOR (LIVE UTILITY TEST-BENCH) */}
+        <section id="auditor" className="space-y-5">
+          <div className="text-center space-y-2 max-w-xl mx-auto">
+            <Badge variant="warn" size="sm">
+              Live Test Bench
+            </Badge>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-text">
+              Test Your Existing Resume Bullets for Interview Risk
+            </h2>
+            <p className="text-xs text-text-dim">
+              See how senior technical interviewers evaluate typical ChatGPT claims in real-time.
+            </p>
+          </div>
+
+          <Card variant="default" padding="lg" className="space-y-5 rounded-lg glow-card max-w-3xl mx-auto">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label className="text-xs font-medium text-text-dim font-sans">
+                  Test a candidate bullet point:
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-text-dim font-mono">Quick Presets:</span>
+                  {PRESET_AUDIT_BULLETS.map((p) => (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() => handleRunAudit(p.text)}
+                      className="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-2 hover:bg-surface-3 border border-border text-text transition cursor-pointer"
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <textarea
+                value={auditInput}
+                onChange={(e) => handleRunAudit(e.target.value)}
+                rows={3}
+                className="w-full bg-bg border border-border rounded-md p-3 text-xs font-mono text-text placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-accent leading-relaxed transition"
+                placeholder="Paste any bullet point to test for ungrounded metrics and interview risks..."
+              />
+            </div>
+
+            {/* Audit Verdict Banner */}
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-md bg-surface-2 border border-border">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-text-dim font-mono">Interview Risk Score:</span>
+                  <Badge
+                    variant={
+                      auditResult.riskLevel === "CRITICAL"
+                        ? "flag"
+                        : auditResult.riskLevel === "MODERATE"
+                          ? "warn"
+                          : "ok"
+                    }
+                    size="sm"
+                  >
+                    {auditResult.riskLevel} RISK
+                  </Badge>
+                </div>
+
+                <div className="flex items-center gap-3 text-[11px] font-mono text-text-dim">
+                  <span>Fluff Buzzwords: {auditResult.fluffHits.length}</span>
+                  <span>Ungrounded Metrics: {auditResult.ungroundedHits.length}</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-text bg-bg/80 p-3 rounded-md border border-border leading-relaxed font-sans">
+                {auditResult.diagnosis}
+              </p>
+            </div>
+          </Card>
+        </section>
+
+        {/* ENGINE CAPABILITIES GRID */}
+        <section id="capabilities" className="space-y-8">
           <div className="text-center space-y-2 max-w-xl mx-auto">
             <Badge variant="neutral" size="sm">
               Engine Capabilities
             </Badge>
             <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-text">
-              Engineered for Developers
+              Engineered for Senior Developers
             </h2>
             <p className="text-xs text-text-dim">
               Built specifically to pass senior software engineering resume screens and system design interview rounds.
@@ -330,20 +608,20 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card variant="surface2" padding="md" className="space-y-2">
-              <div className="w-8 h-8 rounded bg-accent/10 flex items-center justify-center text-accent">
+            <Card variant="surface2" padding="md" className="space-y-2.5 top-highlight hover:border-accent/40 transition">
+              <div className="w-8 h-8 rounded-md bg-accent/10 border border-accent/25 flex items-center justify-center text-accent">
                 <ShieldCheck className="w-4 h-4" />
               </div>
               <h3 className="font-semibold text-sm text-text font-display">
                 Anti-Fabrication Net (§8)
               </h3>
               <p className="text-xs text-text-dim leading-relaxed">
-                Every generated metric and claim is tested against the source corpus. Unsubstantiated claims are immediately flagged or stripped.
+                Every generated metric and claim is tested against the source corpus. Unsubstantiated claims are immediately stripped or flagged.
               </p>
             </Card>
 
-            <Card variant="surface2" padding="md" className="space-y-2">
-              <div className="w-8 h-8 rounded bg-warn/10 flex items-center justify-center text-warn">
+            <Card variant="surface2" padding="md" className="space-y-2.5 top-highlight hover:border-warn/40 transition">
+              <div className="w-8 h-8 rounded-md bg-warn/10 border border-warn/25 flex items-center justify-center text-warn">
                 <Flame className="w-4 h-4" />
               </div>
               <h3 className="font-semibold text-sm text-text font-display">
@@ -354,8 +632,8 @@ export default function HomePage() {
               </p>
             </Card>
 
-            <Card variant="surface2" padding="md" className="space-y-2">
-              <div className="w-8 h-8 rounded bg-ok/10 flex items-center justify-center text-ok">
+            <Card variant="surface2" padding="md" className="space-y-2.5 top-highlight hover:border-ok/40 transition">
+              <div className="w-8 h-8 rounded-md bg-ok/10 border border-ok/25 flex items-center justify-center text-ok">
                 <GitBranch className="w-4 h-4" />
               </div>
               <h3 className="font-semibold text-sm text-text font-display">
@@ -366,8 +644,8 @@ export default function HomePage() {
               </p>
             </Card>
 
-            <Card variant="surface2" padding="md" className="space-y-2">
-              <div className="w-8 h-8 rounded bg-accent/10 flex items-center justify-center text-accent">
+            <Card variant="surface2" padding="md" className="space-y-2.5 top-highlight hover:border-info/40 transition">
+              <div className="w-8 h-8 rounded-md bg-info/10 border border-info/25 flex items-center justify-center text-info">
                 <Cpu className="w-4 h-4" />
               </div>
               <h3 className="font-semibold text-sm text-text font-display">
@@ -378,8 +656,8 @@ export default function HomePage() {
               </p>
             </Card>
 
-            <Card variant="surface2" padding="md" className="space-y-2">
-              <div className="w-8 h-8 rounded bg-accent/10 flex items-center justify-center text-accent">
+            <Card variant="surface2" padding="md" className="space-y-2.5 top-highlight hover:border-accent/40 transition">
+              <div className="w-8 h-8 rounded-md bg-accent/10 border border-accent/25 flex items-center justify-center text-accent">
                 <Lock className="w-4 h-4" />
               </div>
               <h3 className="font-semibold text-sm text-text font-display">
@@ -390,48 +668,57 @@ export default function HomePage() {
               </p>
             </Card>
 
-            <Card variant="surface2" padding="md" className="space-y-2">
-              <div className="w-8 h-8 rounded bg-ok/10 flex items-center justify-center text-ok">
+            <Card variant="surface2" padding="md" className="space-y-2.5 top-highlight hover:border-ok/40 transition">
+              <div className="w-8 h-8 rounded-md bg-ok/10 border border-ok/25 flex items-center justify-center text-ok">
                 <Code2 className="w-4 h-4" />
               </div>
               <h3 className="font-semibold text-sm text-text font-display">
-                Markdown & JSON Export
+                Multi-Format Export
               </h3>
               <p className="text-xs text-text-dim leading-relaxed">
-                Instantly copy or download clean, ATS-compliant bullet points and complete technical dossiers for your resume and prep notes.
+                Instantly copy or export to ATS-friendly Plain Text, Overleaf-compatible LaTeX (\resumeItem), Markdown, or structured JSON.
               </p>
             </Card>
           </div>
         </section>
 
-        {/* Bottom CTA Banner */}
-        <section className="rounded-xl border border-border bg-surface p-8 sm:p-12 text-center space-y-6">
+        {/* BOTTOM CTA BANNER */}
+        <section className="rounded-xl border border-border bg-gradient-to-b from-surface to-surface-2 p-8 sm:p-12 text-center space-y-6 glow-card top-highlight">
           <div className="max-w-xl mx-auto space-y-3">
+            <Badge variant="accent" size="sm">
+              <Zap className="w-3 h-3" />
+              <span>Get Started in 60 Seconds</span>
+            </Badge>
             <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-text">
               Ready to build interview-proof bullets?
             </h2>
-            <p className="text-xs sm:text-sm text-text-dim">
-              Launch the workspace and audit your first project in less than a minute.
+            <p className="text-xs sm:text-sm text-text-dim leading-relaxed">
+              Scan your repository, answer the Socratic Truth Drill, and arm yourself with pre-computed technical defense scripts.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link to="/app" className="w-full sm:w-auto">
-              <Button variant="primary" size="lg" className="w-full shadow-lg shadow-(--color-accent)/15">
+              <Button variant="primary" size="lg" className="w-full sm:w-auto shadow-md shadow-accent/20">
                 <span>Launch Main Workspace</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
-            <Link to="/login" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full">
-                <span>Sign In to Puter</span>
-              </Button>
-            </Link>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={handleLaunchSample}
+              className="w-full sm:w-auto"
+            >
+              <Terminal className="w-4 h-4 text-accent" />
+              <span>Try Live Demo (No Login)</span>
+            </Button>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
+      {/* FOOTER */}
       <footer className="border-t border-border py-8 px-6 bg-surface/30">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-dim font-mono">
           <div className="flex items-center gap-2">

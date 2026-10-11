@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import { toast } from "sonner";
 import {
   FileText,
   Sparkles,
@@ -9,24 +11,34 @@ import {
   Layers,
   Terminal,
   FolderGit2,
+  Code2,
+  Upload,
+  FileCheck2,
+  Trash2,
 } from "lucide-react";
 import { ingestGitHubRepo } from "~/lib/github";
-import { formatErrorMessage } from "~/lib/utils";
-import { Button } from "~/components/ui";
+import { formatErrorMessage, formatSize } from "~/lib/utils";
+import { Button, Badge, Tooltip } from "~/components/ui";
 
 interface SourceInputProps {
   onScan: (
     rawText: string,
-    sourceType?: "paste" | "github",
+    sourceType?: "paste" | "github" | "file",
     sourceRef?: string,
   ) => void;
   isLoading: boolean;
+}
+
+interface LoadedFileMeta {
+  name: string;
+  size: number;
 }
 
 const SHOWCASES = [
   {
     title: "TaskFlow Worker",
     tag: "Express + Redis + Postgres",
+    badge: "Distributed Queue",
     content: `# TaskFlow Engine
 A resilient distributed background job worker and task orchestration service.
 
@@ -53,33 +65,47 @@ A resilient distributed background job worker and task orchestration service.
 - Automated CI pipeline runs unit and integration tests on push via .github/workflows/ci.yml.
 - Environment variables configured via .env.example.
 
-## Features
-- Exponential backoff retry handler with dead-letter queue (DLQ) support
-- Distributed worker locks utilizing Redis atomic tokens to prevent duplicate task execution
-- RESTful HTTP endpoints for task dispatch, status polling, and health checks
+## Core Mechanisms
+- Exponential backoff retry handler with dead-letter queue (DLQ) for failed jobs.
+- Distributed worker locks utilizing Redis atomic tokens to prevent duplicate task execution.
+- RESTful HTTP endpoints for task dispatch, status polling, and health check probes.
 `,
   },
   {
     title: "Go Event Broker",
     tag: "Go + PostgreSQL + Docker",
-    content: `# EventBridge Daemon
-A lightweight distributed event broker written in Go for high-throughput stream ingestion.
+    badge: "Event Streaming",
+    content: `# EventBridge Go
+High-throughput event streaming broker and webhook dispatch daemon.
 
-## Architecture
-- Written in Go utilizing goroutines and sync channels for concurrent worker pools.
-- Backed by PostgreSQL for durable event log storage.
-- Deployed via Docker with a multi-stage Dockerfile and healthcheck probes.
-- Continuous Integration managed with GitHub Actions (.github/workflows/test.yml).
+\`\`\`
+module github.com/acme/eventbridge
 
-## Capabilities
-- Batch ingestion of webhook payloads with transactional atomic commits
-- Worker thread pool throttling to protect downstream consumer databases
-- Automated schema migration runner on container bootstrap
+go 1.22.0
+
+require (
+    github.com/redis/go-redis/v9 v9.5.1
+    github.com/jackc/pgx/v5 v5.5.5
+    github.com/gin-gonic/gin v1.9.1
+)
+\`\`\`
+
+## Infrastructure & DX
+- Containerized daemon using multi-stage Dockerfile builds.
+- Database schema versioning with golang-migrate in scripts/migrations/.
+- Prometheus metrics endpoint on :9090 exporting p99 latency counters.
+- Benchmark suite in benchmark_test.go executing sub-10ms dispatch stress tests.
+
+## Key Capabilities
+- Consumer groups using Redis streams (XREADGROUP) for parallel event fan-out.
+- Transactional outbox ledger in PostgreSQL with background commit flushers.
+- Worker thread pool throttling to protect downstream consumer databases.
 `,
   },
   {
     title: "Next.js SaaS Platform",
     tag: "Next.js + Prisma + Stripe",
+    badge: "SaaS Billing",
     content: `# SubscriptionsApp
 Modern SaaS subscription management and invoicing portal.
 
@@ -105,19 +131,57 @@ Modern SaaS subscription management and invoicing portal.
 - Stripe webhook verification with cryptographic signature validation.
 
 ## Features
-- Webhook idempotency ledger preventing duplicate invoice charges
-- Role-based team access control (RBAC) with optimistic UI updates
-- Automated unit and integration test coverage via Vitest
+- Webhook idempotency ledger preventing duplicate invoice charges.
+- Role-based team access control (RBAC) with optimistic UI updates.
+- Automated unit and integration test coverage via Vitest.
 `,
   },
 ];
 
 export function SourceInput({ onScan, isLoading }: SourceInputProps) {
-  const [activeTab, setActiveTab] = useState<"github" | "paste">("paste");
+  const [activeTab, setActiveTab] = useState<"paste" | "upload" | "github">("paste");
   const [githubUrl, setGithubUrl] = useState("");
   const [pasteContent, setPasteContent] = useState("");
+  const [loadedFileMeta, setLoadedFileMeta] = useState<LoadedFileMeta | null>(null);
   const [isFetchingGithub, setIsFetchingGithub] = useState(false);
   const [githubError, setGithubError] = useState<string | null>(null);
+
+  // File drop handler with FileReader (Client-side, 100% zero-infrastructure)
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length === 0) return;
+      const file = acceptedFiles[0];
+
+      // Read text content
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = reader.result as string;
+        setPasteContent(text);
+        setLoadedFileMeta({ name: file.name, size: file.size });
+        toast.success(`Loaded ${file.name} (${formatSize(file.size)})`);
+      };
+      reader.onerror = () => {
+        toast.error(`Failed to read file ${file.name}`);
+      };
+      reader.readAsText(file);
+    },
+    [],
+  );
+
+  const {
+    getRootProps,
+    getInputProps,
+    isDragActive,
+    isDragReject,
+  } = useDropzone({
+    onDrop,
+    maxFiles: 1,
+    maxSize: 5 * 1024 * 1024, // 5MB limit
+    accept: {
+      "text/*": [".md", ".txt", ".json", ".yaml", ".yml", ".ts", ".tsx", ".js", ".jsx", ".go", ".rs", ".py", ".toml", ".sql", ".env.example"],
+      "application/json": [".json"],
+    },
+  });
 
   const handleGitHubSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,112 +193,345 @@ export function SourceInput({ onScan, isLoading }: SourceInputProps) {
     try {
       const result = await ingestGitHubRepo(githubUrl);
       onScan(result.rawSource, "github", result.repoRef);
+      toast.success(`Ingested ${result.repoRef} via GitHub CDN`);
     } catch (err) {
       const msg = formatErrorMessage(err);
       setGithubError(
-        `Failed to fetch GitHub repository directly: ${msg}. You can paste the README.md content below instead.`,
+        `Failed to fetch GitHub repository directly: ${msg}. You can paste or drop the README.md content directly instead.`,
       );
     } finally {
       setIsFetchingGithub(false);
     }
   };
 
-  const handlePasteSubmit = (e: React.FormEvent) => {
+  const handleContentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!pasteContent.trim() || isLoading) return;
-    onScan(pasteContent, "paste", "Pasted Project Source");
+
+    if (loadedFileMeta) {
+      onScan(pasteContent, "file", loadedFileMeta.name);
+    } else {
+      onScan(pasteContent, "paste", "Pasted Project Source");
+    }
   };
 
   const handleSelectShowcase = (content: string, title: string) => {
     setPasteContent(content);
+    setLoadedFileMeta(null);
     setActiveTab("paste");
     onScan(content, "paste", `Showcase: ${title}`);
   };
 
+  const handleClearContent = () => {
+    setPasteContent("");
+    setLoadedFileMeta(null);
+  };
+
+  const lineCount = pasteContent.trim()
+    ? pasteContent.split("\n").length
+    : 0;
+
   return (
-    <div className="rounded-md border border-border bg-surface p-5 space-y-5">
+    <div className="rounded-xl border border-border bg-surface p-5 sm:p-6 space-y-5 glow-card top-highlight">
       {/* Tab Switcher & Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
-        <div className="flex items-center gap-1.5 p-0.5 rounded bg-surface-2 border border-border">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+        <div className="flex items-center gap-1.5 p-0.5 rounded-md bg-surface-2 border border-border">
           <button
             type="button"
             onClick={() => setActiveTab("paste")}
-            className={`px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-2 cursor-pointer ${
+            className={`px-3 py-1.5 rounded text-xs font-mono transition flex items-center gap-2 cursor-pointer ${
               activeTab === "paste"
-                ? "bg-surface text-accent shadow-sm border border-border"
+                ? "bg-surface text-accent font-semibold shadow-xs border border-border"
                 : "text-text-dim hover:text-text"
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>Paste README / Notes</span>
+            <span>Spec Editor</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("upload")}
+            className={`px-3 py-1.5 rounded text-xs font-mono transition flex items-center gap-2 cursor-pointer ${
+              activeTab === "upload"
+                ? "bg-surface text-accent font-semibold shadow-xs border border-border"
+                : "text-text-dim hover:text-text"
+            }`}
+          >
+            <Upload className="w-3.5 h-3.5" />
+            <span>Drop / Upload File</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("github")}
-            className={`px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-2 cursor-pointer ${
+            className={`px-3 py-1.5 rounded text-xs font-mono transition flex items-center gap-2 cursor-pointer ${
               activeTab === "github"
-                ? "bg-surface text-accent shadow-sm border border-border"
+                ? "bg-surface text-accent font-semibold shadow-xs border border-border"
                 : "text-text-dim hover:text-text"
             }`}
           >
             <FolderGit2 className="w-3.5 h-3.5" />
-            <span>GitHub URL Ingestion</span>
+            <span>GitHub CDN</span>
           </button>
         </div>
 
         <div className="flex items-center gap-2 text-[11px] text-text-dim font-mono">
           <Terminal className="w-3.5 h-3.5 text-accent" />
-          <span>Anti-Fabrication Engine</span>
+          <span>Stage 1: Source Ingestion</span>
         </div>
       </div>
 
-      {/* Architecture Showcase Quick-Pills */}
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5">
-          <Layers className="w-3 h-3 text-text-dim" />
-          <span className="text-[10px] font-mono uppercase tracking-wider text-text-dim">
-            Load Verified Architecture Showcase:
+      {/* Verified Architecture Showcase Quick-Pills */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-text-dim font-sans flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-accent" />
+            Sample architectures:
+          </span>
+          <span className="text-[11px] text-text-dim font-mono hidden sm:inline">
+            1-click instant audit
           </span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {SHOWCASES.map((sc) => (
-            <button
+            <Tooltip
               key={sc.title}
-              type="button"
-              onClick={() => handleSelectShowcase(sc.content, sc.title)}
-              disabled={isLoading || isFetchingGithub}
-              className="px-2.5 py-1 rounded-md bg-surface-2 hover:bg-surface-2/80 border border-border hover:border-slate-600 text-[11px] text-text transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              content={`Load pre-verified ${sc.tag} spec into AST parser`}
+              side="bottom"
             >
-              <span className="font-medium text-accent">{sc.title}</span>
-              <span className="text-text-dim font-mono text-[10px]">
-                ({sc.tag})
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => handleSelectShowcase(sc.content, sc.title)}
+                disabled={isLoading || isFetchingGithub}
+                className="w-full p-2.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-border hover:border-accent/40 text-left transition flex flex-col gap-0.5 cursor-pointer disabled:opacity-50 group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-xs text-text group-hover:text-accent transition">
+                    {sc.title}
+                  </span>
+                  <span className="text-[9px] font-mono text-accent/80 bg-accent/10 px-1 py-0.2 rounded">
+                    {sc.badge}
+                  </span>
+                </div>
+                <span className="text-text-dim font-mono text-[10px] truncate">
+                  {sc.tag}
+                </span>
+              </button>
+            </Tooltip>
           ))}
         </div>
       </div>
 
-      {/* GitHub Fallback Warning Banner */}
+      {/* GitHub Fallback Error Banner */}
       {githubError && (
-        <div className="p-3 rounded-md bg-warn/10 border border-warn/30 text-xs text-warn flex items-center justify-between gap-3">
+        <div className="p-3 rounded-md bg-warn/10 border border-warn/30 text-xs text-warn flex items-center justify-between gap-3 font-mono">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{githubError}</span>
           </div>
           <button
             onClick={() => setGithubError(null)}
-            className="text-warn hover:opacity-80 p-1"
+            className="text-warn hover:opacity-80 p-1 cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
-      {/* TAB 1: GitHub URL Ingestion */}
-      {activeTab === "github" ? (
+      {/* Loaded File Meta Banner (if any) */}
+      {loadedFileMeta && (
+        <div className="flex items-center justify-between p-2.5 rounded-lg bg-surface-2 border border-border text-xs">
+          <div className="flex items-center gap-2 font-mono">
+            <FileCheck2 className="w-4 h-4 text-ok shrink-0" />
+            <span className="text-text font-medium">{loadedFileMeta.name}</span>
+            <span className="text-text-dim text-[11px]">
+              ({formatSize(loadedFileMeta.size)})
+            </span>
+          </div>
+          <Tooltip content="Detach loaded file and reset editor" side="left">
+            <button
+              type="button"
+              onClick={handleClearContent}
+              className="text-text-dim hover:text-flag p-1 transition cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </Tooltip>
+        </div>
+      )}
+
+      {/* TAB 1: Direct Editor (With Drag-and-Drop capability) */}
+      {activeTab === "paste" && (
+        <form onSubmit={handleContentSubmit} className="space-y-3.5">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-text font-display">
+                Architecture Spec / README.md Content
+              </label>
+              <div className="flex items-center gap-2 text-[10px] font-mono text-text-dim">
+                <span>{lineCount} lines</span>
+                <span>&bull;</span>
+                <span>{pasteContent.length} chars</span>
+                {pasteContent && (
+                  <button
+                    type="button"
+                    onClick={handleClearContent}
+                    className="text-flag hover:underline cursor-pointer ml-1"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Code Editor Frame with embedded dropzone detection */}
+            <div
+              {...getRootProps()}
+              className={`rounded-lg border bg-bg overflow-hidden transition ${
+                isDragActive
+                  ? "border-accent ring-2 ring-accent/30 bg-accent/5"
+                  : "border-border focus-within:border-accent/50 focus-within:ring-1 focus-within:ring-accent/50"
+              }`}
+            >
+              <input {...getInputProps()} />
+              <div className="px-3 py-1.5 bg-surface-2 border-b border-border flex items-center justify-between text-[11px] font-mono text-text-dim">
+                <div className="flex items-center gap-1.5">
+                  <Code2 className="w-3 h-3 text-accent" />
+                  <span>Raw Spec Editor</span>
+                  {isDragActive && (
+                    <span className="text-accent text-[10px] animate-pulse">
+                      (Release file to load)
+                    </span>
+                  )}
+                </div>
+                <span>Drop .md or paste text</span>
+              </div>
+              <textarea
+                value={pasteContent}
+                onChange={(e) => {
+                  setPasteContent(e.target.value);
+                  if (loadedFileMeta) setLoadedFileMeta(null);
+                }}
+                rows={11}
+                disabled={isLoading}
+                required
+                className="w-full bg-transparent p-3 text-xs font-mono text-text placeholder:text-text-dim focus:outline-none leading-relaxed resize-y"
+                placeholder={`Paste markdown here (e.g. # Project Name
+
+## Tech Stack
+- Express, Redis, PostgreSQL
+
+\`\`\`json
+{
+  "dependencies": { "ioredis": "^5.3.0" }
+}
+\`\`\`
+)...`}
+              />
+            </div>
+            <p className="text-[11px] text-text-dim font-sans leading-relaxed">
+              Include dependencies, databases, Dockerfiles, and background worker descriptions. You can also drag and drop any file directly onto the editor box above.
+            </p>
+          </div>
+
+          <div className="pt-1 flex items-center justify-between">
+            <span className="text-[11px] font-mono text-text-dim">
+              Stage 1: Signals & Claims
+            </span>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              disabled={isLoading || !pasteContent.trim()}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Structuring Claims...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Scan Architecture</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {/* TAB 2: Dedicated Dropzone File Ingestion (from past creation resumind pattern) */}
+      {activeTab === "upload" && (
+        <div className="space-y-4">
+          <div
+            {...getRootProps()}
+            className={`rounded-xl border-2 border-dashed p-8 sm:p-10 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3.5 select-none ${
+              isDragActive
+                ? "border-accent bg-accent/10 scale-[1.01]"
+                : isDragReject
+                  ? "border-flag bg-flag/10"
+                  : "border-border hover:border-accent/60 bg-surface-2/40 hover:bg-surface-2/80"
+            }`}
+          >
+            <input {...getInputProps()} />
+            <div className="w-12 h-12 rounded-full bg-surface border border-border flex items-center justify-center text-accent shadow-xs">
+              <Upload className="w-6 h-6" />
+            </div>
+
+            <div className="space-y-1">
+              <p className="font-display font-semibold text-sm text-text">
+                {isDragActive
+                  ? "Drop your project file here..."
+                  : "Drag and drop your project spec or source file"}
+              </p>
+              <p className="text-xs text-text-dim font-sans">
+                Supports README.md, package.json, Dockerfile, go.mod, schema.prisma, or raw text (up to 5MB)
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+              {[".md", ".json", ".yaml", ".txt", ".ts", ".go", ".rs", ".py"].map((ext) => (
+                <Badge key={ext} variant="neutral" size="sm">
+                  {ext}
+                </Badge>
+              ))}
+            </div>
+
+            <div className="pt-2">
+              <span className="px-3 py-1.5 rounded-md bg-surface border border-border text-xs font-mono text-text hover:text-accent transition">
+                Browse from computer
+              </span>
+            </div>
+          </div>
+
+          {pasteContent.trim() && (
+            <div className="p-3 rounded-lg bg-surface-2 border border-border flex items-center justify-between">
+              <div className="text-xs font-mono text-text-dim">
+                <span className="text-text font-semibold">Ready to scan:</span>{" "}
+                {loadedFileMeta ? loadedFileMeta.name : "Loaded content"} ({lineCount} lines)
+              </div>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={handleContentSubmit}
+                disabled={isLoading}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Scan Architecture</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 3: GitHub URL Ingestion */}
+      {activeTab === "github" && (
         <form onSubmit={handleGitHubSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="block text-xs font-medium text-text">
+            <label className="block text-xs font-semibold text-text font-display">
               Public GitHub Repository URL
             </label>
             <div className="relative">
@@ -245,11 +542,11 @@ export function SourceInput({ onScan, isLoading }: SourceInputProps) {
                 placeholder="https://github.com/owner/repository (e.g. facebook/react)"
                 disabled={isLoading || isFetchingGithub}
                 required
-                className="w-full bg-bg border border-border rounded-md px-3.5 py-2 text-xs font-mono text-text placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition"
+                className="w-full bg-bg border border-border rounded-lg px-3.5 py-2.5 text-xs font-mono text-text placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-accent transition shadow-inner"
               />
             </div>
-            <p className="text-[11px] text-text-dim leading-relaxed">
-              Proof fetches README and manifests directly via raw CDN (bypassing rate limits) and inspects top-level architecture trees.
+            <p className="text-[11px] text-text-dim leading-relaxed font-sans">
+              Proof fetches README and dependency manifests directly via raw GitHub CDN (bypassing API rate limits) without downloading git history or cloning large binaries.
             </p>
           </div>
 
@@ -258,68 +555,17 @@ export function SourceInput({ onScan, isLoading }: SourceInputProps) {
               type="submit"
               variant="primary"
               size="md"
-              disabled={!githubUrl.trim() || isFetchingGithub || isLoading}
+              disabled={isLoading || isFetchingGithub || !githubUrl.trim()}
             >
-              {isFetchingGithub || isLoading ? (
+              {isFetchingGithub ? (
                 <>
-                  <Loader2 className="animate-spin h-3.5 w-3.5" />
-                  <span>Ingesting Repository...</span>
-                </>
-              ) : (
-                <>
-                  <span>Fetch & Scan Repo</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-      ) : (
-        /* TAB 2: Paste Raw README / Notes */
-        <form onSubmit={handlePasteSubmit} className="space-y-4">
-          <div className="relative">
-            <textarea
-              value={pasteContent}
-              onChange={(e) => setPasteContent(e.target.value)}
-              disabled={isLoading}
-              placeholder={`Paste markdown here (e.g. # Project Name \n\n## Tech Stack\n- Express, Redis, PostgreSQL\n\n\`\`\`json\n{\n  "dependencies": { "ioredis": "^5.3.0" }\n}\n\`\`\`)...`}
-              className="w-full h-72 bg-bg border border-border rounded-md p-3.5 text-xs font-mono text-text placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none leading-relaxed transition-all"
-              required
-            />
-            <div className="absolute bottom-2.5 right-3 text-[11px] text-text-dim font-mono">
-              {pasteContent.length > 0 ? `${pasteContent.length} chars` : "Empty"}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-1">
-            {pasteContent.length > 0 ? (
-              <button
-                type="button"
-                onClick={() => setPasteContent("")}
-                disabled={isLoading}
-                className="text-xs text-text-dim hover:text-text transition cursor-pointer"
-              >
-                Clear buffer
-              </button>
-            ) : (
-              <span />
-            )}
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              disabled={!pasteContent.trim() || isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="animate-spin h-3.5 w-3.5" />
-                  <span>Extracting Architecture Signals...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Inspecting CDN Manifests...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Scan Architecture</span>
+                  <span>Scan GitHub Repository</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}

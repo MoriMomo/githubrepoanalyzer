@@ -4,8 +4,8 @@ import {
   ShieldCheck,
   ArrowRight,
   Loader2,
-  AlertCircle,
   Trash2,
+  Zap,
 } from "lucide-react";
 import type { TruthDrillQuestion, Claim } from "~/../types";
 import { Button, Badge, Card } from "~/components/ui";
@@ -42,7 +42,8 @@ export function TruthDrill({
     for (const q of questions) {
       const choice = selectedChoices[q.claimId];
       if (choice === "__OTHER__") {
-        finalAnswers[q.claimId] = customText[q.claimId]?.trim() || "No custom detail specified";
+        finalAnswers[q.claimId] =
+          customText[q.claimId]?.trim() || "Custom architectural trade-off specified";
       } else if (choice) {
         finalAnswers[q.claimId] = choice;
       } else {
@@ -53,62 +54,83 @@ export function TruthDrill({
     onSubmit(finalAnswers);
   };
 
+  const answeredCount = Object.keys(selectedChoices).length;
+  const progressPct =
+    questions.length > 0
+      ? Math.round((answeredCount / questions.length) * 100)
+      : 100;
+
   return (
-    <div className="rounded-md border border-border bg-surface p-5 space-y-5">
-      <div className="border-b border-border pb-4 space-y-2">
-        <div className="flex items-center gap-2">
-          <Badge variant="warn" size="sm">
-            <HelpCircle className="w-3 h-3" />
-            <span>Ground Truth Drill</span>
-          </Badge>
-          <span className="text-xs font-mono text-text-dim">
-            {questions.length} critical question{questions.length === 1 ? "" : "s"}
-          </span>
+    <div className="rounded-xl border border-border bg-surface p-5 sm:p-6 space-y-6 glow-card top-highlight">
+      {/* Header with Progress Tracker */}
+      <div className="border-b border-border pb-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Badge variant="warn" size="sm">
+              <HelpCircle className="w-3 h-3" />
+              <span>Ground Truth Drill</span>
+            </Badge>
+            <span className="text-xs font-mono text-text-dim">
+              {questions.length} critical question{questions.length === 1 ? "" : "s"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 font-mono text-[11px] text-text-dim">
+            <span>Progress: {answeredCount} / {questions.length}</span>
+            <div className="w-20 h-1.5 rounded-full bg-surface-2 border border-border overflow-hidden">
+              <div
+                className="h-full bg-accent transition-all duration-300"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
         </div>
-        <h3 className="font-display font-semibold text-base text-text">
-          Lock Down Your Verifiable Technical Trade-Offs
-        </h3>
-        <p className="text-xs text-text-dim leading-relaxed">
-          Technical interviewers press for receipts when numbers smell arbitrary. Select your real architectural pattern in 1 click, or tag template boilerplate to purge unverified claims before bullets are generated.
-        </p>
+
+        <div>
+          <h3 className="font-display font-bold text-base sm:text-lg text-text tracking-tight">
+            Lock Down Your Verifiable Technical Trade-Offs
+          </h3>
+          <p className="text-xs text-text-dim leading-relaxed font-sans pt-0.5">
+            Senior interviewers challenge arbitrary metrics within 10 seconds. Select the actual pattern you implemented in 1 click, or tag template boilerplate to purge ungrounded claims before bullets are synthesized.
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {questions.map((q, idx) => {
           const matchedClaim = claims.find((c) => c.id === q.claimId);
           const currentChoice = selectedChoices[q.claimId];
           const isOther = currentChoice === "__OTHER__";
-          const isBoilerplateSelected =
-            currentChoice &&
-            (currentChoice.includes("[D]") ||
-              currentChoice.toLowerCase().includes("template boilerplate") ||
-              currentChoice.toLowerCase().includes("did not implement"));
 
           return (
             <Card
               key={q.claimId}
               variant="surface2"
-              padding="sm"
-              className="truth-drill-question-card space-y-3"
+              padding="md"
+              className="truth-drill-question-card space-y-3.5 rounded-lg border-border"
             >
-              <div className="flex items-start gap-2.5">
-                <span className="shrink-0 w-5 h-5 rounded-full bg-accent/15 text-accent text-[11px] font-mono font-semibold flex items-center justify-center mt-0.5 border border-accent/30">
+              {/* Question Header */}
+              <div className="flex items-start gap-3">
+                <span className="shrink-0 w-6 h-6 rounded-md bg-accent/15 text-accent text-xs font-mono font-bold flex items-center justify-center mt-0.5 border border-accent/30 shadow-xs">
                   {idx + 1}
                 </span>
                 <div className="space-y-1">
-                  <h4 className="text-xs font-medium text-text">
+                  <h4 className="text-xs sm:text-sm font-semibold text-text leading-snug">
                     {q.question}
                   </h4>
                   {matchedClaim && (
-                    <p className="text-[11px] text-text-dim font-mono">
-                      Target Claim: <span className="text-text italic">{matchedClaim.text}</span>
-                    </p>
+                    <div className="flex items-center gap-1.5 text-[11px] font-mono text-text-dim">
+                      <span className="text-accent/80 font-medium">Target Claim:</span>
+                      <span className="text-text italic bg-bg/50 px-1.5 py-0.5 rounded border border-border truncate max-w-md">
+                        {matchedClaim.text}
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
 
-              {/* Scaffolded Options */}
-              <div className="space-y-2 pt-1 pl-7">
+              {/* Scaffolded Option Cards */}
+              <div className="space-y-2 pt-1 pl-0 sm:pl-9">
                 {q.options?.map((opt) => {
                   const isSelected = currentChoice === opt;
                   const isBoilerplateOpt =
@@ -116,17 +138,22 @@ export function TruthDrill({
                     opt.toLowerCase().includes("boilerplate") ||
                     opt.toLowerCase().includes("did not implement");
 
+                  // Extract letter prefix if present (e.g. "[A]")
+                  const prefixMatch = opt.match(/^\[([A-Z])\]/);
+                  const letter = prefixMatch ? prefixMatch[1] : null;
+                  const cleanText = letter ? opt.replace(/^\[[A-Z]\]\s*/, "") : opt;
+
                   return (
                     <label
                       key={opt}
-                      className={`flex items-start gap-2.5 p-2.5 rounded-md border text-xs cursor-pointer transition select-none ${
+                      className={`flex items-start gap-3 p-3 rounded-lg border text-xs cursor-pointer transition select-none ${
                         isSelected
                           ? isBoilerplateOpt
-                            ? "bg-flag/15 border-flag/50 text-text"
-                            : "bg-accent/10 border-accent/50 text-text"
+                            ? "bg-flag/15 border-flag/60 text-text shadow-sm"
+                            : "bg-accent/10 border-accent/60 text-text shadow-sm"
                           : isBoilerplateOpt
-                            ? "bg-surface border-border/80 text-text-dim hover:text-text hover:border-flag/40"
-                            : "bg-surface border-border text-text-dim hover:text-text hover:border-slate-600"
+                            ? "bg-surface border-border hover:border-flag/40 text-text-dim hover:text-text hover:bg-surface-2"
+                            : "bg-surface border-border hover:border-accent/40 text-text-dim hover:text-text hover:bg-surface-2"
                       }`}
                     >
                       <input
@@ -134,39 +161,38 @@ export function TruthDrill({
                         name={`question_${q.claimId}`}
                         checked={isSelected}
                         onChange={() => handleSelectChoice(q.claimId, opt)}
-                        className={`mt-0.5 cursor-pointer ${
+                        className={`mt-0.5 shrink-0 cursor-pointer ${
                           isBoilerplateOpt ? "text-flag focus:ring-flag" : "text-accent focus:ring-accent"
                         }`}
                       />
-                      <div className="flex-1 flex items-start justify-between gap-2">
-                        <span>{opt}</span>
+
+                      <div className="flex-1 flex flex-wrap items-center justify-between gap-2 min-w-0">
+                        <span className="leading-relaxed font-sans font-normal text-text">
+                          {letter && (
+                            <span className="font-mono font-bold text-accent mr-1.5">
+                              [{letter}]
+                            </span>
+                          )}
+                          {cleanText}
+                        </span>
+
                         {isBoilerplateOpt && (
-                          <Badge variant="flag" size="sm" className="shrink-0 text-[10px]">
-                            <Trash2 className="w-2.5 h-2.5 mr-0.5" />
-                            Purge Boilerplate
-                          </Badge>
+                          <span className="inline-flex items-center gap-1 text-[10px] font-mono text-flag bg-flag/10 px-1.5 py-0.5 rounded border border-flag/25 shrink-0">
+                            <Trash2 className="w-2.5 h-2.5" />
+                            <span>Purge Boilerplate</span>
+                          </span>
                         )}
                       </div>
                     </label>
                   );
                 })}
 
-                {/* Boilerplate Selected Feedback Banner */}
-                {isBoilerplateSelected && (
-                  <div className="p-2.5 rounded-md bg-flag/10 border border-flag/30 text-xs text-flag flex items-start gap-2 animate-fade-in">
-                    <Trash2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                    <p className="text-[11px] leading-relaxed">
-                      <span className="font-semibold">Boilerplate Discard Active:</span> This claim will be completely omitted from your synthesized resume bullets, shielding you from interview questions about skeleton/cloned code you did not author.
-                    </p>
-                  </div>
-                )}
-
-                {/* Other option for custom specifics */}
+                {/* Option: Other (Custom trade-off) */}
                 <label
-                  className={`flex items-start gap-2.5 p-2.5 rounded-md border text-xs cursor-pointer transition select-none ${
+                  className={`flex items-start gap-3 p-3 rounded-lg border text-xs cursor-pointer transition select-none ${
                     isOther
-                      ? "bg-accent/10 border-accent/50 text-text"
-                      : "bg-surface border-border text-text-dim hover:text-text hover:border-slate-600"
+                      ? "bg-accent/10 border-accent/60 text-text"
+                      : "bg-surface border-border hover:border-slate-600 text-text-dim hover:text-text hover:bg-surface-2"
                   }`}
                 >
                   <input
@@ -176,48 +202,52 @@ export function TruthDrill({
                     onChange={() => handleSelectChoice(q.claimId, "__OTHER__")}
                     className="mt-0.5 text-accent focus:ring-accent cursor-pointer"
                   />
-                  <span>Other (Type custom implementation specifics)</span>
-                </label>
-
-                {isOther && (
-                  <div className="pt-1.5 pl-6">
-                    <input
-                      type="text"
-                      value={customText[q.claimId] || ""}
-                      onChange={(e) => handleCustomChange(q.claimId, e.target.value)}
-                      placeholder="e.g. Cached user session JSON with a 1-hour Redis TTL..."
-                      className="w-full px-3 py-2 rounded-md bg-bg border border-border text-xs font-mono text-text placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-                      required={isOther}
-                    />
+                  <div className="flex-1 space-y-2">
+                    <span className="font-sans font-normal text-text block">
+                      Other / Type custom architectural details
+                    </span>
+                    {isOther && (
+                      <div className="pt-1">
+                        <textarea
+                          value={customText[q.claimId] || ""}
+                          onChange={(e) => handleCustomChange(q.claimId, e.target.value)}
+                          placeholder="Describe the real trade-off or mechanism you implemented in 1-2 sentences..."
+                          rows={2}
+                          className="w-full p-2.5 rounded-md bg-bg border border-border text-xs font-mono text-text placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-accent leading-relaxed"
+                        />
+                      </div>
+                    )}
                   </div>
-                )}
+                </label>
               </div>
             </Card>
           );
         })}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
-          <p className="text-[11px] text-text-dim font-mono flex items-center gap-1.5">
-            <AlertCircle className="w-3.5 h-3.5 text-warn" />
-            <span>Unanswered questions default to defensible qualitative phrasing (no ungrounded metrics).</span>
-          </p>
+        {/* Bottom Action Footer */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-border">
+          <div className="flex items-center gap-2 text-[11px] text-text-dim font-mono">
+            <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
+            <span>Unanswered questions default to defensible qualitative phrasing.</span>
+          </div>
 
           <Button
             type="submit"
             variant="primary"
-            size="md"
+            size="lg"
             disabled={isLoading}
+            className="shadow-md shadow-accent/20"
           >
             {isLoading ? (
               <>
-                <Loader2 className="animate-spin h-3.5 w-3.5" />
-                <span>Synthesizing & Auditing Bullets...</span>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Synthesizing Defensible Bullets...</span>
               </>
             ) : (
               <>
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Synthesize Bullets & Defense Cards</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <Zap className="w-4 h-4" />
+                <span>Synthesize Bullets & Defense Playbook</span>
+                <ArrowRight className="w-4 h-4" />
               </>
             )}
           </Button>

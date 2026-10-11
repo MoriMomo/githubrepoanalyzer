@@ -205,8 +205,8 @@ export function parseSource(rawSource: string): SignalSet {
   const manifest = extractPackageJson(cleanSource);
   if (manifest) {
     const allDeps: Record<string, string> = {
-      ...((manifest.dependencies as Record<string, string>) || {}),
-      ...((manifest.devDependencies as Record<string, string>) || {}),
+      ...(manifest.dependencies as Record<string, string>),
+      ...(manifest.devDependencies as Record<string, string>),
     };
 
     runtime = "Node";

@@ -3,9 +3,10 @@ import {
   Copy,
   Check,
   GitBranch,
-  ShieldAlert,
   Edit3,
   AlertTriangle,
+  Flame,
+  CheckCircle2,
 } from "lucide-react";
 import type { Bullet, Claim } from "~/../types";
 import { MODEL } from "~/lib/prompts";
@@ -13,7 +14,7 @@ import { DefenseCard } from "./DefenseCard";
 import { TraceabilityModal } from "./TraceabilityModal";
 import { MockInterviewModal } from "./MockInterviewModal";
 import { extractMetricTokens, normalize } from "~/lib/grounding";
-import { Button, Badge, Card } from "~/components/ui";
+import { Button, Badge, Card, Tooltip } from "~/components/ui";
 
 interface BulletCardProps {
   bullet: Bullet;
@@ -27,15 +28,15 @@ interface BulletCardProps {
 const CATEGORY_META = {
   systems: {
     label: "Systems & Data Flow",
-    variant: "accent" as const,
+    badgeVariant: "accent" as const,
   },
   api: {
     label: "API & Business Logic",
-    variant: "default" as const,
+    badgeVariant: "default" as const,
   },
   reliability: {
     label: "Reliability & DX",
-    variant: "ok" as const,
+    badgeVariant: "ok" as const,
   },
 };
 
@@ -55,7 +56,7 @@ export function BulletCard({
 
   const meta = CATEGORY_META[bullet.category] || {
     label: bullet.category,
-    variant: "default" as const,
+    badgeVariant: "default" as const,
   };
 
   // Real-time live grounding check while editing
@@ -110,99 +111,110 @@ export function BulletCard({
     <>
       <Card
         variant="default"
-        padding="md"
-        className="space-y-4 hover:border-slate-700/80 transition-colors"
+        padding="lg"
+        className="space-y-4 rounded-xl border-border hover:border-border-strong transition-all glow-card top-highlight"
       >
-        {/* Header Row */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
-          <Badge variant={meta.variant} size="md">
-            <span>{meta.label}</span>
-          </Badge>
+        {/* Header Row: Category Badge + Action Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-border pb-3">
+          <div className="flex items-center gap-2">
+            <Badge variant={meta.badgeVariant} size="md">
+              <span>{meta.label}</span>
+            </Badge>
+            <span className="text-[11px] font-mono text-accent/80 hidden sm:inline">
+              Google X-Y-Z Standard
+            </span>
+          </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowTraceModal(true)}
-              title="Inspect verifiable evidence lineage"
-            >
-              <GitBranch className="w-3 h-3 text-accent" />
-              <span>Trace Lineage</span>
-            </Button>
+            <Tooltip content="Inspect cryptographic HMAC hashes and source evidence lineage">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowTraceModal(true)}
+              >
+                <GitBranch className="w-3.5 h-3.5 text-accent" />
+                <span>Trace Lineage</span>
+              </Button>
+            </Tooltip>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowMockModal(true)}
-              className="border-warn/40 text-warn hover:bg-warn/10"
-              title="Practice defending this bullet against senior interview questions"
-            >
-              <ShieldAlert className="w-3 h-3" />
-              <span>Practice Defense</span>
-            </Button>
+            <Tooltip content="Practice defending this bullet against senior staff engineer grilling">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowMockModal(true)}
+                className="border-warn/40 text-warn hover:bg-warn/10 hover:border-warn"
+              >
+                <Flame className="w-3.5 h-3.5" />
+                <span>Practice Defense</span>
+              </Button>
+            </Tooltip>
 
-            {onUpdateBullet && !isEditing && (
+            <Tooltip content="Edit bullet text with live deterministic grounding validation">
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsEditing(true)}
+                onClick={() => setIsEditing(!isEditing)}
               >
-                <Edit3 className="w-3 h-3" />
-                <span>Edit</span>
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>{isEditing ? "Cancel" : "Edit"}</span>
               </Button>
-            )}
+            </Tooltip>
 
-            <Button
-              type="button"
-              variant={copied ? "primary" : "secondary"}
-              size="sm"
-              onClick={handleCopy}
-            >
-              {copied ? (
-                <>
-                  <Check className="w-3 h-3 text-bg" />
-                  <span>Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3 h-3 text-text-dim" />
-                  <span>Copy</span>
-                </>
-              )}
-            </Button>
+            <Tooltip content="Copy bullet to clipboard (Google X-Y-Z standard)">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={handleCopy}
+                className="font-mono text-[11px]"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-ok" />
+                    <span className="text-ok">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </Button>
+            </Tooltip>
           </div>
         </div>
 
-        {/* Bullet Content or Inline Linter Editor */}
+        {/* Bullet Statement Body */}
         {isEditing ? (
-          <div className="space-y-3">
+          <div className="space-y-3 p-3.5 rounded-lg bg-surface-2 border border-border">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium text-text-dim font-sans">
+                Live grounding editor
+              </label>
+              {ungroundedInEdit.length > 0 ? (
+                <span className="text-[10px] font-mono text-flag bg-flag/10 px-2 py-0.5 rounded border border-flag/30 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  <span>Warning: ungrounded metric detected ({ungroundedInEdit.join(", ")})</span>
+                </span>
+              ) : (
+                <span className="text-[10px] font-mono text-ok bg-ok/10 px-2 py-0.5 rounded border border-ok/30 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Grounding Net Satisfied</span>
+                </span>
+              )}
+            </div>
+
             <textarea
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
-              className="w-full p-3 rounded-md bg-bg border border-accent text-xs font-mono text-text focus:outline-none focus:ring-2 focus:ring-accent resize-none h-24 leading-relaxed"
+              rows={3}
+              className="w-full p-3 rounded-md bg-bg border border-border text-xs font-sans text-text placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-accent leading-relaxed"
             />
 
-            {/* Real-time live grounding warning */}
-            {ungroundedInEdit.length > 0 && (
-              <div className="p-3 rounded-md bg-flag/10 border border-flag/30 text-xs text-flag space-y-1">
-                <span className="font-semibold flex items-center gap-1.5 font-mono">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  Anti-Fabrication Alert
-                </span>
-                <p className="font-sans text-[11px] leading-relaxed">
-                  The metric token{ungroundedInEdit.length > 1 ? "s" : ""}{" "}
-                  <span className="font-mono font-bold underline">
-                    {ungroundedInEdit.join(", ")}
-                  </span>{" "}
-                  cannot be traced to your source files or Truth Drill answers. Interviewers will challenge ungrounded metrics.
-                </p>
-              </div>
-            )}
-
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-end gap-2 pt-1">
               <Button
                 type="button"
                 variant="ghost"
@@ -222,50 +234,43 @@ export function BulletCard({
             </div>
           </div>
         ) : (
-          <div className="p-3.5 rounded-md bg-bg border border-border text-xs leading-relaxed text-text font-sans">
-            <span className="text-accent font-bold mr-1.5">&bull;</span>
-            {bullet.text}
+          <div className="space-y-3">
+            <div className="flex items-start gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-accent mt-1.5 shrink-0" />
+              <p className="text-xs sm:text-sm font-sans font-medium text-text leading-relaxed">
+                {bullet.text}
+              </p>
+            </div>
+
+            {/* Evidence & Omission Flags Line */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 pl-4.5">
+              {bullet.grounding && bullet.grounding.length > 0 && (
+                <div className="flex items-center gap-1.5 text-[10px] font-mono text-text-dim">
+                  <span className="text-text-muted">Evidence Lineage:</span>
+                  {bullet.grounding.map((g, idx) => (
+                    <Badge key={idx} variant="neutral" size="sm">
+                      {g}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              {bullet.flags && bullet.flags.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  {bullet.flags.map((flag, idx) => (
+                    <Badge key={idx} variant="flag" size="sm">
+                      <AlertTriangle className="w-2.5 h-2.5" />
+                      <span>{flag}</span>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Traceability & Grounding Badges */}
-        <div className="space-y-2">
-          {bullet.grounding && bullet.grounding.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-              <span className="text-text-dim font-mono text-[10px] uppercase tracking-wider">
-                Evidence Lineage:
-              </span>
-              {bullet.grounding.map((g, i) => (
-                <Badge key={i} variant="neutral" size="sm">
-                  {g}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {/* Anti-fabrication Audit Flags */}
-          {bullet.flags && bullet.flags.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-              {bullet.flags.map((flag, idx) => {
-                const isRemoved = flag.includes("removed") || flag.includes("omitted");
-                const isWarning = flag.includes("warning");
-                return (
-                  <Badge
-                    key={idx}
-                    variant={isRemoved || isWarning ? "flag" : "neutral"}
-                    size="sm"
-                  >
-                    <AlertTriangle className="w-2.5 h-2.5" />
-                    <span>{flag}</span>
-                  </Badge>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Integrated Defense Card */}
-        <DefenseCard defense={bullet.defense} />
+        {/* Expandable Interview Defense Card */}
+        {bullet.defense && <DefenseCard defense={bullet.defense} />}
       </Card>
 
       {/* Modals */}

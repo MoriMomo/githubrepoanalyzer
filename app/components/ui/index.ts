@@ -4,3 +4,5 @@ export * from "./Card";
 export * from "./Panel";
 export * from "./Divider";
 export * from "./MotionView";
+export * from "./ExportDropdown";
+export * from "./Tooltip";

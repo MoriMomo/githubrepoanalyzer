@@ -38,16 +38,19 @@ export function StackBadges({ signals }: StackBadgesProps) {
   return (
     <div className="space-y-4">
       {/* Detected Stack Section */}
-      <div>
-        <div className="flex items-center gap-2 mb-2.5">
-          <Cpu className="w-3.5 h-3.5 text-accent" />
-          <h4 className="text-[11px] font-mono uppercase tracking-wider text-text-dim">
-            Detected Tech Stack Signals
-          </h4>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-text-dim">
+            <Cpu className="w-3.5 h-3.5 text-accent" />
+            <span>Detected stack</span>
+          </div>
+          <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+            Verified from AST
+          </span>
         </div>
 
         {hasAnyStack ? (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 pt-0.5">
             {stack.language && (
               <Badge variant="accent" size="md">
                 <FileCode className="w-3 h-3" />
@@ -82,19 +85,17 @@ export function StackBadges({ signals }: StackBadgesProps) {
             ))}
           </div>
         ) : (
-          <p className="text-xs text-text-dim italic font-mono">
-            No specific dependencies found in text. Analysis will rely on declared features and Truth Drill answers.
+          <p className="text-xs text-text-dim italic font-mono bg-bg/50 p-2.5 rounded border border-border">
+            No explicit framework dependencies matched in manifests. Analysis will extract signals from declared features and Truth Drill answers.
           </p>
         )}
       </div>
 
       {/* Presence Flags Section */}
-      <div>
-        <div className="flex items-center gap-2 mb-2.5">
+      <div className="space-y-2 pt-1 border-t border-border">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-text-dim">
           <Box className="w-3.5 h-3.5 text-text-dim" />
-          <h4 className="text-[11px] font-mono uppercase tracking-wider text-text-dim">
-            Architectural Footprints
-          </h4>
+          <span>Infrastructure footprint</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -103,18 +104,22 @@ export function StackBadges({ signals }: StackBadgesProps) {
             return (
               <div
                 key={item.label}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-mono transition-colors ${
+                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-mono transition-colors ${
                   item.active
-                    ? "bg-surface-2 border-border text-text"
-                    : "bg-surface/40 border-border/50 text-text-dim/50"
+                    ? "bg-surface-2 border-border text-text shadow-xs"
+                    : "bg-surface/30 border-border/40 text-text-dim/40"
                 }`}
               >
                 {item.active ? (
                   <CheckCircle2 className="w-3.5 h-3.5 text-ok shrink-0" />
                 ) : (
-                  <XCircle className="w-3.5 h-3.5 text-text-dim/40 shrink-0" />
+                  <XCircle className="w-3.5 h-3.5 text-text-dim/30 shrink-0" />
                 )}
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${item.active ? "text-accent" : "text-text-dim/30"}`} />
+                <Icon
+                  className={`w-3.5 h-3.5 shrink-0 ${
+                    item.active ? "text-accent" : "text-text-dim/30"
+                  }`}
+                />
                 <span className="truncate text-[11px]">{item.label}</span>
               </div>
             );

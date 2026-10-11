@@ -1,36 +1,85 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap");
 @import "tailwindcss";
 
 @theme {
-  /* Typography */
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Typography: Precision Engineering Sans + Technical Monospace */
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Neutrals (dark-first developer tool palette) */
-  --color-bg: #0b0d10;
-  --color-surface: #14171c;
-  --color-surface-2: #1b1f26;
-  --color-border: #262b33;
-  --color-text: #e6e9ef;
-  --color-text-dim: #9aa3b2;
+  /* Neutrals: Deep Obsidian & Machined Slate Surfaces */
+  --color-bg: #07090d;
+  --color-surface: #0e1117;
+  --color-surface-2: #141820;
+  --color-surface-3: #1c222d;
+  --color-border: #1f2532;
+  --color-border-subtle: #171c26;
+  --color-border-strong: #2a3243;
+  --color-text: #eff2f7;
+  --color-text-dim: #8b96a8;
+  --color-text-muted: #535e71;
 
-  /* ONE functional accent (signals "verified / grounded") */
-  --color-accent: #5eead4;
-  --color-accent-dim: #2dd4bf;
+  /* Functional Verification Accent: Electric Emerald / Grounded Cyan */
+  --color-accent: #10b981;
+  --color-accent-dim: #059669;
+  --color-accent-glow: #34d399;
 
-  /* Semantic status (maps directly to anti-fabrication guarantee) */
-  --color-ok: #4ade80;
-  --color-warn: #fbbf24;
-  --color-flag: #fb7185;
+  /* Semantic status colors (Grounded = Emerald, Needs drill = Amber, Fluff/Ungrounded = Rose, Info = Blue) */
+  --color-ok: #10b981;
+  --color-warn: #f59e0b;
+  --color-flag: #f43f5e;
+  --color-info: #38bdf8;
 }
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
-  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
 }
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
+
+/* Tactile glow utilities */
+.glow-accent {
+  box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.25);
+}
+
+.glow-card {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+.top-highlight {
+  position: relative;
+}
+.top-highlight::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 50%, transparent 100%);
+  pointer-events: none;
+}
+

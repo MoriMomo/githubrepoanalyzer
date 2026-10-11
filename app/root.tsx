@@ -11,6 +11,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { usePuterStore } from "~/lib/puter";
 import { useEffect } from "react";
+import { Toaster } from "sonner";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -21,7 +22,7 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap",
   },
 ];
 
@@ -41,6 +42,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         className="bg-bg text-text min-h-screen selection:bg-accent/20 selection:text-accent"
       >
         {children}
+        <Toaster
+          position="bottom-right"
+          theme="dark"
+          toastOptions={{
+            className: "bg-surface-2 border border-border text-text font-sans text-xs shadow-xl",
+          }}
+        />
         <ScrollRestoration />
         <Scripts />
       </body>

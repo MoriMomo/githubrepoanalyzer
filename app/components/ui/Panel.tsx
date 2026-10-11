@@ -14,13 +14,13 @@ export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(
       <div
         ref={ref}
         className={cn(
-          "rounded-md border border-border bg-surface overflow-hidden",
+          "rounded-lg border border-border bg-surface overflow-hidden shadow-xs",
           className,
         )}
         {...props}
       >
         {(title || actions || badge) && (
-          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-border bg-surface-2/40">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4.5 py-3 border-b border-border bg-surface-2/60">
             <div className="flex items-center gap-2.5">
               {title && (
                 <h3 className="font-display font-semibold text-xs tracking-tight text-text">
@@ -37,7 +37,7 @@ export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(
             {actions && <div className="flex items-center gap-2">{actions}</div>}
           </div>
         )}
-        <div className="p-4">{children}</div>
+        <div className="p-4.5">{children}</div>
       </div>
     );
   },

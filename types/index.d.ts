@@ -59,7 +59,7 @@ export interface ProjectSession {
   createdAt: number;
   updatedAt?: number;
   version?: number;
-  sourceType: "paste" | "github";
+  sourceType: "paste" | "github" | "file";
   sourceRef: string;
   signals: SignalSet;
   claims: Claim[];

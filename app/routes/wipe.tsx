@@ -52,7 +52,7 @@ export default function WipePage() {
       }
 
       setWipeReport(
-        `Reset complete. Successfully purged ${fulfilled} session keys${
+        `Reset complete. Purged ${fulfilled} session keys from Puter KV${
           rejected > 0 ? ` (${rejected} failed)` : ""
         }.`,
       );
@@ -65,70 +65,98 @@ export default function WipePage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <Card variant="default" padding="lg" className="max-w-md w-full space-y-5 border-border">
-        <div className="space-y-2">
+    <div className="min-h-screen flex flex-col bg-bg text-text">
+      {/* Header */}
+      <header className="border-b border-border bg-bg/85 backdrop-blur-md px-4 sm:px-6 h-14 flex items-center justify-between sticky top-0 z-30">
+        <Link
+          to="/"
+          className="text-xs text-text-dim hover:text-text transition-colors flex items-center gap-1.5 font-mono"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Home</span>
+        </Link>
+
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded bg-accent/15 border border-accent/30 text-accent font-mono font-bold text-xs flex items-center justify-center">
+            P
+          </span>
+          <span className="font-display font-extrabold text-sm tracking-tight text-text">
+            PROOF
+          </span>
           <Badge variant="flag" size="sm">
-            <AlertTriangle className="w-3 h-3" />
-            <span>Danger Zone</span>
+            DANGER ZONE
           </Badge>
-          <h1 className="font-display text-xl font-bold text-text">
-            Reset Proof Data
-          </h1>
-          <p className="text-xs text-text-dim leading-relaxed font-sans">
-            This operation completely wipes all saved project sessions and cached Truth Drill answers from your Puter KV cloud store.
-          </p>
         </div>
 
-        <Card variant="surface2" padding="md" className="space-y-2 text-xs">
-          <div className="flex justify-between items-center text-text">
-            <span>Detected saved sessions:</span>
-            <span className="font-mono font-semibold text-flag">
-              {isLoading ? "Counting..." : sessionKeys.length}
-            </span>
+        <div className="w-12" />
+      </header>
+
+      {/* Main Container */}
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <Card variant="default" padding="lg" className="max-w-md w-full space-y-5 border-border rounded-xl shadow-2xl">
+          <div className="space-y-2">
+            <Badge variant="flag" size="sm">
+              <AlertTriangle className="w-3 h-3" />
+              <span>Danger Zone</span>
+            </Badge>
+            <h1 className="font-display text-xl sm:text-2xl font-bold text-text">
+              Reset Proof Cloud Data
+            </h1>
+            <p className="text-xs text-text-dim leading-relaxed font-sans">
+              This operation permanently wipes all saved project sessions and cached Truth Drill answers from your Puter KV cloud store.
+            </p>
           </div>
-          <p className="text-text-dim text-[11px] leading-relaxed">
-            This action cannot be undone. All resume bullets and interview defense scripts will be permanently destroyed.
-          </p>
+
+          <Card variant="surface2" padding="md" className="space-y-2 text-xs border-border">
+            <div className="flex justify-between items-center text-text">
+              <span>Detected saved sessions:</span>
+              <span className="font-mono font-bold text-flag">
+                {isLoading ? "Counting..." : sessionKeys.length}
+              </span>
+            </div>
+            <p className="text-text-dim text-[11px] leading-relaxed">
+              This action cannot be undone. All resume bullets and interview defense scripts in your Puter KV will be permanently purged.
+            </p>
+          </Card>
+
+          {wipeReport && (
+            <div className="p-3 rounded-lg bg-ok/10 border border-ok/30 text-ok text-xs font-mono flex items-center gap-2 animate-fade-in">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{wipeReport}</span>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between pt-2 border-t border-border">
+            <Link
+              to="/app"
+              className="text-xs text-text-dim hover:text-text font-mono transition-colors flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Return to App</span>
+            </Link>
+
+            <Button
+              type="button"
+              variant="destructive"
+              size="md"
+              onClick={handleWipe}
+              disabled={isWiping || isLoading || sessionKeys.length === 0}
+            >
+              {isWiping ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Purging KV...</span>
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Confirm & Purge</span>
+                </>
+              )}
+            </Button>
+          </div>
         </Card>
-
-        {wipeReport && (
-          <div className="p-3 rounded-md bg-ok/10 border border-ok/30 text-ok text-xs font-mono flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>{wipeReport}</span>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between pt-2 border-t border-border">
-          <Link
-            to="/"
-            className="text-xs text-text-dim hover:text-text font-mono transition flex items-center gap-1.5"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Return Home</span>
-          </Link>
-
-          <Button
-            type="button"
-            variant="destructive"
-            size="md"
-            onClick={handleWipe}
-            disabled={isWiping || isLoading || sessionKeys.length === 0}
-          >
-            {isWiping ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Purging KV...</span>
-              </>
-            ) : (
-              <>
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Confirm & Delete</span>
-              </>
-            )}
-          </Button>
-        </div>
-      </Card>
+      </main>
     </div>
   );
 }
