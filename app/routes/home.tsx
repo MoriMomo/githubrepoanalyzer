@@ -20,7 +20,14 @@ import {
 } from "lucide-react";
 import { generateUUID } from "~/lib/utils";
 import { auditBulletRisk, type BulletAuditReport } from "~/lib/grounding";
-import { Button, Badge, Card, Hero01 } from "~/components/ui";
+import {
+  Button,
+  Badge,
+  Card,
+  Hero01,
+  InteractiveCodeHero,
+  ClaimAndProofFeatures,
+} from "~/components/ui";
 import {
   GoIcon,
   RedisIcon,
@@ -167,6 +174,16 @@ export default function HomePage() {
           ]}
         />
 
+        {/* INTERACTIVE AST CODE ENGINE & WALKTHROUGH (FULLY ANIMATED) */}
+        <InteractiveCodeHero
+          badge="Deterministic AST Extraction"
+          title="Verifiable code grounding in action."
+          subtitle="Proof parses AST tokens and concurrency primitives from your actual files, tying each resume bullet to concrete, verifiable source lines."
+          fileName="pkg/worker/pool.go"
+          onActionClick={handleLaunchSample}
+          actionLabel="Launch Live Audit Sandbox →"
+        />
+
         {/* INTERACTIVE REALITY CHECK TERMINAL (THE PROOF OF VALUE) */}
         <section id="reality-check" className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
@@ -302,60 +319,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* TRUST PILLARS / ENGINEERING STANDARDS */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
-            <div className="flex items-center justify-between">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              <Badge variant="accent" size="sm">§8 Standard</Badge>
-            </div>
-            <h3 className="text-sm font-semibold font-sans text-text">
-              0% Hallucinations
-            </h3>
-            <p className="text-xs text-text-dim leading-relaxed font-sans">
-              Strict deterministic validation pass strips ungrounded numbers or invented benchmarks before you copy.
-            </p>
-          </Card>
-
-          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
-            <div className="flex items-center justify-between">
-              <span className="w-2 h-2 rounded-full bg-ok" />
-              <Badge variant="ok" size="sm">Format</Badge>
-            </div>
-            <h3 className="text-sm font-semibold font-sans text-text">
-              Google X-Y-Z Standard
-            </h3>
-            <p className="text-xs text-text-dim leading-relaxed font-sans">
-              Every bullet is structured as: Accomplished [X], measured by [Y], by implementing [Z].
-            </p>
-          </Card>
-
-          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
-            <div className="flex items-center justify-between">
-              <span className="w-2 h-2 rounded-full bg-warn" />
-              <Badge variant="warn" size="sm">Interviews</Badge>
-            </div>
-            <h3 className="text-sm font-semibold font-sans text-text">
-              Hotseat Scripts
-            </h3>
-            <p className="text-xs text-text-dim leading-relaxed font-sans">
-              Pre-computed spoken scripts and verbatim code proof anchors for senior interviewer challenges.
-            </p>
-          </Card>
-
-          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
-            <div className="flex items-center justify-between">
-              <span className="w-2 h-2 rounded-full bg-info" />
-              <Badge variant="neutral" size="sm">Privacy</Badge>
-            </div>
-            <h3 className="text-sm font-semibold font-sans text-text">
-              Client-Only Storage
-            </h3>
-            <p className="text-xs text-text-dim leading-relaxed font-sans">
-              Zero centralized backend database. Stored safely in your browser and personal Puter cloud KV.
-            </p>
-          </Card>
-        </section>
+        {/* CLAIMS & TECHNICAL SAFEGUARDS (FULLY ANIMATED TELEMETRY) */}
+        <ClaimAndProofFeatures
+          badge="The Technical Safeguards"
+          title="Engineered for technical hotseats."
+          subtitle="We didn't build another generic resume AI to generate padded fluff. We built it to enforce strict mechanical boundaries between claims, measurements, and verifiable git proof."
+        />
 
         {/* HOW IT WORKS / 4-STAGE PIPELINE */}
         <section id="pipeline" className="space-y-8">
