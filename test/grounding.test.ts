@@ -153,4 +153,34 @@ Configured Docker container and automated schema migrations.
     expect(report.ungroundedHits).toContain("40%");
     expect(report.ungroundedHits).toContain("10k users");
   });
+
+  it("detects and flags ungrounded enterprise scope inflation buzzwords", () => {
+    const inflatedBulletText =
+      "Architected fault-tolerant distributed consensus algorithm with split-brain mitigation.";
+    const simpleStudentCorpus =
+      "A simple Node.js Express server with local SQLite database.";
+
+    const report = auditBulletRisk(inflatedBulletText, simpleStudentCorpus);
+    expect(report.inflatedTerms).toContain("fault-tolerant");
+    expect(report.inflatedTerms).toContain("consensus algorithm");
+    expect(report.inflatedTerms).toContain("split-brain");
+    expect(report.diagnosis).toContain("Unsubstantiated enterprise scope claimed");
+
+    // Also test enforceGrounding flagging
+    const bullets: Bullet[] = [
+      {
+        category: "systems",
+        text: inflatedBulletText,
+        grounding: ["Node.js"],
+        defense: {
+          question: "How did you implement consensus?",
+          script: "Did not actually implement.",
+        },
+        flags: [],
+      },
+    ];
+
+    const audited = enforceGrounding(bullets, simpleStudentCorpus);
+    expect(audited[0].flags.some((f) => f.includes("scope flag"))).toBe(true);
+  });
 });

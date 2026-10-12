@@ -92,14 +92,15 @@ For each claim:
 FOR EVERY "needs-drill" CLAIM (and at most 3 questions total across all claims):
 - Formulate ONE specific Truth Drill question identifying a real architectural trade-off.
 - MUST provide exactly 4 options:
-  - 3 concrete implementation trade-offs prefixed with [A], [B], [C] (e.g. "[A] Cache-aside: Read cache, fallback to Postgres on miss", "[B] Write-through: Synchronously updated cache on write", "[C] Basic session store: Stored auth tokens only")
+  - 3 concrete, educational implementation trade-offs prefixed with [A], [B], [C] (e.g. "[A] Cache-aside: Read cache, fallback to Postgres on miss", "[B] Write-through: Synchronously updated cache on write", "[C] Basic session store: Stored auth tokens only"). Explain the mechanism clearly so students who learned from tutorials can recognize what they built.
   - 1 boilerplate discard option: "[D] Template boilerplate / Did not implement directly"
 
-STRICT RULES:
+JUNIOR SCOPE CALIBRATION & HARD RULES:
 1. NEVER invent any percentage, latency, throughput, scale, or user count.
-2. NEVER use forbidden fluff: "spearheaded", "leveraged", "utilized", "participated in", "responsible for".
-3. For student repositories that are forks/templates, option [D] allows discarding unworked boilerplate before bullets are generated.
-4. Return ONLY a valid JSON object matching the schema below. No Markdown code fences, no extra conversational text.
+2. SCOPE CALIBRATION: Strictly PROHIBIT enterprise-tier buzzwords ("distributed", "fault-tolerant", "high-availability", "microservices", "consensus", "CQRS") UNLESS the repository explicitly contains distributed infrastructure dependencies (e.g., Kafka, RabbitMQ, multi-container Docker compose). Calibrate to the authentic engineering scope of a junior developer.
+3. NEVER use forbidden fluff: "spearheaded", "leveraged", "utilized", "participated in", "responsible for".
+4. For student repositories that are forks/templates, option [D] allows discarding unworked boilerplate before bullets are generated.
+5. Return ONLY a valid JSON object matching the schema below. No Markdown code fences, no extra conversational text.
 
 JSON Schema:
 {
@@ -107,7 +108,7 @@ JSON Schema:
     {
       "id": "c1",
       "category": "systems" | "api" | "reliability",
-      "text": "Engineered Redis caching layer for session storage to avoid frequent DB lookups",
+      "text": "Configured Redis caching layer for session storage to eliminate redundant database lookups",
       "evidence": ["ioredis"],
       "status": "grounded" | "needs-drill"
     }
@@ -169,12 +170,19 @@ Original Raw Source Context:
 ${signals.rawSource.slice(0, 3500)}
 """
 
-ANTI-FABRICATION GUARANTEE (STRICT):
-1. A numeric metric (percentages %, ms, latencies, requests/sec, rows, multiplier Nx, millions) may appear ONLY IF it is present verbatim in the source text or in the drill answers above.
-2. If no numeric metric was measured or provided by the student, write the qualitative version focusing on concrete technical mechanisms (e.g. "ensuring idempotent payment processing via database transaction locks") and include "metric omitted — not measured" in the "flags" array.
-3. NEVER use fluff: "spearheaded", "leveraged", "utilized", "participated in", "responsible for".
-4. BOILERPLATE PURGE: Claims discarded as boilerplate or template skeleton MUST NOT produce a bullet. Focus only on mechanisms authoritatively built.
-5. For each bullet, create an Interview Defense Card:
+ANTI-FABRICATION GUARANTEE & JUNIOR SCOPE CALIBRATION:
+1. ABSOLUTE METRIC PROOF: A numeric metric (percentages %, ms, latencies, requests/sec, rows, multiplier Nx, millions) may appear ONLY IF it is present verbatim in the source text or in the drill answers above.
+2. LOCAL VERIFIABLE PROXIES FOR GOOGLE X-Y-Z [Y]:
+   When no production scale metric exists (e.g., student project has 0 active users or unmeasured throughput), DO NOT leave [Y] blank or amputated. Instead, pivot [Y] to a verifiable local engineering quality proxy:
+   - Test suites: "as measured by passing 100% of unit assertions across critical edge cases"
+   - Type/schema contracts: "as measured by strict TypeScript compiler zero-type-error enforcement and Prisma schema validation"
+   - Data integrity: "as measured by zero orphaned records via foreign key cascading constraints"
+   - Failure resilience: "as measured by graceful recovery across 3 network retry and timeout scenarios"
+   If even a local proxy cannot be grounded, write the clean mechanism and append "metric omitted — not measured" in the "flags" array.
+3. ENTERPRISE SCOPE INFLATION BAN: Do NOT inflate simple implementations into enterprise buzzwords ("distributed", "fault-tolerant", "high-availability", "microservices") unless supported by explicit multi-service dependencies.
+4. BANNED FLUFF WORDS: Never use "spearheaded", "leveraged", "utilized", "participated in", "responsible for".
+5. BOILERPLATE PURGE: Claims discarded as boilerplate or template skeleton MUST NOT produce a bullet. Focus only on mechanisms authoritatively built.
+6. For each bullet, create an Interview Defense Card:
    - "question": The sharpest technical interview question a skeptical senior interviewer would ask about this exact claim (e.g. "Why choose cache-aside over write-through?").
    - "script": A 1-2 sentence truthful response the candidate can speak verbatim, rooted in the trade-offs and facts they verified.
    - "codeProof": Precise file path and line or symbol reference based on the verified source implementation (e.g. "src/server.ts:L24" or "prisma/schema.prisma:model User" or "src/services/cache.ts").
@@ -186,7 +194,7 @@ JSON Schema:
 [
   {
     "category": "systems" | "api" | "reliability",
-    "text": "Designed Redis session caching layer by configuring key expiration TTLs, eliminating redundant PostgreSQL queries for authenticated endpoints",
+    "text": "Engineered Redis session caching layer, eliminating redundant PostgreSQL queries for authenticated endpoints by enforcing sliding key TTL invalidation",
     "grounding": ["ioredis dependency", "drill answer: session tokens"],
     "defense": {
       "question": "How did you handle cache invalidation when a user logged out or changed passwords?",

@@ -23,6 +23,18 @@ export const BANNED_FLUFF_WORDS = [
 ];
 
 /**
+ * Enterprise architecture buzzwords that trigger senior interviewer skepticism
+ * when claimed on a junior project without backing infrastructure in source corpus.
+ */
+export const INFLATED_ENTERPRISE_WORDS = [
+  "high-availability",
+  "fault-tolerant",
+  "consensus algorithm",
+  "split-brain",
+  "cqrs",
+];
+
+/**
  * Detects occurrences of banned fluff words in a given text.
  */
 export function detectFluffWords(text: string): string[] {
@@ -37,10 +49,30 @@ export function detectFluffWords(text: string): string[] {
   return hits;
 }
 
+/**
+ * Detects ungrounded enterprise architecture claims that lack evidence in source corpus.
+ */
+export function detectEnterpriseInflation(
+  text: string,
+  groundedCorpus: string,
+): string[] {
+  const lowerText = text.toLowerCase();
+  const lowerCorpus = groundedCorpus.toLowerCase();
+  const hits: string[] = [];
+  for (const term of INFLATED_ENTERPRISE_WORDS) {
+    const regex = new RegExp(`\\b${term.replace("-", "[-\\s]")}\\b`, "i");
+    if (regex.test(lowerText) && !regex.test(lowerCorpus)) {
+      hits.push(term);
+    }
+  }
+  return hits;
+}
+
 export interface BulletAuditReport {
   fluffHits: string[];
   ungroundedHits: string[];
   groundedHits: string[];
+  inflatedTerms: string[];
   riskLevel: "CRITICAL" | "MODERATE" | "CLEAN";
   diagnosis: string;
 }
@@ -55,6 +87,7 @@ export function auditBulletRisk(
 ): BulletAuditReport {
   const fluffHits = detectFluffWords(candidateBulletText);
   const metricHits = extractMetricTokens(candidateBulletText);
+  const inflatedTerms = detectEnterpriseInflation(candidateBulletText, groundedCorpus);
 
   const normalizedCorpus = groundedCorpus.toLowerCase().replace(/\s+/g, " ");
   const compactCorpus = normalize(groundedCorpus);
@@ -73,7 +106,11 @@ export function auditBulletRisk(
   let riskLevel: "CRITICAL" | "MODERATE" | "CLEAN" = "CLEAN";
   if (ungroundedHits.length > 0 && fluffHits.length > 0) {
     riskLevel = "CRITICAL";
-  } else if (ungroundedHits.length > 0 || fluffHits.length > 0) {
+  } else if (
+    ungroundedHits.length > 0 ||
+    fluffHits.length > 0 ||
+    inflatedTerms.length > 0
+  ) {
     riskLevel = "MODERATE";
   }
 
@@ -84,12 +121,15 @@ export function auditBulletRisk(
     diagnosis = `Unverified metrics detected: ${ungroundedHits.join(", ")}. Without benchmark artifacts, interviewers will ask for profiling proofs.`;
   } else if (fluffHits.length > 0) {
     diagnosis = `Passive fluff buzzwords detected: ${fluffHits.join(", ")}. Replace with concrete mechanism verbs.`;
+  } else if (inflatedTerms.length > 0) {
+    diagnosis = `Unsubstantiated enterprise scope claimed: ${inflatedTerms.join(", ")}. Interviewers will probe failure modes you may not have implemented.`;
   }
 
   return {
     fluffHits,
     ungroundedHits,
     groundedHits,
+    inflatedTerms,
     riskLevel,
     diagnosis,
   };
@@ -162,9 +202,7 @@ export function enforceGrounding(bullets: Bullet[], groundedCorpus: string): Bul
 
   return bullets.map((bullet) => {
     const hits = extractMetricTokens(bullet.text);
-    if (hits.length === 0) {
-      return bullet;
-    }
+    const inflatedTerms = detectEnterpriseInflation(bullet.text, groundedCorpus);
 
     const ungroundedHits = hits.filter((hit) => {
       const normHit = normalize(hit);
@@ -175,7 +213,7 @@ export function enforceGrounding(bullets: Bullet[], groundedCorpus: string): Bul
       return !isPresent;
     });
 
-    if (ungroundedHits.length === 0) {
+    if (ungroundedHits.length === 0 && inflatedTerms.length === 0) {
       return bullet;
     }
 
@@ -185,10 +223,13 @@ export function enforceGrounding(bullets: Bullet[], groundedCorpus: string): Bul
       updatedText = stripNumberPhrase(updatedText, ungrounded);
     }
 
-    const updatedFlags = [
-      ...(bullet.flags || []),
-      `metric removed (ungrounded): ${ungroundedHits.join(", ")}`,
-    ];
+    const updatedFlags = [...(bullet.flags || [])];
+    if (ungroundedHits.length > 0) {
+      updatedFlags.push(`metric removed (ungrounded): ${ungroundedHits.join(", ")}`);
+    }
+    if (inflatedTerms.length > 0) {
+      updatedFlags.push(`scope flag (unverified enterprise claim): ${inflatedTerms.join(", ")}`);
+    }
 
     return {
       ...bullet,

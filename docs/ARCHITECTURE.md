@@ -226,23 +226,30 @@ No token in v1/v2. A user-supplied token is a possible v3 power-user option, not
 
 ---
 
-## 8. The Anti-Fabrication Guarantee (how we actually enforce it)
+## 8. The Anti-Fabrication & Scope Calibration Guarantee (how we actually enforce it)
 
 This is the product; it cannot be left to the model being well-behaved. It must hold regardless of which model (§4.1) is selected. Three layers:
 
-1. **Prompt constraints (Stage 2 system prompt):**
-   - Never emit a percentage, latency, throughput, user count, or data volume unless it appears verbatim in the source text or in a Truth Drill answer.
-   - Banned fluff: "spearheaded", "leveraged", "utilized", "participated in", "responsible for".
-   - Focus on *mechanisms*: trade-offs, protocols, algorithms, schemas, error states, consistency/durability properties.
-   - When a quantified claim would strengthen a bullet but no number exists, write the qualitative version and emit a `flag`: "metric omitted — not measured".
+1. **Prompt constraints (Stage 1 & Stage 2 system prompts):**
+   - **Absolute Metric Proof:** Never emit a percentage, latency, throughput, user count, or data volume unless it appears verbatim in the source text or in a Truth Drill answer.
+   - **Junior Scope Calibration:** Strictly prohibit inflating student projects into enterprise-tier buzzwords ("distributed", "fault-tolerant", "high-availability", "microservices", "consensus", "CQRS") unless the repository explicitly contains distributed infrastructure dependencies (Kafka, RabbitMQ, multi-container compose).
+   - **Local Verifiable Engineering Proxies for Google X-Y-Z [Y]:** When no production scale metric exists (e.g. 0 active users), the engine pivots [Y] to local verifiable engineering proxies rather than amputating the bullet:
+     - Test coverage/assertions: *"as measured by 100% test pass rate across 14 unit assertions"*
+     - Schema & relational constraints: *"as measured by zero orphaned records via foreign key cascading constraints"*
+     - Contract/type safety: *"as measured by strict TypeScript compiler zero-type-error enforcement"*
+     - Failure resilience: *"as measured by graceful recovery across 3 network timeout scenarios"*
+     - If no proxy can be grounded, write the clean mechanism and emit `flag`: "metric omitted — not measured".
+   - **Banned fluff words:** "spearheaded", "leveraged", "utilized", "participated in", "responsible for".
 
 2. **Deterministic validation pass (our code, after the AI returns):**
    - Regex-scan each bullet for number-like tokens (`\d+%`, `\d+ms`, `\d+x`, "millions", etc.).
-   - For each hit, require a matching source in `grounding`. If none, **strip the number and attach a flag** rather than trusting the model. This runs in `app/lib/grounding.ts` and is unit-tested. Because this layer is model-independent, you can swap the model freely without weakening the guarantee.
+   - For each hit, require a matching source in `grounding`. If none, **strip the number and attach a flag** rather than trusting the model.
+   - Scan each bullet for ungrounded enterprise architecture inflation terms (`high-availability`, `fault-tolerant`, `consensus algorithm`, `split-brain`, `cqrs`) against the source corpus. Attach scope flags when unearned architectural claims are detected.
+   - This runs in `app/lib/grounding.ts` and is unit-tested. Because this layer is model-independent, you can swap the model freely without weakening the guarantee.
 
-3. **Visible traceability in the UI:** each bullet can expand to show *why* each claim is allowed (which signal or drill answer backs it). The Defense Card is the user-facing payoff of this same data.
+3. **Visible traceability & Interview Defense Cards in the UI:** each bullet displays its grounding lineage (which signal or drill answer backs it), its exact Code Proof anchor, and an Interview Defense Card containing the tough interviewer question, candidate spoken defense script, and trade-off rationale.
 
-**Acceptance test for the guarantee:** feed a README with zero numbers and give drill answers with zero numbers → assert no output bullet contains a number-like token. This test must pass before v1 is "done".
+**Acceptance test for the guarantee:** feed a README with zero numbers and give drill answers with zero numbers → assert no output bullet contains an ungrounded number-like token, and unverified enterprise terms are flagged. This test must pass before v1 is "done".
 
 ---
 
@@ -315,12 +322,14 @@ Each v1 step is small enough to verify independently. We do not start v2 until t
 
 ---
 
-## 12. Open Questions (for Kentaro before build)
+## 12. Resolved Contract Decisions (from LLM Council Review)
 
-1. **Name** — keep "Proof", or one of Defensible / Ground Truth / Receipts? (Affects titles, nothing structural.)
-2. **Niche confirmation** — student / new-grad *software* engineers specifically? That tunes the prompt's vocabulary and the three bullet categories.
-3. **Deadline / context** — is this tied to a competition or hackathon submission? That changes how much we invest in v1 polish vs. breadth.
-4. **MCQ vs short-answer** for the Truth Drill — MCQ is faster for the user and easier to ground; short-answer is richer but needs more validation. v1 could do MCQ-with-"other" to get both.
-5. **Model** — default is `alibaba:qwen/qwen-max` (§4.1), swappable via one constant. Confirm Qwen, or name a preferred default. A user-facing picker is an easy post-v1 add.
+1. **Product Identity:** Retained **Proof** (tagline: "Defensible Resume Bullets & Architectural Grounding Engine").
+2. **Target Niche:** Student / new-grad software engineers facing technical hotseat interviews.
+3. **Truth Drill Format:** 4-Option Multiple Choice with Boilerplate Discard:
+   - Options `[A]`, `[B]`, `[C]`: Concrete, educational trade-offs (e.g. Cache-aside vs Write-through vs Ephemeral session tokens).
+   - Option `[D]`: "Template boilerplate / Did not implement directly" (automatically purges unworked starter code).
+4. **Scope Calibration & Local Proxies:** Strict prohibition of unearned enterprise terms (`distributed`, `fault-tolerant`, `consensus`, `split-brain`) and substitution of Google X-Y-Z [Y] with local verifiable engineering quality proxies when scale numbers are absent.
+5. **AI Model Strategy:** Default `gpt-5-mini` with low reasoning effort and low verbosity for near-zero token cost and sub-second JSON extraction, with UI model picker enabling candidates to evaluate Qwen Max, Gemini 3.6 Flash, and Claude models. All models bound by the deterministic `grounding.ts` post-pass.
 ```
 
