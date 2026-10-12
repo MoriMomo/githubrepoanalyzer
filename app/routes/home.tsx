@@ -24,9 +24,7 @@ import {
   Button,
   Badge,
   Card,
-  Hero01,
   InteractiveCodeHero,
-  ClaimAndProofFeatures,
 } from "~/components/ui";
 import {
   GoIcon,
@@ -128,16 +126,16 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="flex-1 space-y-24 pt-24 pb-16 px-4 sm:px-6 max-w-6xl mx-auto w-full">
-        {/* HERO SECTION - REFINED DEVELOPER MINIMALISM */}
-        <Hero01
+        {/* HERO SECTION - ANIMATED INTERACTIVE AST CODE ENGINE */}
+        <InteractiveCodeHero
           badge={
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-mono">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-mono shadow-xs">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Deterministic Resume Engineering &amp; Hotseat Defense</span>
             </div>
           }
           headline={
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text leading-[1.12]">
+            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-text leading-[1.14]">
               Turn raw repositories into{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-emerald-300 to-teal-200">
                 interview-defensible
@@ -145,10 +143,8 @@ export default function HomePage() {
               resume bullets.
             </h1>
           }
-          brandName="Proof"
-          brandPronunciation="Proof /pruːf/ — evidence sufficient to establish a fact"
           description={
-            <p className="text-base sm:text-lg text-text-dim leading-relaxed font-sans max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-text-dim leading-relaxed font-sans">
               Generic AI invents metrics like{" "}
               <span className="text-flag font-mono font-medium bg-flag/10 px-1.5 py-0.5 rounded border border-flag/20">
                 &ldquo;improved query efficiency by 40%&rdquo;
@@ -172,16 +168,7 @@ export default function HomePage() {
             { icon: <DockerIcon />, title: "Docker" },
             { icon: <TypeScriptIcon />, title: "TypeScript" },
           ]}
-        />
-
-        {/* INTERACTIVE AST CODE ENGINE & WALKTHROUGH (FULLY ANIMATED) */}
-        <InteractiveCodeHero
-          badge="Deterministic AST Extraction"
-          title="Verifiable code grounding in action."
-          subtitle="Proof parses AST tokens and concurrency primitives from your actual files, tying each resume bullet to concrete, verifiable source lines."
           fileName="pkg/worker/pool.go"
-          onActionClick={handleLaunchSample}
-          actionLabel="Launch Live Audit Sandbox →"
         />
 
         {/* INTERACTIVE REALITY CHECK TERMINAL (THE PROOF OF VALUE) */}
@@ -319,12 +306,60 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* CLAIMS & TECHNICAL SAFEGUARDS (FULLY ANIMATED TELEMETRY) */}
-        <ClaimAndProofFeatures
-          badge="The Technical Safeguards"
-          title="Engineered for technical hotseats."
-          subtitle="We didn't build another generic resume AI to generate padded fluff. We built it to enforce strict mechanical boundaries between claims, measurements, and verifiable git proof."
-        />
+        {/* TRUST PILLARS / ENGINEERING STANDARDS */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
+            <div className="flex items-center justify-between">
+              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+              <Badge variant="accent" size="sm">§8 Standard</Badge>
+            </div>
+            <h3 className="text-sm font-semibold font-sans text-text">
+              0% Hallucinations
+            </h3>
+            <p className="text-xs text-text-dim leading-relaxed font-sans">
+              Strict deterministic validation pass strips ungrounded numbers or invented benchmarks before you copy.
+            </p>
+          </Card>
+
+          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
+            <div className="flex items-center justify-between">
+              <span className="w-2 h-2 rounded-full bg-ok" />
+              <Badge variant="ok" size="sm">Format</Badge>
+            </div>
+            <h3 className="text-sm font-semibold font-sans text-text">
+              Google X-Y-Z Standard
+            </h3>
+            <p className="text-xs text-text-dim leading-relaxed font-sans">
+              Every bullet is structured as: Accomplished [X], measured by [Y], by implementing [Z].
+            </p>
+          </Card>
+
+          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
+            <div className="flex items-center justify-between">
+              <span className="w-2 h-2 rounded-full bg-warn" />
+              <Badge variant="warn" size="sm">Interviews</Badge>
+            </div>
+            <h3 className="text-sm font-semibold font-sans text-text">
+              Hotseat Scripts
+            </h3>
+            <p className="text-xs text-text-dim leading-relaxed font-sans">
+              Pre-computed spoken scripts and verbatim code proof anchors for senior interviewer challenges.
+            </p>
+          </Card>
+
+          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
+            <div className="flex items-center justify-between">
+              <span className="w-2 h-2 rounded-full bg-info" />
+              <Badge variant="neutral" size="sm">Privacy</Badge>
+            </div>
+            <h3 className="text-sm font-semibold font-sans text-text">
+              Client-Only Storage
+            </h3>
+            <p className="text-xs text-text-dim leading-relaxed font-sans">
+              Zero centralized backend database. Stored safely in your browser and personal Puter cloud KV.
+            </p>
+          </Card>
+        </section>
 
         {/* HOW IT WORKS / 4-STAGE PIPELINE */}
         <section id="pipeline" className="space-y-8">

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, Copy, Check, FileCode2, Cpu, ShieldCheck, Activity, Sparkles, ArrowRight } from 'lucide-react';
+import { Button } from '~/components/ui/Button';
+import { cn } from '~/lib/utils';
 
 // ----------------------------------------------------------------------
 // 1. Data Structures & Types
@@ -129,27 +131,52 @@ const PROOF_FEATURES: FeatureItem[] = [
 // 2. Interactive Code Walkthrough Section
 // ----------------------------------------------------------------------
 export interface InteractiveCodeHeroProps {
-  badge?: string;
+  badge?: React.ReactNode;
+  headline?: React.ReactNode;
   title?: string;
+  description?: React.ReactNode;
   subtitle?: string;
+  primaryAction?: {
+    label: string;
+    href?: string;
+    onClick?: () => void;
+  };
+  secondaryAction?: {
+    label: string;
+    href?: string;
+    onClick?: () => void;
+  };
+  trustNotes?: React.ReactNode;
+  techItems?: Array<{
+    icon: React.ReactNode;
+    title: string;
+  }>;
   fileName?: string;
   code?: CodeLine[];
   explanations?: Record<number, string>;
   activeLines?: number[];
   onActionClick?: () => void;
   actionLabel?: string;
+  className?: string;
 }
 
 export function InteractiveCodeHero({
   badge = "Deterministic AST Engine",
+  headline,
   title = "Zero-hallucination code extraction.",
+  description,
   subtitle = "Proof inspects your repository tree and package manifests, parses the real concurrency primitives, and anchors every bullet to verbatim code lines.",
+  primaryAction,
+  secondaryAction,
+  trustNotes,
+  techItems,
   fileName = "pkg/worker/pool.go",
   code = PROOF_DEMO_CODE,
   explanations = PROOF_EXPLANATIONS,
   activeLines = [4, 5, 9],
   onActionClick,
   actionLabel = "Try Interactive Demo",
+  className,
 }: InteractiveCodeHeroProps) {
   const [activeLine, setActiveLine] = useState<number | null>(null);
   const [isCopied, setIsCopied] = useState(false);
@@ -167,78 +194,119 @@ export function InteractiveCodeHero({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="py-12 md:py-16"
+      className={cn("py-6 sm:py-10", className)}
     >
       <div className="max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
         {/* Left Column: Explanations & Controls */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="space-y-3.5">
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-border text-xs font-mono text-accent shadow-xs"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{badge}</span>
-            </motion.div>
+        <div className="lg:col-span-6 space-y-6">
+          <div className="space-y-4">
+            {typeof badge === "string" ? (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-border text-xs font-mono text-accent shadow-xs"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{badge}</span>
+              </motion.div>
+            ) : (
+              badge
+            )}
 
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-text tracking-tight leading-tight">
-              {title}
-            </h2>
+            {headline ? (
+              headline
+            ) : (
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-extrabold text-text tracking-tight leading-[1.12]">
+                {title}
+              </h1>
+            )}
 
-            <p className="text-text-dim leading-relaxed text-sm sm:text-base font-sans">
-              {subtitle}
-            </p>
+            {description ? (
+              description
+            ) : (
+              <p className="text-text-dim leading-relaxed text-sm sm:text-base font-sans">
+                {subtitle}
+              </p>
+            )}
           </div>
 
-          <div className="space-y-2.5 pt-2">
-            <p className="text-xs font-mono font-semibold text-text-muted uppercase tracking-wider">
-              Interactive Code Line Traceability
-            </p>
-
-            {activeLines.map((lineNum) => {
-              const isSelected = activeLine === lineNum;
-              return (
-                <motion.button
-                  key={lineNum}
-                  type="button"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  onMouseEnter={() => setActiveLine(lineNum)}
-                  onMouseLeave={() => setActiveLine(null)}
-                  className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 group cursor-pointer ${
-                    isSelected
-                      ? 'bg-surface-3/90 border-accent/40 shadow-lg shadow-black/40'
-                      : 'bg-surface/50 border-border/70 hover:border-border-strong hover:bg-surface-2/60'
-                  }`}
+          {(primaryAction || secondaryAction) && (
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+              {primaryAction && (
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full sm:w-auto px-6 py-3 text-sm font-bold shadow-md shadow-accent/20 cursor-pointer"
+                  onClick={primaryAction.onClick}
                 >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`mt-0.5 flex items-center justify-center w-5 h-5 rounded-full border text-[10px] font-mono font-bold transition-colors ${
-                        isSelected
-                          ? 'border-accent text-accent bg-accent/10'
-                          : 'border-border-strong text-text-muted group-hover:text-text-dim'
-                      }`}
-                    >
-                      {lineNum}
+                  {primaryAction.label}
+                </Button>
+              )}
+              {secondaryAction && (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto px-5 py-3 text-sm border-border hover:bg-surface-2 cursor-pointer font-mono"
+                  onClick={secondaryAction.onClick}
+                >
+                  {secondaryAction.label}
+                </Button>
+              )}
+            </div>
+          )}
+
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-mono font-semibold text-text-muted uppercase tracking-wider">
+                Interactive Code Line Traceability
+              </p>
+              <span className="text-[10px] font-mono text-accent">Click line to inspect AST</span>
+            </div>
+
+            <div className="space-y-1.5">
+              {activeLines.map((lineNum) => {
+                const isSelected = activeLine === lineNum;
+                return (
+                  <motion.button
+                    key={lineNum}
+                    type="button"
+                    whileHover={{ scale: 1.005 }}
+                    whileTap={{ scale: 0.995 }}
+                    onClick={() => setActiveLine(isSelected ? null : lineNum)}
+                    className={`w-full text-left p-2.5 sm:p-3 rounded-lg border transition-all duration-200 group cursor-pointer ${
+                      isSelected
+                        ? 'bg-surface-3/90 border-accent/40 shadow-sm'
+                        : 'bg-surface/50 border-border/70 hover:border-border-strong hover:bg-surface-2/60'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <div
+                        className={`mt-0.5 flex items-center justify-center w-5 h-5 rounded-md border text-[10px] font-mono font-bold shrink-0 transition-colors ${
+                          isSelected
+                            ? 'border-accent text-accent bg-accent/15'
+                            : 'border-border-strong text-text-muted group-hover:text-text-dim'
+                        }`}
+                      >
+                        L{lineNum}
+                      </div>
+                      <p
+                        className={`text-xs font-sans leading-relaxed transition-colors ${
+                          isSelected ? 'text-text font-medium' : 'text-text-dim group-hover:text-text'
+                        }`}
+                      >
+                        {explanations[lineNum] ?? `Trace signal on line ${lineNum}`}
+                      </p>
                     </div>
-                    <p
-                      className={`text-xs sm:text-sm font-sans leading-relaxed transition-colors ${
-                        isSelected ? 'text-text font-medium' : 'text-text-dim group-hover:text-text'
-                      }`}
-                    >
-                      {explanations[lineNum] ?? `Trace signal on line ${lineNum}`}
-                    </p>
-                  </div>
-                </motion.button>
-              );
-            })}
+                  </motion.button>
+                );
+              })}
+            </div>
           </div>
 
           {onActionClick && (
-            <div className="pt-2">
+            <div className="pt-1">
               <button
                 type="button"
                 onClick={onActionClick}
@@ -249,6 +317,13 @@ export function InteractiveCodeHero({
               </button>
             </div>
           )}
+
+          {trustNotes && (
+            <div className="text-[11px] font-mono text-text-dim/80 pt-0.5">
+              {trustNotes}
+            </div>
+          )}
+
         </div>
 
         {/* Right Column: Code Sandbox Window with Animated Scanner */}
@@ -257,7 +332,7 @@ export function InteractiveCodeHero({
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="lg:col-span-7 relative group"
+          className="lg:col-span-6 relative group"
         >
           {/* Subtle Outer Ambient Glow */}
           <div className="absolute -inset-1 bg-gradient-to-r from-accent/20 via-teal-500/10 to-transparent rounded-2xl blur-lg opacity-40 group-hover:opacity-75 transition duration-700 pointer-events-none" />
@@ -311,6 +386,7 @@ export function InteractiveCodeHero({
             {/* Code Body */}
             <div className="p-4 sm:p-5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto relative select-text">
               {code.map((line, idx) => {
+                const isTargetLine = activeLines.includes(line.num);
                 const isActive = activeLine === line.num;
                 const isDimmed = activeLine !== null && activeLine !== line.num;
                 return (
@@ -318,7 +394,14 @@ export function InteractiveCodeHero({
                     key={idx}
                     animate={{ opacity: isDimmed ? 0.35 : 1 }}
                     transition={{ duration: 0.2 }}
-                    className="flex relative group/line py-0.5"
+                    onClick={() => {
+                      if (isTargetLine) {
+                        setActiveLine(isActive ? null : line.num);
+                      }
+                    }}
+                    className={`flex relative py-0.5 ${
+                      isTargetLine ? 'cursor-pointer hover:bg-surface-2/40 rounded transition-colors' : ''
+                    }`}
                   >
                     <AnimatePresence>
                       {isActive && (
@@ -333,7 +416,11 @@ export function InteractiveCodeHero({
                       )}
                     </AnimatePresence>
 
-                    <span className="w-8 flex-shrink-0 text-right pr-4 text-text-muted select-none relative z-10 font-mono text-xs">
+                    <span
+                      className={`w-8 flex-shrink-0 text-right pr-4 select-none relative z-10 font-mono text-xs ${
+                        isActive ? 'text-accent font-bold' : isTargetLine ? 'text-text-dim' : 'text-text-muted'
+                      }`}
+                    >
                       {line.num}
                     </span>
 
@@ -355,6 +442,23 @@ export function InteractiveCodeHero({
             </div>
           </div>
         </motion.div>
+
+        {/* Full-Width Verified Systems Strip */}
+        {techItems && techItems.length > 0 && (
+          <div className="col-span-12 pt-6 sm:pt-8 border-t border-border/50">
+            <div className="flex items-center justify-center flex-wrap gap-5 sm:gap-8">
+              {techItems.map((tech, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center space-x-2 text-text-dim hover:text-text transition-colors select-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+                >
+                  {tech.icon}
+                  <span className="text-xs font-mono font-medium whitespace-nowrap">{tech.title}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </motion.section>
   );
