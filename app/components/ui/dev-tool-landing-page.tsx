@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, Copy, Check, FileCode2, Cpu, ShieldCheck, Activity, Sparkles, ArrowRight } from 'lucide-react';
+import { Terminal, Copy, Check, FileCode2, Cpu, ShieldCheck, Activity, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { cn } from '~/lib/utils';
 
@@ -67,10 +67,40 @@ const PROOF_DEMO_CODE: CodeLine[] = [
   { num: 11, type: 'empty', text: '' },
 ];
 
-const PROOF_EXPLANATIONS: Record<number, string> = {
-  4: "AST parses Pool.DispatchJobs to ground the 'Distributed Job Queue (Go + Redis)' resume bullet.",
-  5: "Discovers Redis XReadGroup consumer group: proves architectural ownership against concurrent locking.",
-  9: "Maps worker pool dispatch to verbatim line proof: justifies sub-10ms latency in technical hotseats."
+export interface CodeExplanationItem {
+  line: number;
+  shortLabel: string;
+  title: string;
+  type: string;
+  explanation: string;
+  bullet: string;
+}
+
+const PROOF_EXPLANATIONS: Record<number, CodeExplanationItem> = {
+  4: {
+    line: 4,
+    shortLabel: "L4: Worker Pool",
+    title: "func DispatchJobs",
+    type: "Architecture",
+    explanation: "Proof detects your core asynchronous dispatcher. Proves you designed system architecture rather than superficial glue code.",
+    bullet: "Architected distributed job queue handling 1,500 jobs/sec with sub-10ms dispatch latency."
+  },
+  5: {
+    line: 5,
+    shortLabel: "L5: Redis Streams",
+    title: "redis.XReadGroup",
+    type: "Stream Consumer",
+    explanation: "Discovers consumer groups and stream offsets. Proves you handled concurrent worker locking and prevented database bottlenecks during traffic spikes.",
+    bullet: "Integrated Redis Streams consumer groups to distribute worker payloads without database lock contention."
+  },
+  9: {
+    line: 9,
+    shortLabel: "L9: Concurrency",
+    title: "workerPool.Submit",
+    type: "Goroutine Pool",
+    explanation: "Validates bounded worker dispatch with idempotent task execution. Defends your latency numbers against senior interviewer scrutiny.",
+    bullet: "Implemented bounded goroutine worker pool with idempotent charge retry semantics."
+  }
 };
 
 const PROOF_FEATURES: FeatureItem[] = [
@@ -153,7 +183,7 @@ export interface InteractiveCodeHeroProps {
   }>;
   fileName?: string;
   code?: CodeLine[];
-  explanations?: Record<number, string>;
+  explanations?: Record<number, CodeExplanationItem>;
   activeLines?: number[];
   onActionClick?: () => void;
   actionLabel?: string;
@@ -168,17 +198,13 @@ export function InteractiveCodeHero({
   subtitle = "Proof inspects your repository tree and package manifests, parses the real concurrency primitives, and anchors every bullet to verbatim code lines.",
   primaryAction,
   secondaryAction,
-  trustNotes,
-  techItems,
   fileName = "pkg/worker/pool.go",
   code = PROOF_DEMO_CODE,
   explanations = PROOF_EXPLANATIONS,
   activeLines = [4, 5, 9],
-  onActionClick,
-  actionLabel = "Try Interactive Demo",
   className,
 }: InteractiveCodeHeroProps) {
-  const [activeLine, setActiveLine] = useState<number | null>(null);
+  const [activeLine, setActiveLine] = useState<number>(5);
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = () => {
@@ -197,7 +223,7 @@ export function InteractiveCodeHero({
       className={cn("py-6 sm:py-10", className)}
     >
       <div className="max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-        {/* Left Column: Explanations & Controls */}
+        {/* Left Column: Focused Pure Narrative & CTAs (Anti-Slop) */}
         <div className="lg:col-span-6 space-y-6">
           <div className="space-y-4">
             {typeof badge === "string" ? (
@@ -256,77 +282,9 @@ export function InteractiveCodeHero({
               )}
             </div>
           )}
-
-          <div className="space-y-2 pt-1">
-            <div className="flex items-center justify-between">
-              <p className="text-[11px] font-mono font-semibold text-text-muted uppercase tracking-wider">
-                Interactive Code Line Traceability
-              </p>
-              <span className="text-[10px] font-mono text-accent">Click line to inspect AST</span>
-            </div>
-
-            <div className="space-y-1.5">
-              {activeLines.map((lineNum) => {
-                const isSelected = activeLine === lineNum;
-                return (
-                  <motion.button
-                    key={lineNum}
-                    type="button"
-                    whileHover={{ scale: 1.005 }}
-                    whileTap={{ scale: 0.995 }}
-                    onClick={() => setActiveLine(isSelected ? null : lineNum)}
-                    className={`w-full text-left p-2.5 sm:p-3 rounded-lg border transition-all duration-200 group cursor-pointer ${
-                      isSelected
-                        ? 'bg-surface-3/90 border-accent/40 shadow-sm'
-                        : 'bg-surface/50 border-border/70 hover:border-border-strong hover:bg-surface-2/60'
-                    }`}
-                  >
-                    <div className="flex items-start gap-2.5">
-                      <div
-                        className={`mt-0.5 flex items-center justify-center w-5 h-5 rounded-md border text-[10px] font-mono font-bold shrink-0 transition-colors ${
-                          isSelected
-                            ? 'border-accent text-accent bg-accent/15'
-                            : 'border-border-strong text-text-muted group-hover:text-text-dim'
-                        }`}
-                      >
-                        L{lineNum}
-                      </div>
-                      <p
-                        className={`text-xs font-sans leading-relaxed transition-colors ${
-                          isSelected ? 'text-text font-medium' : 'text-text-dim group-hover:text-text'
-                        }`}
-                      >
-                        {explanations[lineNum] ?? `Trace signal on line ${lineNum}`}
-                      </p>
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </div>
-
-          {onActionClick && (
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={onActionClick}
-                className="inline-flex items-center gap-2 text-xs font-mono text-accent hover:text-accent-glow font-semibold transition cursor-pointer"
-              >
-                <span>{actionLabel}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
-
-          {trustNotes && (
-            <div className="text-[11px] font-mono text-text-dim/80 pt-0.5">
-              {trustNotes}
-            </div>
-          )}
-
         </div>
 
-        {/* Right Column: Code Sandbox Window with Animated Scanner */}
+        {/* Right Column: Code Sandbox Window with Integrated Plain-English Proof (UI/UX Pro Max) */}
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -396,7 +354,7 @@ export function InteractiveCodeHero({
                     transition={{ duration: 0.2 }}
                     onClick={() => {
                       if (isTargetLine) {
-                        setActiveLine(isActive ? null : line.num);
+                        setActiveLine(line.num);
                       }
                     }}
                     className={`flex relative py-0.5 ${
@@ -440,25 +398,83 @@ export function InteractiveCodeHero({
                 );
               })}
             </div>
-          </div>
-        </motion.div>
 
-        {/* Full-Width Verified Systems Strip */}
-        {techItems && techItems.length > 0 && (
-          <div className="col-span-12 pt-6 sm:pt-8 border-t border-border/50">
-            <div className="flex items-center justify-center flex-wrap gap-5 sm:gap-8">
-              {techItems.map((tech, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center space-x-2 text-text-dim hover:text-text transition-colors select-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-                >
-                  {tech.icon}
-                  <span className="text-xs font-mono font-medium whitespace-nowrap">{tech.title}</span>
+            {/* Integrated Plain-English Proof Drawer (UI/UX Pro Max & Anti-Slop) */}
+            <div className="border-t border-border/80 bg-surface/95 backdrop-blur-sm p-4 sm:p-4.5 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-text-muted font-semibold">
+                    Signal:
+                  </span>
+                  {activeLines.map((lineNum) => {
+                    const isSelected = activeLine === lineNum;
+                    const item = explanations[lineNum];
+                    return (
+                      <button
+                        key={lineNum}
+                        type="button"
+                        onClick={() => setActiveLine(lineNum)}
+                        className={`px-2.5 py-1 rounded-md text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
+                          isSelected
+                            ? 'bg-accent/15 text-accent border border-accent/40 font-semibold shadow-xs'
+                            : 'bg-surface-2/60 text-text-dim border border-border/60 hover:text-text hover:bg-surface-3'
+                        }`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-accent animate-pulse' : 'bg-text-muted'}`} />
+                        <span>{item?.shortLabel ?? `Line ${lineNum}`}</span>
+                      </button>
+                    );
+                  })}
                 </div>
-              ))}
+
+                <span className="text-[11px] font-mono text-accent hidden sm:inline-flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
+                  <span>Git Grounded</span>
+                </span>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {explanations[activeLine] && (
+                  <motion.div
+                    key={activeLine}
+                    initial={{ opacity: 0, y: 3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -3 }}
+                    transition={{ duration: 0.15 }}
+                    className="space-y-2 rounded-lg bg-surface-2/80 border border-border/80 p-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="px-1.5 py-0.5 rounded bg-bg text-accent font-mono text-[11px] font-semibold border border-border">
+                          Line {activeLine}
+                        </span>
+                        <span className="font-semibold text-text text-xs font-sans">
+                          {explanations[activeLine].title}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono text-text-dim font-medium">
+                        {explanations[activeLine].type}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-text-dim font-sans leading-relaxed">
+                      {explanations[activeLine].explanation}
+                    </p>
+
+                    <div className="pt-2 border-t border-border/50 flex items-start gap-2">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-accent font-bold shrink-0 mt-0.5">
+                        Bullet:
+                      </span>
+                      <p className="text-xs text-text font-sans font-medium leading-relaxed">
+                        &ldquo;{explanations[activeLine].bullet}&rdquo;
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
-        )}
+        </motion.div>
       </div>
     </motion.section>
   );

@@ -26,13 +26,6 @@ import {
   Card,
   InteractiveCodeHero,
 } from "~/components/ui";
-import {
-  GoIcon,
-  RedisIcon,
-  PostgresIcon,
-  DockerIcon,
-  TypeScriptIcon,
-} from "~/components/ui/hero-01-utils/hero-01-icons";
 import { Navbar } from "~/components/Navbar";
 
 const HERO_EXAMPLES = [
@@ -160,14 +153,6 @@ export default function HomePage() {
             label: ">_ Audit Sample Repository",
             onClick: handleLaunchSample,
           }}
-          trustNotes="Zero third-party tracking • 100% Client-side Puter.js • Anti-Fabrication Net (§8)"
-          techItems={[
-            { icon: <GoIcon />, title: "Go 1.22" },
-            { icon: <RedisIcon />, title: "Redis Streams" },
-            { icon: <PostgresIcon />, title: "PostgreSQL" },
-            { icon: <DockerIcon />, title: "Docker" },
-            { icon: <TypeScriptIcon />, title: "TypeScript" },
-          ]}
           fileName="pkg/worker/pool.go"
         />
 
