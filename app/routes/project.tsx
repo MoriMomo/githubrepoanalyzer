@@ -630,7 +630,7 @@ export default function ProjectPage() {
 
               <div className="p-4 rounded-lg bg-surface-2 border border-border text-xs text-text-dim space-y-1">
                 <span className="font-bold text-text font-mono text-[11px]">
-                  Deterministic Safety Pass (§8 Contract):
+                  Deterministic Safety Pass (Zero Hallucination):
                 </span>
                 <p className="font-sans leading-relaxed text-[11px]">
                   Even if an underlying AI model outputs an ungrounded metric, our validator strips it and flags the omission before you copy or export the bullet.

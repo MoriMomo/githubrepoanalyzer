@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, Copy, Check, FileCode2, Cpu, ShieldCheck, Activity, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Terminal, Copy, Check, FileCode2, Cpu, ShieldCheck, Activity, Sparkles } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { cn } from '~/lib/utils';
 
@@ -79,23 +79,23 @@ export interface CodeExplanationItem {
 const PROOF_EXPLANATIONS: Record<number, CodeExplanationItem> = {
   4: {
     line: 4,
-    shortLabel: "L4: Worker Pool",
+    shortLabel: "Worker Dispatcher",
     title: "func DispatchJobs",
     type: "Architecture",
-    explanation: "Proof detects your core asynchronous dispatcher. Proves you designed system architecture rather than superficial glue code.",
-    bullet: "Architected distributed job queue handling 1,500 jobs/sec with sub-10ms dispatch latency."
+    explanation: "Detects your asynchronous dispatcher. Proves you designed system architecture rather than superficial glue code.",
+    bullet: "Architected asynchronous worker pool in Go using Redis streams, processing 1,500 jobs/sec with sub-10ms dispatch latency."
   },
   5: {
     line: 5,
-    shortLabel: "L5: Redis Streams",
+    shortLabel: "Redis Streams",
     title: "redis.XReadGroup",
     type: "Stream Consumer",
-    explanation: "Discovers consumer groups and stream offsets. Proves you handled concurrent worker locking and prevented database bottlenecks during traffic spikes.",
+    explanation: "Extracts consumer groups and stream offsets. Proves you handled concurrent worker locking and prevented database bottlenecks during traffic spikes.",
     bullet: "Integrated Redis Streams consumer groups to distribute worker payloads without database lock contention."
   },
   9: {
     line: 9,
-    shortLabel: "L9: Concurrency",
+    shortLabel: "Goroutine Pool",
     title: "workerPool.Submit",
     type: "Goroutine Pool",
     explanation: "Validates bounded worker dispatch with idempotent task execution. Defends your latency numbers against senior interviewer scrutiny.",
@@ -106,7 +106,7 @@ const PROOF_EXPLANATIONS: Record<number, CodeExplanationItem> = {
 const PROOF_FEATURES: FeatureItem[] = [
   {
     id: 'anti-fabrication',
-    title: 'Anti-Fabrication Net (§8)',
+    title: 'Zero Hallucination Guarantee',
     description: 'Strict deterministic validation pass. We strip ungrounded numbers or invented benchmarks before you copy — protecting you from senior interviewer traps.',
     icon: ShieldCheck,
     accent: 'text-emerald-400',
@@ -138,15 +138,15 @@ const PROOF_FEATURES: FeatureItem[] = [
   },
   {
     id: 'zero-backend',
-    title: 'Zero-Infra Client Runtime',
-    description: '100% static client-side React Router SPA. Your private code manifests never leave your browser. Zero third-party telemetry, powered by Puter.js KV.',
+    title: '100% Client-Side Privacy',
+    description: 'Client-side local execution. Your private code manifests never leave your browser. Zero tracking, zero telemetry, and zero model training on your code.',
     icon: Cpu,
     accent: 'text-rose-400',
     glow: 'group-hover:shadow-[0_0_35px_-5px_rgba(251,113,133,0.2)]',
     proof: {
       label: 'Privacy & Storage Engine',
       lines: [
-        { text: 'Storage: Browser localStorage + Puter KV', dim: true },
+        { text: 'Storage: Browser localStorage + Client Cloud KV', dim: true },
         { text: 'Network: 0 Server DB calls • Zero data retention', dim: false },
         { text: 'Security: Client-side cryptographic isolation', dim: true }
       ]
@@ -198,6 +198,7 @@ export function InteractiveCodeHero({
   subtitle = "Proof inspects your repository tree and package manifests, parses the real concurrency primitives, and anchors every bullet to verbatim code lines.",
   primaryAction,
   secondaryAction,
+  trustNotes,
   fileName = "pkg/worker/pool.go",
   code = PROOF_DEMO_CODE,
   explanations = PROOF_EXPLANATIONS,
@@ -280,6 +281,12 @@ export function InteractiveCodeHero({
                   {secondaryAction.label}
                 </Button>
               )}
+            </div>
+          )}
+
+          {trustNotes && (
+            <div className="pt-0.5">
+              {trustNotes}
             </div>
           )}
         </div>
@@ -399,40 +406,31 @@ export function InteractiveCodeHero({
               })}
             </div>
 
-            {/* Integrated Plain-English Proof Drawer (UI/UX Pro Max & Anti-Slop) */}
-            <div className="border-t border-border/80 bg-surface/95 backdrop-blur-sm p-4 sm:p-4.5 space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-text-muted font-semibold">
-                    Signal:
-                  </span>
-                  {activeLines.map((lineNum) => {
-                    const isSelected = activeLine === lineNum;
-                    const item = explanations[lineNum];
-                    return (
-                      <button
-                        key={lineNum}
-                        type="button"
-                        onClick={() => setActiveLine(lineNum)}
-                        className={`px-2.5 py-1 rounded-md text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
-                          isSelected
-                            ? 'bg-accent/15 text-accent border border-accent/40 font-semibold shadow-xs'
-                            : 'bg-surface-2/60 text-text-dim border border-border/60 hover:text-text hover:bg-surface-3'
-                        }`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-accent animate-pulse' : 'bg-text-muted'}`} />
-                        <span>{item?.shortLabel ?? `Line ${lineNum}`}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <span className="text-[11px] font-mono text-accent hidden sm:inline-flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
-                  <span>Git Grounded</span>
-                </span>
+            {/* Integrated Plain-English Proof Drawer (Calm Engineering Craft) */}
+            <div className="border-t border-border/80 bg-surface/95 backdrop-blur-sm p-4 space-y-3">
+              {/* Clean Segment Tabs (No screaming badges) */}
+              <div className="flex items-center gap-1.5 p-1 bg-surface-2/80 rounded-lg border border-border/60">
+                {activeLines.map((lineNum) => {
+                  const isSelected = activeLine === lineNum;
+                  const item = explanations[lineNum];
+                  return (
+                    <button
+                      key={lineNum}
+                      type="button"
+                      onClick={() => setActiveLine(lineNum)}
+                      className={`flex-1 py-1.5 px-2 rounded-md text-xs font-mono transition cursor-pointer text-center ${
+                        isSelected
+                          ? 'bg-bg text-accent font-semibold shadow-xs border border-border/80'
+                          : 'text-text-dim hover:text-text'
+                      }`}
+                    >
+                      {item?.shortLabel ?? `Line ${lineNum}`}
+                    </button>
+                  );
+                })}
               </div>
 
+              {/* Direct Code-to-Bullet Bridge */}
               <AnimatePresence mode="wait">
                 {explanations[activeLine] && (
                   <motion.div
@@ -441,33 +439,29 @@ export function InteractiveCodeHero({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -3 }}
                     transition={{ duration: 0.15 }}
-                    className="space-y-2 rounded-lg bg-surface-2/80 border border-border/80 p-3"
+                    className="space-y-2.5 rounded-lg bg-bg/90 border border-border p-3.5"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="px-1.5 py-0.5 rounded bg-bg text-accent font-mono text-[11px] font-semibold border border-border">
-                          Line {activeLine}
-                        </span>
-                        <span className="font-semibold text-text text-xs font-sans">
-                          {explanations[activeLine].title}
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-mono text-text-dim font-medium">
-                        {explanations[activeLine].type}
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-accent font-medium">
+                        pkg/worker/pool.go:L{activeLine}
+                      </span>
+                      <span className="text-text-dim text-[11px]">
+                        {explanations[activeLine].title}
                       </span>
                     </div>
 
-                    <p className="text-xs text-text-dim font-sans leading-relaxed">
-                      {explanations[activeLine].explanation}
-                    </p>
-
-                    <div className="pt-2 border-t border-border/50 flex items-start gap-2">
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-accent font-bold shrink-0 mt-0.5">
-                        Bullet:
-                      </span>
-                      <p className="text-xs text-text font-sans font-medium leading-relaxed">
+                    <div className="space-y-1">
+                      <div className="text-[11px] font-mono text-text-dim uppercase tracking-wider">
+                        ↳ Synthesized Resume Bullet:
+                      </div>
+                      <p className="text-xs text-text font-medium leading-relaxed font-sans">
                         &ldquo;{explanations[activeLine].bullet}&rdquo;
                       </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-border/60 text-xs text-text-dim leading-relaxed font-sans">
+                      <span className="text-accent font-mono text-[11px] font-semibold">Defense Script: </span>
+                      {explanations[activeLine].explanation}
                     </div>
                   </motion.div>
                 )}

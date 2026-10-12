@@ -226,7 +226,7 @@ export default function DashboardPage() {
                 <ShieldCheck className="w-3.5 h-3.5 text-accent" />
                 Grounding Net
               </span>
-              <span className="text-[11px] text-accent/90 font-mono">§8 Active</span>
+              <span className="text-[11px] text-accent/90 font-mono">Grounding Active</span>
             </div>
             <p className="text-2xl sm:text-3xl font-extrabold font-mono text-accent tracking-tight">
               100%
