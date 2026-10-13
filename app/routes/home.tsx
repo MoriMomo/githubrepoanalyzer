@@ -10,13 +10,9 @@ import {
   Terminal,
   Cpu,
   Flame,
-  Check,
-  X,
   Code2,
   CheckCircle2,
-  AlertTriangle,
   Zap,
-  Copy,
 } from "lucide-react";
 import { generateUUID } from "~/lib/utils";
 import {
@@ -29,43 +25,9 @@ import {
   Badge,
   Card,
   InteractiveCodeHero,
+  InteractiveRealityCheckDemo,
 } from "~/components/ui";
 import { Navbar } from "~/components/Navbar";
-
-const HERO_EXAMPLES = [
-  {
-    id: "redis-worker",
-    title: "Distributed Job Queue (Go + Redis)",
-    genericBullet:
-      "Engineered high-performance microservices architecture using Redis and Kafka, improving query efficiency by 40% across distributed workloads.",
-    genericInterviewer:
-      "How did you measure that 40%? What was your benchmark baseline? Which profiling tool did you use, and how did you configure consumer group partition offsets?",
-    genericRisk: "HIGH FABRICATION RISK",
-    genericOutcome: "Candidate freezes. Red flag for unsubstantiated metrics.",
-    proofBullet:
-      "Architected asynchronous job queue in Go using Redis streams and worker pools, handling 1,500 jobs/sec with sub-10ms dispatch latency verified via benchmark suite.",
-    proofCodeProof: "pkg/worker/pool.go:L42-L78",
-    proofDefense:
-      "When asked about the 10ms dispatch latency, explain how Redis streams XREADGROUP was coupled with buffered channels in pkg/worker/pool.go, avoiding database locking during burst traffic.",
-    proofOutcome: "Demonstrates architectural ownership and mechanical sympathy. Immediate hire signal.",
-  },
-  {
-    id: "api-service",
-    title: "E-Commerce Ingestion (Node + Postgres)",
-    genericBullet:
-      "Spearheaded database optimization and scalable REST APIs with Redis caching, boosting throughput by 300% and reducing database load.",
-    genericInterviewer:
-      "Where did the 300% number come from? Did you measure read or write throughput? What cache invalidation strategy prevented stale reads on inventory?",
-    genericRisk: "UNMEASURED METRIC",
-    genericOutcome: "Interviewer flags buzzword padding. Fails technical audit.",
-    proofBullet:
-      "Engineered idempotent webhook ingestion pipeline with Postgres advisory locks and Redis token-bucket rate limiter, guaranteeing exactly-once charge execution.",
-    proofCodeProof: "src/webhooks/ledger.ts:L18-L55",
-    proofDefense:
-      "Explain how Postgres SELECT FOR UPDATE was replaced with advisory locks to serialize concurrent webhook deliveries without table-level lock contention.",
-    proofOutcome: "Answers trade-offs with production precision. Verified pass.",
-  },
-];
 
 const PRESET_AUDIT_BULLETS = [
   {
@@ -91,9 +53,6 @@ const PRESET_AUDIT_BULLETS = [
 export default function HomePage() {
   const navigate = useNavigate();
 
-  const [activeHeroTab, setActiveHeroTab] = useState(0);
-  const [copiedProof, setCopiedProof] = useState(false);
-
   // Mini Risk Auditor state
   const [auditInput, setAuditInput] = useState(PRESET_AUDIT_BULLETS[0].text);
   const [auditResult, setAuditResult] = useState<BulletAuditReport>(() =>
@@ -108,18 +67,6 @@ export default function HomePage() {
   const handleRunAudit = (text: string) => {
     setAuditInput(text);
     setAuditResult(auditBulletRisk(text, ""));
-  };
-
-  const currentExample = HERO_EXAMPLES[activeHeroTab];
-
-  const handleCopyProof = async () => {
-    try {
-      await navigator.clipboard.writeText(currentExample.proofBullet);
-      setCopiedProof(true);
-      setTimeout(() => setCopiedProof(false), 2000);
-    } catch {
-      // fallback
-    }
   };
 
   return (
@@ -178,195 +125,8 @@ export default function HomePage() {
           fileName="pkg/worker/pool.go"
         />
 
-        {/* INTERACTIVE REALITY CHECK TERMINAL (THE PROOF OF VALUE) */}
-        <section id="reality-check" className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <Badge variant="warn" size="sm">
-                  <Flame className="w-3 h-3" />
-                  <span>The Technical Reality Check</span>
-                </Badge>
-                <span className="text-xs font-mono text-text-dim hidden sm:inline">
-                  Interactive Side-by-Side Comparison
-                </span>
-              </div>
-              <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-text mt-1">
-                Why Senior Interviewers Reject Generic AI Bullets
-              </h2>
-            </div>
-
-            {/* Example Tabs */}
-            <div className="flex items-center gap-1.5 p-0.5 rounded-md bg-surface-2 border border-border">
-              {HERO_EXAMPLES.map((ex, idx) => (
-                <button
-                  key={ex.id}
-                  type="button"
-                  onClick={() => setActiveHeroTab(idx)}
-                  className={`px-2.5 py-1 rounded text-[11px] font-mono transition cursor-pointer ${
-                    activeHeroTab === idx
-                      ? "bg-surface text-accent font-semibold border border-border shadow-xs"
-                      : "text-text-dim hover:text-text"
-                  }`}
-                >
-                  {idx === 0 ? "Redis Worker" : "E-Commerce Webhooks"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-            {/* LEFT PANE: Generic AI / ChatGPT Fluff */}
-            <Card
-              variant="default"
-              padding="lg"
-              className="border-flag/30 bg-flag/[0.03] space-y-4 flex flex-col justify-between rounded-lg glow-card"
-            >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-flag/20 pb-2.5">
-                  <Badge variant="flag" size="sm">
-                    <X className="w-3 h-3" />
-                    <span>Generic AI / ChatGPT Resume Bullet</span>
-                  </Badge>
-                  <span className="text-xs font-mono font-medium text-flag">
-                    {currentExample.genericRisk}
-                  </span>
-                </div>
-
-                <div className="p-3.5 rounded-md bg-bg/90 border border-flag/25 font-mono text-xs text-text leading-relaxed">
-                  &ldquo;{currentExample.genericBullet}&rdquo;
-                </div>
-
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-center gap-1.5 text-flag font-medium font-sans text-xs">
-                    <Flame className="w-3.5 h-3.5" />
-                    <span>Anticipated challenge:</span>
-                  </div>
-                  <p className="text-text-dim italic bg-surface-2/60 p-3 rounded-md border border-border leading-relaxed font-sans">
-                    &ldquo;{currentExample.genericInterviewer}&rdquo;
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-md bg-flag/10 border border-flag/25 text-flag text-xs font-mono flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>Outcome: {currentExample.genericOutcome}</span>
-              </div>
-            </Card>
-
-            {/* RIGHT PANE: Proof Defensible Bullet */}
-            <Card
-              variant="default"
-              padding="lg"
-              className="border-accent/40 bg-accent/[0.03] space-y-4 flex flex-col justify-between rounded-lg glow-card top-highlight"
-            >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-accent/20 pb-2.5">
-                  <Badge variant="ok" size="sm">
-                    <Check className="w-3 h-3" />
-                    <span>Proof Grounded Bullet (Zero Hallucination)</span>
-                  </Badge>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-medium text-accent">
-                      Verbatim Code Anchor
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleCopyProof}
-                      className="p-1 rounded text-text-dim hover:text-accent transition cursor-pointer"
-                      title="Copy bullet"
-                    >
-                      {copiedProof ? (
-                        <Check className="w-3.5 h-3.5 text-accent" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-md bg-bg/90 border border-accent/30 font-mono text-xs text-text leading-relaxed">
-                  &ldquo;{currentExample.proofBullet}&rdquo;
-                </div>
-
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-accent font-semibold font-mono text-[11px]">
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      <span>Verifiable Spoken Defense Script:</span>
-                    </div>
-                    <span className="font-mono text-[10px] text-accent/80 bg-accent/10 px-1.5 py-0.5 rounded border border-accent/20">
-                      {currentExample.proofCodeProof}
-                    </span>
-                  </div>
-                  <p className="text-text bg-surface-2/60 p-3 rounded-md border border-border leading-relaxed font-sans">
-                    &ldquo;{currentExample.proofDefense}&rdquo;
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-md bg-ok/10 border border-ok/25 text-ok text-xs font-mono flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>Outcome: {currentExample.proofOutcome}</span>
-              </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* TRUST PILLARS / ENGINEERING STANDARDS */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
-            <div className="flex items-center justify-between">
-              <span className="w-2 h-2 rounded-full bg-accent" />
-              <Badge variant="accent" size="sm">Deterministic</Badge>
-            </div>
-            <h3 className="text-sm font-semibold font-sans text-text">
-              Zero Hallucinations
-            </h3>
-            <p className="text-xs text-text-dim leading-relaxed font-sans">
-              Strict deterministic validation pass strips ungrounded numbers or invented benchmarks before you copy.
-            </p>
-          </Card>
-
-          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
-            <div className="flex items-center justify-between">
-              <span className="w-2 h-2 rounded-full bg-ok" />
-              <Badge variant="ok" size="sm">Format</Badge>
-            </div>
-            <h3 className="text-sm font-semibold font-sans text-text">
-              Google X-Y-Z Standard
-            </h3>
-            <p className="text-xs text-text-dim leading-relaxed font-sans">
-              Structured as: Accomplished [X], measured by [Y], by implementing [Z]. Calibrated to verified local engineering proxies.
-            </p>
-          </Card>
-
-          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
-            <div className="flex items-center justify-between">
-              <span className="w-2 h-2 rounded-full bg-warn" />
-              <Badge variant="warn" size="sm">Interviews</Badge>
-            </div>
-            <h3 className="text-sm font-semibold font-sans text-text">
-              Hotseat Scripts
-            </h3>
-            <p className="text-xs text-text-dim leading-relaxed font-sans">
-              Pre-computed spoken scripts and verbatim code proof anchors for senior interviewer challenges.
-            </p>
-          </Card>
-
-          <Card variant="surface2" padding="md" className="space-y-2 top-highlight">
-            <div className="flex items-center justify-between">
-              <span className="w-2 h-2 rounded-full bg-info" />
-              <Badge variant="neutral" size="sm">Privacy</Badge>
-            </div>
-            <h3 className="text-sm font-semibold font-sans text-text">
-              100% Client-Side Privacy
-            </h3>
-            <p className="text-xs text-text-dim leading-relaxed font-sans">
-              Zero centralized backend database. Runs entirely in your browser with personal cloud backup.
-            </p>
-          </Card>
-        </section>
+        {/* INTERACTIVE REALITY CHECK DEMO (GSAP + TIMELINE MORPHING) */}
+        <InteractiveRealityCheckDemo />
 
         {/* HOW IT WORKS / 4-STAGE PIPELINE */}
         <section id="pipeline" className="space-y-8">
