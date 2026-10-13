@@ -147,28 +147,16 @@ export function InteractiveCodeHero({
   };
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 25 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={cn("py-6 sm:py-10", className)}
-    >
+    <section className={cn("py-6 sm:py-10", className)}>
       <div className="max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
         {/* Left Column: Focused Pure Narrative & CTAs (Anti-Slop) */}
         <div className="lg:col-span-6 space-y-6">
           <div className="space-y-4">
             {typeof badge === "string" ? (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-border text-xs font-mono text-accent shadow-xs"
-              >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-border text-xs font-mono text-accent shadow-xs">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>{badge}</span>
-              </motion.div>
+              </div>
             ) : (
               badge
             )}
@@ -221,13 +209,7 @@ export function InteractiveCodeHero({
         </div>
 
         {/* Right Column: Mechanical Code Terminal */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="lg:col-span-6"
-        >
+        <div className="lg:col-span-6">
           <div className="rounded-xl border border-border bg-[#07090d] shadow-2xl overflow-hidden glow-card">
             {/* Terminal Titlebar */}
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-surface-2/90">
@@ -262,7 +244,7 @@ export function InteractiveCodeHero({
                 const isHighlight = activeLines.includes(line.num);
                 const isSelected = activeLine === line.num;
                 return (
-                  <motion.div
+                  <div
                     key={line.num}
                     onClick={() => isHighlight && setActiveLine(line.num)}
                     className={cn(
@@ -286,7 +268,7 @@ export function InteractiveCodeHero({
                         ))}
                       {line.type === 'empty' && <span>{'\n'}</span>}
                     </span>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -353,8 +335,8 @@ export function InteractiveCodeHero({
               </AnimatePresence>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

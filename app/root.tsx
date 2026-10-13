@@ -35,7 +35,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <title>Proof — Defensible Resume Bullets</title>
         <Meta />
         <Links />
-        <script src="https://js.puter.com/v2/"></script>
+        <script src="https://js.puter.com/v2/" defer></script>
       </head>
       <body
         suppressHydrationWarning
