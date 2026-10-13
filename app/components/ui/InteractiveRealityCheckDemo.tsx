@@ -6,8 +6,6 @@ import {
   RotateCcw,
   Flame,
   ShieldCheck,
-  CheckCircle2,
-  AlertTriangle,
   X,
   Check,
   Copy,
@@ -304,11 +302,10 @@ export function InteractiveRealityCheckDemo() {
               key={s.id}
               type="button"
               onClick={() => handleSelectScenario(idx)}
-              className={`px-2.5 py-1.5 rounded-md text-xs font-mono transition cursor-pointer ${
-                selectedScenarioIndex === idx
+              className={`px-2.5 py-1.5 rounded-md text-xs font-mono transition cursor-pointer ${selectedScenarioIndex === idx
                   ? "bg-surface text-accent font-semibold border border-border shadow-xs"
                   : "text-text-dim hover:text-text"
-              }`}
+                }`}
             >
               {s.name}
             </button>
@@ -362,11 +359,10 @@ export function InteractiveRealityCheckDemo() {
                 <button
                   type="button"
                   onClick={() => setSpeed(0.5)}
-                  className={`px-2 py-0.5 rounded transition cursor-pointer ${
-                    speed === 0.5
+                  className={`px-2 py-0.5 rounded transition cursor-pointer ${speed === 0.5
                       ? "bg-surface text-accent font-semibold"
                       : "text-text-dim hover:text-text"
-                  }`}
+                    }`}
                   title="Slow Motion Transformation"
                 >
                   0.5x Slow
@@ -374,11 +370,10 @@ export function InteractiveRealityCheckDemo() {
                 <button
                   type="button"
                   onClick={() => setSpeed(1)}
-                  className={`px-2 py-0.5 rounded transition cursor-pointer ${
-                    speed === 1
+                  className={`px-2 py-0.5 rounded transition cursor-pointer ${speed === 1
                       ? "bg-surface text-accent font-semibold"
                       : "text-text-dim hover:text-text"
-                  }`}
+                    }`}
                   title="Normal Speed"
                 >
                   1x Normal
@@ -391,19 +386,18 @@ export function InteractiveRealityCheckDemo() {
               <Gauge className="w-4 h-4 text-text-dim" />
               <span className="text-xs font-mono text-text-dim">Risk Level:</span>
               <span
-                className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${
-                  riskScore > 50
+                className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${riskScore > 50
                     ? "bg-flag/15 text-flag border border-flag/30"
                     : riskScore > 0
-                    ? "bg-warn/15 text-warn border border-warn/30"
-                    : "bg-ok/15 text-ok border border-ok/30"
-                }`}
+                      ? "bg-warn/15 text-warn border border-warn/30"
+                      : "bg-ok/15 text-ok border border-ok/30"
+                  }`}
               >
                 {riskScore > 50
                   ? `${riskScore}% CRITICAL RISK`
                   : riskScore > 0
-                  ? `${riskScore}% MITIGATING`
-                  : "0% GROUNDED PASS"}
+                    ? `${riskScore}% MITIGATING`
+                    : "0% GROUNDED PASS"}
               </span>
             </div>
           </div>
@@ -418,13 +412,12 @@ export function InteractiveRealityCheckDemo() {
                   key={stg.index}
                   type="button"
                   onClick={() => handleSetStage(stg.index)}
-                  className={`relative p-2 rounded-lg text-left transition cursor-pointer border ${
-                    isActive
+                  className={`relative p-2 rounded-lg text-left transition cursor-pointer border ${isActive
                       ? "bg-surface border-accent shadow-xs"
                       : isPassed
-                      ? "bg-surface-2/40 border-border/80 text-text"
-                      : "bg-surface-2/20 border-border/40 text-text-dim hover:border-border"
-                  }`}
+                        ? "bg-surface-2/40 border-border/80 text-text"
+                        : "bg-surface-2/20 border-border/40 text-text-dim hover:border-border"
+                    }`}
                 >
                   <div className="flex items-center justify-between text-[11px] font-mono">
                     <span className={isActive ? "text-accent font-bold" : "text-text-dim"}>
@@ -453,10 +446,10 @@ export function InteractiveRealityCheckDemo() {
                   currentStage === 0
                     ? "flag"
                     : currentStage === 1
-                    ? "warn"
-                    : currentStage === 2
-                    ? "accent"
-                    : "ok"
+                      ? "warn"
+                      : currentStage === 2
+                        ? "accent"
+                        : "ok"
                 }
                 size="sm"
               >
@@ -498,21 +491,20 @@ export function InteractiveRealityCheckDemo() {
           </div>
 
           <div
-            className={`p-5 rounded-xl border transition-all duration-500 font-mono text-xs sm:text-sm leading-relaxed ${
-              currentStage <= 1
+            className={`p-5 rounded-xl border transition-all duration-500 font-mono text-xs sm:text-sm leading-relaxed ${currentStage <= 1
                 ? "bg-flag/[0.04] border-flag/30 text-text"
                 : currentStage === 2
-                ? "bg-accent/[0.04] border-accent/40 text-text"
-                : "bg-ok/[0.04] border-ok/40 text-text shadow-lg shadow-ok/5"
-            }`}
+                  ? "bg-accent/[0.04] border-accent/40 text-text"
+                  : "bg-ok/[0.04] border-ok/40 text-text shadow-lg shadow-ok/5"
+              }`}
           >
             <div className="text-[11px] font-mono uppercase tracking-wider text-text-dim mb-2 flex items-center justify-between">
               <span>
                 {currentStage <= 1
                   ? "Resume Bullet (Vulnerable AI Fluff):"
                   : currentStage === 2
-                  ? "AST Grounding & Metric Stripping:"
-                  : "Synthesized Resume Bullet (Grounded & Defensible):"}
+                    ? "AST Grounding & Metric Stripping:"
+                    : "Synthesized Resume Bullet (Grounded & Defensible):"}
               </span>
               <span className="font-mono text-[10px] text-text-dim">
                 {currentStage <= 1
@@ -530,51 +522,6 @@ export function InteractiveRealityCheckDemo() {
             >
               {renderStageBullet(scenario, currentStage)}
             </motion.p>
-          </div>
-
-          {/* DYNAMIC SECONDARY CONTEXT BOX */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-lg bg-surface border border-border space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="flex items-center gap-1.5 text-warn font-semibold">
-                  <Flame className="w-3.5 h-3.5" />
-                  <span>Senior Interviewer Hotseat Challenge:</span>
-                </span>
-                <span className="text-[10px] text-text-dim">Behavioral Screen</span>
-              </div>
-              <p className="text-xs text-text-dim italic font-sans leading-relaxed bg-surface-2/60 p-3 rounded-md border border-border">
-                &ldquo;{scenario.genericInterviewer}&rdquo;
-              </p>
-              <div className="text-[11px] font-mono text-flag flex items-center gap-1.5 pt-1">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                <span>Risk: {scenario.genericOutcome}</span>
-              </div>
-            </div>
-
-            <div
-              className={`p-4 rounded-lg border space-y-2 transition-all ${
-                currentStage >= 3
-                  ? "bg-accent/[0.04] border-accent/40"
-                  : "bg-surface border-border opacity-70"
-              }`}
-            >
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="flex items-center gap-1.5 text-accent font-semibold">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Verifiable Spoken Defense Script:</span>
-                </span>
-                <span className="font-mono text-[10px] text-accent/80 bg-accent/10 px-1.5 py-0.5 rounded border border-accent/20">
-                  {scenario.codeAnchor}
-                </span>
-              </div>
-              <p className="text-xs text-text font-sans leading-relaxed bg-surface-2/60 p-3 rounded-md border border-border">
-                &ldquo;{scenario.proofDefense}&rdquo;
-              </p>
-              <div className="text-[11px] font-mono text-ok flex items-center gap-1.5 pt-1">
-                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                <span>Outcome: {scenario.proofOutcome}</span>
-              </div>
-            </div>
           </div>
         </div>
       </Card>
