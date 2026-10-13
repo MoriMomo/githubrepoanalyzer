@@ -12,7 +12,6 @@ import {
   Check,
   Copy,
   Terminal,
-  FileCode2,
   Gauge,
 } from "lucide-react";
 import { Badge } from "./Badge";
@@ -576,20 +575,6 @@ export function InteractiveRealityCheckDemo() {
                 <span>Outcome: {scenario.proofOutcome}</span>
               </div>
             </div>
-          </div>
-
-          {/* AST Code Anchor Lineage Accordion */}
-          <div className="p-3.5 rounded-lg bg-surface-2/60 border border-border font-mono text-xs space-y-2">
-            <div className="flex items-center justify-between text-text-dim">
-              <span className="flex items-center gap-1.5 text-accent font-medium">
-                <FileCode2 className="w-3.5 h-3.5" />
-                <span>AST Code Anchor &amp; Evidence Lineage:</span>
-              </span>
-              <span className="text-[11px] text-text-dim">{scenario.codeFile}</span>
-            </div>
-            <pre className="p-2.5 rounded bg-[#07090d] border border-border/80 text-[11px] text-text-dim overflow-x-auto leading-relaxed">
-              <code>{scenario.astSnippet}</code>
-            </pre>
           </div>
         </div>
       </Card>
