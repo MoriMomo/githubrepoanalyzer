@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, Copy, Check, FileCode2, Cpu, ShieldCheck, Activity, Sparkles } from 'lucide-react';
+import { Terminal, Copy, Check, Sparkles } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { cn } from '~/lib/utils';
 
@@ -13,21 +13,6 @@ export interface CodeLine {
   indent?: boolean;
   text?: string;
   tokens?: Array<{ text: string; className: string }>;
-}
-
-export interface FeatureProof {
-  label: string;
-  lines: Array<{ text: string; dim: boolean }>;
-}
-
-export interface FeatureItem {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
-  accent: string;
-  glow: string;
-  proof: FeatureProof;
 }
 
 const PROOF_DEMO_CODE: CodeLine[] = [
@@ -102,60 +87,6 @@ const PROOF_EXPLANATIONS: Record<number, CodeExplanationItem> = {
     bullet: "Implemented bounded goroutine worker pool with idempotent charge retry semantics."
   }
 };
-
-const PROOF_FEATURES: FeatureItem[] = [
-  {
-    id: 'anti-fabrication',
-    title: 'Zero Hallucination Guarantee',
-    description: 'Strict deterministic validation pass. We strip ungrounded numbers or invented benchmarks before you copy — protecting you from senior interviewer traps.',
-    icon: ShieldCheck,
-    accent: 'text-emerald-400',
-    glow: 'group-hover:shadow-[0_0_35px_-5px_rgba(52,211,153,0.2)]',
-    proof: {
-      label: 'Grounding Verification',
-      lines: [
-        { text: '✓ Verified source: pkg/worker/pool.go:L42-L78', dim: true },
-        { text: '✓ 0.0% Hallucinated metrics permitted', dim: false },
-        { text: '↳ Spoken defense script compiled', dim: true }
-      ]
-    }
-  },
-  {
-    id: 'truth-drill',
-    title: 'Socratic Truth Drill',
-    description: 'A focused 3-question drill forces you to articulate trade-offs, failure modes, and benchmark baselines long before sitting in the interview hotseat.',
-    icon: Terminal,
-    accent: 'text-amber-400',
-    glow: 'group-hover:shadow-[0_0_35px_-5px_rgba(251,191,36,0.2)]',
-    proof: {
-      label: 'Hotseat Simulator',
-      lines: [
-        { text: 'Q: "How did you measure that 10ms dispatch latency?"', dim: true },
-        { text: '↳ "Redis XREADGROUP was coupled with buffered channels"', dim: false },
-        { text: 'Outcome: Senior Pass (Immediate Hire Signal)', dim: true }
-      ]
-    }
-  },
-  {
-    id: 'zero-backend',
-    title: '100% Client-Side Privacy',
-    description: 'Client-side local execution. Your private code manifests never leave your browser. Zero tracking, zero telemetry, and zero model training on your code.',
-    icon: Cpu,
-    accent: 'text-rose-400',
-    glow: 'group-hover:shadow-[0_0_35px_-5px_rgba(251,113,133,0.2)]',
-    proof: {
-      label: 'Privacy & Storage Engine',
-      lines: [
-        { text: 'Storage: Browser localStorage + Client Cloud KV', dim: true },
-        { text: 'Network: 0 Server DB calls • Zero data retention', dim: false },
-        { text: 'Security: Client-side cryptographic isolation', dim: true }
-      ]
-    }
-  }
-];
-
-
-
 
 // ----------------------------------------------------------------------
 // 2. Interactive Code Walkthrough Section
@@ -253,30 +184,31 @@ export function InteractiveCodeHero({
             {description ? (
               description
             ) : (
-              <p className="text-text-dim leading-relaxed text-sm sm:text-base font-sans">
+              <p className="text-sm sm:text-base text-text-dim leading-relaxed max-w-xl font-sans">
                 {subtitle}
               </p>
             )}
           </div>
 
+          {/* Action CTAs */}
           {(primaryAction || secondaryAction) && (
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-3 pt-1">
               {primaryAction && (
                 <Button
-                  variant="primary"
                   size="lg"
-                  className="w-full sm:w-auto px-6 py-3 text-sm font-bold shadow-md shadow-accent/20 cursor-pointer"
+                  variant="primary"
                   onClick={primaryAction.onClick}
+                  className="font-mono text-xs shadow-md shadow-accent/15 cursor-pointer"
                 >
                   {primaryAction.label}
                 </Button>
               )}
               {secondaryAction && (
                 <Button
-                  variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto px-5 py-3 text-sm border-border hover:bg-surface-2 cursor-pointer font-mono"
+                  variant="secondary"
                   onClick={secondaryAction.onClick}
+                  className="font-mono text-xs cursor-pointer"
                 >
                   {secondaryAction.label}
                 </Button>
@@ -284,118 +216,71 @@ export function InteractiveCodeHero({
             </div>
           )}
 
-          {trustNotes && (
-            <div className="pt-0.5">
-              {trustNotes}
-            </div>
-          )}
+          {/* Trust Footprint */}
+          {trustNotes && <div className="pt-2">{trustNotes}</div>}
         </div>
 
-        {/* Right Column: Code Sandbox Window with Integrated Plain-English Proof (UI/UX Pro Max) */}
+        {/* Right Column: Mechanical Code Terminal */}
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="lg:col-span-6 relative group"
+          className="lg:col-span-6"
         >
-          {/* Subtle Outer Ambient Glow */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-accent/20 via-teal-500/10 to-transparent rounded-2xl blur-lg opacity-40 group-hover:opacity-75 transition duration-700 pointer-events-none" />
-
-          <div className="relative rounded-xl overflow-hidden bg-[#090b10] border border-border-strong shadow-2xl">
-            {/* Window Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-surface-2/90 border-b border-border">
-              <div className="flex items-center gap-3">
+          <div className="rounded-xl border border-border bg-[#07090d] shadow-2xl overflow-hidden glow-card">
+            {/* Terminal Titlebar */}
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-surface-2/90">
+              <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-border-strong" />
                   <div className="w-2.5 h-2.5 rounded-full bg-border-strong" />
                   <div className="w-2.5 h-2.5 rounded-full bg-border-strong" />
                 </div>
-                <div className="flex items-center gap-2 px-2.5 py-1 bg-bg/80 rounded-md border border-border/80 text-xs text-text-dim font-mono">
-                  <FileCode2 className="w-3.5 h-3.5 text-accent" />
+                <span className="text-xs font-mono text-text-dim flex items-center gap-1.5 ml-2">
+                  <Terminal className="w-3.5 h-3.5 text-accent" />
                   <span>{fileName}</span>
-                </div>
+                </span>
               </div>
-
-              <motion.button
+              <button
                 type="button"
-                whileTap={{ scale: 0.9 }}
                 onClick={handleCopy}
-                aria-label="Copy demo code"
-                className="text-text-muted hover:text-text transition-colors p-1.5 rounded-md hover:bg-surface-3 cursor-pointer"
+                className="p-1 rounded hover:bg-surface text-text-dim hover:text-text transition cursor-pointer"
+                title="Copy snippet"
               >
-                <AnimatePresence mode="wait" initial={false}>
-                  {isCopied ? (
-                    <motion.div
-                      key="check"
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.5, opacity: 0 }}
-                    >
-                      <Check className="w-4 h-4 text-accent" />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="copy"
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.5, opacity: 0 }}
-                    >
-                      <Copy className="w-4 h-4" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
+                {isCopied ? (
+                  <Check className="w-3.5 h-3.5 text-accent" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
+              </button>
             </div>
 
-            {/* Code Body */}
-            <div className="p-4 sm:p-5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto relative select-text">
-              {code.map((line, idx) => {
-                const isTargetLine = activeLines.includes(line.num);
-                const isActive = activeLine === line.num;
-                const isDimmed = activeLine !== null && activeLine !== line.num;
+            {/* Code Body with Line Highlights */}
+            <div className="p-4 font-mono text-xs leading-relaxed overflow-x-auto space-y-0.5 bg-[#07090d]">
+              {code.map((line) => {
+                const isHighlight = activeLines.includes(line.num);
+                const isSelected = activeLine === line.num;
                 return (
                   <motion.div
-                    key={idx}
-                    animate={{ opacity: isDimmed ? 0.35 : 1 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={() => {
-                      if (isTargetLine) {
-                        setActiveLine(line.num);
-                      }
-                    }}
-                    className={`flex relative py-0.5 ${
-                      isTargetLine ? 'cursor-pointer hover:bg-surface-2/40 rounded transition-colors' : ''
-                    }`}
+                    key={line.num}
+                    onClick={() => isHighlight && setActiveLine(line.num)}
+                    className={cn(
+                      "flex items-center gap-3 px-2 py-0.5 rounded transition-colors group",
+                      isHighlight && "cursor-pointer hover:bg-surface-2",
+                      isSelected && "bg-accent/10 border-l-2 border-accent pl-1.5"
+                    )}
                   >
-                    <AnimatePresence>
-                      {isActive && (
-                        <motion.div
-                          layoutId="active-line-bg"
-                          className="absolute inset-y-0 -inset-x-5 bg-accent/[0.09] border-l-2 border-accent pointer-events-none rounded-r"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.18 }}
-                        />
-                      )}
-                    </AnimatePresence>
-
-                    <span
-                      className={`w-8 flex-shrink-0 text-right pr-4 select-none relative z-10 font-mono text-xs ${
-                        isActive ? 'text-accent font-bold' : isTargetLine ? 'text-text-dim' : 'text-text-muted'
-                      }`}
-                    >
+                    <span className="w-5 text-right text-text-muted select-none text-[11px]">
                       {line.num}
                     </span>
-
-                    <span className={`relative z-10 whitespace-pre ${line.indent ? 'pl-4' : ''}`}>
+                    <span className={cn(line.indent && "pl-4", "flex-1")}>
                       {line.type === 'comment' && (
-                        <span className="text-text-muted italic">{line.text}</span>
+                        <span className="text-zinc-500 italic">{line.text}</span>
                       )}
                       {line.type === 'code' &&
-                        line.tokens?.map((token, tIdx) => (
-                          <span key={tIdx} className={token.className}>
+                        line.tokens?.map((token, idx) => (
+                          <span key={idx} className={token.className}>
                             {token.text}
                           </span>
                         ))}
@@ -406,9 +291,9 @@ export function InteractiveCodeHero({
               })}
             </div>
 
-            {/* Integrated Plain-English Proof Drawer (Calm Engineering Craft) */}
+            {/* Integrated Plain-English Proof Drawer */}
             <div className="border-t border-border/80 bg-surface/95 backdrop-blur-sm p-4 space-y-3">
-              {/* Clean Segment Tabs (No screaming badges) */}
+              {/* Clean Segment Tabs */}
               <div className="flex items-center gap-1.5 p-1 bg-surface-2/80 rounded-lg border border-border/60">
                 {activeLines.map((lineNum) => {
                   const isSelected = activeLine === lineNum;
@@ -473,152 +358,3 @@ export function InteractiveCodeHero({
     </motion.section>
   );
 }
-
-// ----------------------------------------------------------------------
-// 3. Claims & Proof Features Section
-// ----------------------------------------------------------------------
-export interface ClaimAndProofFeaturesProps {
-  badge?: string;
-  title?: string;
-  subtitle?: string;
-  features?: FeatureItem[];
-}
-
-export function ClaimAndProofFeatures({
-  badge = "The Technical Safeguards",
-  title = "Engineered for technical hotseats.",
-  subtitle = "We didn't build another generic resume AI to generate padded fluff. We built it to enforce strict mechanical boundaries between claims, measurements, and verifiable git proof.",
-  features = PROOF_FEATURES,
-}: ClaimAndProofFeaturesProps) {
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-
-  return (
-    <motion.section
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="py-12 md:py-20"
-    >
-      <div className="max-w-5xl mx-auto space-y-12 w-full">
-        <div className="space-y-3.5 max-w-2xl text-left">
-          {badge && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-border text-xs font-mono text-accent">
-              <Activity className="w-3.5 h-3.5" />
-              <span>{badge}</span>
-            </div>
-          )}
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-text tracking-tight">
-            {title}
-          </h2>
-          <p className="text-text-dim text-sm sm:text-base leading-relaxed font-sans">
-            {subtitle}
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          {features.map((feature, fIdx) => (
-            <motion.div
-              key={feature.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: fIdx * 0.1 }}
-              onMouseEnter={() => setHoveredId(feature.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              className={`group relative flex flex-col md:flex-row items-stretch bg-surface border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:border-border-strong hover:bg-surface-2/80 ${feature.glow}`}
-            >
-              {/* Feature Description Left Half */}
-              <div className="flex-1 p-6 md:p-8 flex flex-col justify-center relative z-10">
-                <div className="flex items-center gap-3.5 mb-3.5">
-                  <div
-                    className={`p-2.5 rounded-lg bg-surface-2 border border-border ${feature.accent} transition-transform duration-300 group-hover:scale-105`}
-                  >
-                    <feature.icon className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-base sm:text-lg font-display font-semibold text-text">
-                    {feature.title}
-                  </h3>
-                </div>
-                <p className="text-text-dim text-xs sm:text-sm leading-relaxed max-w-md font-sans">
-                  {feature.description}
-                </p>
-              </div>
-
-              {/* Feature Proof Terminal Right Half */}
-              <div className="md:w-80 border-t md:border-t-0 md:border-l border-border bg-[#090b10] relative overflow-hidden flex flex-col">
-                <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-surface-2/80">
-                  <span className="text-[10px] uppercase font-mono tracking-widest text-text-muted font-bold">
-                    {feature.proof.label}
-                  </span>
-                  <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                    <div className="w-1.5 h-1.5 rounded-full bg-border-strong" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-border-strong" />
-                  </div>
-                </div>
-
-                <div className="p-4 flex-1 flex flex-col justify-center font-mono text-xs leading-relaxed relative min-h-[110px]">
-                  {/* Subtle Placeholder Bars */}
-                  <div className="absolute inset-4 flex flex-col justify-center transition-opacity duration-300 opacity-100 group-hover:opacity-0">
-                    <div className="h-2 w-3/4 bg-border/60 rounded mb-2.5" />
-                    <div className="h-2 w-1/2 bg-border/60 rounded mb-2.5" />
-                    <div className="h-2 w-5/6 bg-border/60 rounded" />
-                  </div>
-
-                  {/* Active Diagnostics Lines */}
-                  <div className="relative z-10 transition-all duration-300 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 space-y-1">
-                    {feature.proof.lines.map((line, idx) => (
-                      <motion.div
-                        key={idx}
-                        className={`whitespace-pre text-[11px] ${
-                          line.dim ? 'text-text-muted' : feature.accent
-                        }`}
-                      >
-                        {line.text}
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Animated Scanner Beam */}
-                  <AnimatePresence>
-                    {hoveredId === feature.id && (
-                      <motion.div
-                        initial={{ top: 0, opacity: 0 }}
-                        animate={{ top: '100%', opacity: [0, 0.7, 0] }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 1.4, ease: 'linear', repeat: Infinity }}
-                        className="absolute left-0 right-0 h-8 bg-gradient-to-b from-transparent via-accent/15 to-transparent pointer-events-none"
-                        style={{ borderBottom: '1px solid rgba(16, 185, 129, 0.25)' }}
-                      />
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </motion.section>
-  );
-}
-
-// ----------------------------------------------------------------------
-// 4. Combined Component
-// ----------------------------------------------------------------------
-export interface DevToolLandingPageProps {
-  interactiveHero?: InteractiveCodeHeroProps;
-  claimsAndProof?: ClaimAndProofFeaturesProps;
-}
-
-export function Component({ interactiveHero, claimsAndProof }: DevToolLandingPageProps = {}) {
-  return (
-    <div className="text-text selection:bg-accent/30 space-y-12">
-      <InteractiveCodeHero {...interactiveHero} />
-      <ClaimAndProofFeatures {...claimsAndProof} />
-    </div>
-  );
-}
-
-export const DevToolLandingPage = Component;
-
-export default Component;
