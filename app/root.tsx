@@ -13,6 +13,22 @@ import { usePuterStore } from "~/lib/puter";
 import { useEffect } from "react";
 import { Toaster } from "sonner";
 
+export const meta: Route.MetaFunction = () => [
+  { title: "Proof — Defensible Resume Bullets" },
+  {
+    name: "description",
+    content:
+      "Turn raw repositories and project manifests into interview-defensible resume bullets with zero hallucinated metrics.",
+  },
+  { property: "og:title", content: "Proof — Defensible Resume Bullets" },
+  {
+    property: "og:description",
+    content:
+      "Turn raw repositories and project manifests into interview-defensible resume bullets with zero hallucinated metrics.",
+  },
+  { property: "og:type", content: "website" },
+];
+
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -21,8 +37,13 @@ export const links: Route.LinksFunction = () => [
     crossOrigin: "anonymous",
   },
   {
+    rel: "preload",
+    as: "style",
+    href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap",
+  },
+  {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap",
   },
 ];
 
@@ -32,7 +53,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Proof — Defensible Resume Bullets</title>
         <Meta />
         <Links />
         <script src="https://js.puter.com/v2/" defer></script>

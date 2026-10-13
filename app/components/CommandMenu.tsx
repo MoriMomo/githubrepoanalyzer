@@ -59,7 +59,7 @@ export function CommandMenu({
       >
         <Search className="w-3.5 h-3.5 text-text-muted" />
         <span className="font-normal">Quick actions...</span>
-        <kbd className="ml-2 font-mono text-[10px] bg-surface-3 px-1.5 py-0.5 rounded border border-border text-text-muted">
+        <kbd className="ml-2 font-mono text-[10px] bg-surface-3 px-1.5 py-0.5 rounded border border-border-strong text-text font-medium">
           ⌘K
         </kbd>
       </button>

@@ -31,11 +31,11 @@ const PROOF_DEMO_CODE: CodeLine[] = [
     { text: '(ctx, &redis.XReadGroupArgs{', className: 'text-zinc-400' }
   ]},
   { num: 6, type: 'code', indent: true, tokens: [
-    { text: '    Group: ', className: 'text-zinc-500' },
+    { text: '    Group: ', className: 'text-zinc-400' },
     { text: '"billing-workers"', className: 'text-amber-300' },
-    { text: ', Streams: []string{', className: 'text-zinc-500' },
+    { text: ', Streams: []string{', className: 'text-zinc-400' },
     { text: '"jobs:stream"', className: 'text-amber-300' },
-    { text: ', ">"}, Count: 50,', className: 'text-zinc-500' }
+    { text: ', ">"}, Count: 50,', className: 'text-zinc-400' }
   ]},
   { num: 7, type: 'code', indent: true, tokens: [
     { text: '})', className: 'text-zinc-400' }
@@ -253,12 +253,12 @@ export function InteractiveCodeHero({
                       isSelected && "bg-accent/10 border-l-2 border-accent pl-1.5"
                     )}
                   >
-                    <span className="w-5 text-right text-text-muted select-none text-[11px]">
+                    <span className="w-5 text-right text-text-dim select-none text-[11px]">
                       {line.num}
                     </span>
                     <span className={cn(line.indent && "pl-4", "flex-1")}>
                       {line.type === 'comment' && (
-                        <span className="text-zinc-500 italic">{line.text}</span>
+                        <span className="text-zinc-400 italic">{line.text}</span>
                       )}
                       {line.type === 'code' &&
                         line.tokens?.map((token, idx) => (
