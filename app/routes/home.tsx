@@ -24,8 +24,8 @@ import { Button, Badge, Card } from "~/components/ui";
 import {
   InteractiveCodeHero,
   InteractiveRealityCheckDemo,
-} from "~/components/landing";
-import { Navbar } from "~/components/Navbar";
+} from "~/features/landing";
+import { Navbar } from "~/components/layout";
 
 const PRESET_AUDIT_BULLETS = [
   {

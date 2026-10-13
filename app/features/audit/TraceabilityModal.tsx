@@ -7,7 +7,7 @@ import {
   ShieldCheck,
   GitBranch,
 } from "lucide-react";
-import type { Bullet, Claim } from "~/../types";
+import type { Bullet, Claim } from "~/types";
 import { Button, Badge, Card } from "~/components/ui";
 
 interface TraceabilityModalProps {

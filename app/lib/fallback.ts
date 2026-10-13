@@ -1,4 +1,4 @@
-import type { SignalSet, Claim, TruthDrillQuestion, Bullet } from "~/../types";
+import type { SignalSet, Claim, TruthDrillQuestion, Bullet } from "~/types";
 
 /**
  * Deterministic fallback generator for when Puter AI is offline, unauthenticated,

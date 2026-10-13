@@ -9,7 +9,7 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import type { BulletDefense } from "~/../types";
+import type { BulletDefense } from "~/types";
 import { MotionView, Tooltip } from "~/components/ui";
 
 interface DefenseCardProps {

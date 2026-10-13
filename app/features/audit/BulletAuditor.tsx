@@ -5,7 +5,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { auditBulletRisk, type BulletAuditReport } from "~/lib/grounding";
-import type { Bullet } from "~/../types";
+import type { Bullet } from "~/types";
 import { Badge, Card } from "~/components/ui";
 
 interface BulletAuditorProps {

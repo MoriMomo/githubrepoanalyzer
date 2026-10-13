@@ -16,7 +16,7 @@ import {
 import { usePuterStore } from "~/lib/puter";
 import { resolveNext } from "~/lib/utils";
 import { Button, Card, Badge, Divider } from "~/components/ui";
-import { Navbar } from "~/components/Navbar";
+import { Navbar } from "~/components/layout";
 
 export default function AuthPage() {
   const { auth, isLoading, puterReady, error, clearError } = usePuterStore();

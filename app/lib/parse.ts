@@ -1,4 +1,4 @@
-import type { SignalSet } from "~/../types";
+import type { SignalSet } from "~/types";
 
 const DEP_TO_CACHE: Record<string, string> = {
   ioredis: "Redis",

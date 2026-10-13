@@ -6,7 +6,7 @@ import {
   detectFluffWords,
   auditBulletRisk,
 } from "~/lib/grounding";
-import type { Bullet } from "~/../types";
+import type { Bullet } from "~/types";
 
 describe("Anti-Fabrication Grounding Guarantee (lib/grounding.ts)", () => {
   it("does not strip release years or library version numbers", () => {

@@ -1,11 +1,9 @@
-export * from "./Button";
 export * from "./Badge";
+export * from "./Button";
 export * from "./Card";
-export * from "./Panel";
 export * from "./Divider";
-export * from "./MotionView";
 export * from "./ExportDropdown";
+export * from "./LazyMotionView";
+export * from "./MotionView";
+export * from "./Panel";
 export * from "./Tooltip";
-
-// Landing components re-export for backwards compatibility
-export * from "../landing";

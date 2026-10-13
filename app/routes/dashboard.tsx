@@ -20,8 +20,8 @@ import { usePuterStore } from "~/lib/puter";
 import { generateUUID } from "~/lib/utils";
 import { SessionStorageAdapter } from "~/lib/storage";
 import { Button, Badge, Card, MotionView, Tooltip } from "~/components/ui";
-import { Navbar } from "~/components/Navbar";
-import type { ProjectSession } from "~/../types";
+import { Navbar } from "~/components/layout";
+import type { ProjectSession } from "~/types";
 
 const SAMPLE_PROJECTS = [
   {

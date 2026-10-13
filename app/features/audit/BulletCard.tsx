@@ -8,11 +8,10 @@ import {
   Flame,
   CheckCircle2,
 } from "lucide-react";
-import type { Bullet, Claim } from "~/../types";
+import type { Bullet, Claim } from "~/types";
 import { MODEL } from "~/lib/prompts";
-import { DefenseCard } from "./DefenseCard";
+import { DefenseCard, MockInterviewModal } from "~/features/interview";
 import { TraceabilityModal } from "./TraceabilityModal";
-import { MockInterviewModal } from "./MockInterviewModal";
 import { extractMetricTokens, normalize } from "~/lib/grounding";
 import { Button, Badge, Card, Tooltip } from "~/components/ui";
 

@@ -7,7 +7,7 @@ import {
   Trash2,
   Zap,
 } from "lucide-react";
-import type { TruthDrillQuestion, Claim } from "~/../types";
+import type { TruthDrillQuestion, Claim } from "~/types";
 import { Button, Badge, Card } from "~/components/ui";
 
 interface TruthDrillProps {

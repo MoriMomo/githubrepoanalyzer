@@ -1,4 +1,4 @@
-import type { SignalSet, Claim } from "~/../types";
+import type { SignalSet, Claim } from "~/types";
 
 /**
  * Single source of truth for the default AI model.

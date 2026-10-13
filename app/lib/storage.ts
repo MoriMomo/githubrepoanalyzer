@@ -1,4 +1,4 @@
-import type { ProjectSession } from "~/../types";
+import type { ProjectSession } from "~/types";
 import { parseAIJson } from "./utils";
 
 const LOCAL_STORAGE_PREFIX = "proof:session:";

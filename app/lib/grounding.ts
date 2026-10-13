@@ -1,4 +1,4 @@
-import type { Bullet } from "~/../types";
+import type { Bullet } from "~/types";
 
 /**
  * Metric unit regex matching quantified performance, scale, or benchmark claims.

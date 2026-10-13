@@ -7,7 +7,7 @@ import {
   Lightbulb,
   ShieldAlert,
 } from "lucide-react";
-import type { Bullet } from "~/../types";
+import type { Bullet } from "~/types";
 import { usePuterStore } from "~/lib/puter";
 import { DEFAULT_AI_OPTIONS } from "~/lib/prompts";
 import { extractAIText, parseAIJson } from "~/lib/utils";

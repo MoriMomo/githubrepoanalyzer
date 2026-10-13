@@ -23,15 +23,11 @@ import {
 } from "~/lib/fallback";
 import { extractAIText, parseAIJson, formatErrorMessage } from "~/lib/utils";
 import { SessionStorageAdapter } from "~/lib/storage";
-import { SourceInput } from "~/components/SourceInput";
-import { StackBadges } from "~/components/StackBadges";
-import { TruthDrill } from "~/components/TruthDrill";
-import { BulletCard } from "~/components/BulletCard";
-import { BulletAuditor } from "~/components/BulletAuditor";
-import { ExportDropdown } from "~/components/ui/ExportDropdown";
-import { Navbar } from "~/components/Navbar";
+import { SourceInput, StackBadges } from "~/features/scanner";
+import { TruthDrill, BulletCard, BulletAuditor } from "~/features/audit";
+import { ExportDropdown, Button, Badge, Card, Panel, MotionView, Tooltip } from "~/components/ui";
+import { Navbar } from "~/components/layout";
 import { toast } from "sonner";
-import { Button, Badge, Card, Panel, MotionView, Tooltip } from "~/components/ui";
 import type {
   ProjectSession,
   SignalSet,
@@ -39,7 +35,7 @@ import type {
   TruthDrillQuestion,
   Bullet,
   SessionPhase,
-} from "~/../types";
+} from "~/types";
 
 export default function ProjectPage() {
   const params = useParams();

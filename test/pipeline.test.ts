@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { parseSource } from "~/lib/parse";
 import { enforceGrounding } from "~/lib/grounding";
-import type { Claim, Bullet } from "~/../types";
+import type { Claim, Bullet } from "~/types";
 
 describe("End-to-End Pipeline Integration (test/pipeline.test.ts)", () => {
   it("executes the full pipeline: parse -> drill merge -> synthesis -> grounding audit", () => {
@@ -204,7 +204,7 @@ Includes Dockerfile and .github/workflows/deploy.yml.
       delete: async () => true,
     };
 
-    const dummySession: import("~/../types").ProjectSession = {
+    const dummySession: import("~/types").ProjectSession = {
       id: "guest-test-123",
       createdAt: Date.now(),
       sourceType: "paste",

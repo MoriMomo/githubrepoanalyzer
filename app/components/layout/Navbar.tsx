@@ -2,7 +2,7 @@ import * as React from "react";
 import { Link, useNavigate } from "react-router";
 import { ShieldCheck, ArrowRight, Plus } from "lucide-react";
 import { usePuterStore } from "~/lib/puter";
-import { CommandMenu } from "~/components/CommandMenu";
+import { CommandMenu } from "./CommandMenu";
 import { AVAILABLE_MODELS } from "~/lib/prompts";
 
 export interface NavbarProps {

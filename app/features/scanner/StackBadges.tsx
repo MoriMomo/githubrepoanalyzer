@@ -10,7 +10,7 @@ import {
   Cpu,
   Layers,
 } from "lucide-react";
-import type { SignalSet } from "~/../types";
+import type { SignalSet } from "~/types";
 import { Badge } from "~/components/ui";
 
 interface StackBadgesProps {

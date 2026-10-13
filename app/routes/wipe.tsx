@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { AlertTriangle, Trash2, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { usePuterStore } from "~/lib/puter";
 import { Button, Badge, Card } from "~/components/ui";
-import { Navbar } from "~/components/Navbar";
+import { Navbar } from "~/components/layout";
 
 export default function WipePage() {
   const { kv, auth, puterReady } = usePuterStore();
