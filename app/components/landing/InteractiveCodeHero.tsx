@@ -1,55 +1,76 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, Copy, Check, Sparkles } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { cn } from '~/lib/utils';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Terminal, Copy, Check, Sparkles } from "lucide-react";
+import { Button } from "~/components/ui";
+import { cn } from "~/lib/utils";
 
-// ----------------------------------------------------------------------
-// 1. Data Structures & Types
-// ----------------------------------------------------------------------
 export interface CodeLine {
   num: number;
-  type: 'code' | 'comment' | 'empty';
+  type: "code" | "comment" | "empty";
   indent?: boolean;
   text?: string;
   tokens?: Array<{ text: string; className: string }>;
 }
 
 const PROOF_DEMO_CODE: CodeLine[] = [
-  { num: 1, type: 'comment', text: '// Real codebase: pkg/worker/pool.go (Redis Stream Worker)' },
-  { num: 2, type: 'comment', text: '// Proof AST engine extracts verifiable concurrency signals' },
-  { num: 3, type: 'empty', text: '' },
-  { num: 4, type: 'code', tokens: [
-    { text: 'func ', className: 'text-rose-400' },
-    { text: '(p *Pool) ', className: 'text-amber-300' },
-    { text: 'DispatchJobs', className: 'text-emerald-400 font-bold' },
-    { text: '(ctx context.Context) error {', className: 'text-zinc-300' }
-  ]},
-  { num: 5, type: 'code', indent: true, tokens: [
-    { text: 'entries, err := p.redis.', className: 'text-zinc-400' },
-    { text: 'XReadGroup', className: 'text-emerald-300 font-semibold' },
-    { text: '(ctx, &redis.XReadGroupArgs{', className: 'text-zinc-400' }
-  ]},
-  { num: 6, type: 'code', indent: true, tokens: [
-    { text: '    Group: ', className: 'text-zinc-400' },
-    { text: '"billing-workers"', className: 'text-amber-300' },
-    { text: ', Streams: []string{', className: 'text-zinc-400' },
-    { text: '"jobs:stream"', className: 'text-amber-300' },
-    { text: ', ">"}, Count: 50,', className: 'text-zinc-400' }
-  ]},
-  { num: 7, type: 'code', indent: true, tokens: [
-    { text: '})', className: 'text-zinc-400' }
-  ]},
-  { num: 8, type: 'comment', indent: true, text: '// Grounded: 1,500 jobs/sec with sub-10ms dispatch latency' },
-  { num: 9, type: 'code', indent: true, tokens: [
-    { text: 'p.workerPool.', className: 'text-zinc-400' },
-    { text: 'Submit', className: 'text-teal-300 font-semibold' },
-    { text: '(func() { p.executeIdempotentCharge(entries) })', className: 'text-zinc-300' }
-  ]},
-  { num: 10, type: 'code', tokens: [
-    { text: '}', className: 'text-zinc-400' }
-  ]},
-  { num: 11, type: 'empty', text: '' },
+  { num: 1, type: "comment", text: "// Real codebase: pkg/worker/pool.go (Redis Stream Worker)" },
+  { num: 2, type: "comment", text: "// Proof AST engine extracts verifiable concurrency signals" },
+  { num: 3, type: "empty", text: "" },
+  {
+    num: 4,
+    type: "code",
+    tokens: [
+      { text: "func ", className: "text-rose-400" },
+      { text: "(p *Pool) ", className: "text-amber-300" },
+      { text: "DispatchJobs", className: "text-emerald-400 font-bold" },
+      { text: "(ctx context.Context) error {", className: "text-zinc-300" },
+    ],
+  },
+  {
+    num: 5,
+    type: "code",
+    indent: true,
+    tokens: [
+      { text: "entries, err := p.redis.", className: "text-zinc-400" },
+      { text: "XReadGroup", className: "text-emerald-300 font-semibold" },
+      { text: "(ctx, &redis.XReadGroupArgs{", className: "text-zinc-400" },
+    ],
+  },
+  {
+    num: 6,
+    type: "code",
+    indent: true,
+    tokens: [
+      { text: "    Group: ", className: "text-zinc-400" },
+      { text: '"billing-workers"', className: "text-amber-300" },
+      { text: ", Streams: []string{", className: "text-zinc-400" },
+      { text: '"jobs:stream"', className: "text-amber-300" },
+      { text: ', ">"}, Count: 50,', className: "text-zinc-400" },
+    ],
+  },
+  {
+    num: 7,
+    type: "code",
+    indent: true,
+    tokens: [{ text: "})", className: "text-zinc-400" }],
+  },
+  { num: 8, type: "comment", indent: true, text: "// Grounded: 1,500 jobs/sec with sub-10ms dispatch latency" },
+  {
+    num: 9,
+    type: "code",
+    indent: true,
+    tokens: [
+      { text: "p.workerPool.", className: "text-zinc-400" },
+      { text: "Submit", className: "text-teal-300 font-semibold" },
+      { text: "(func() { p.executeIdempotentCharge(entries) })", className: "text-zinc-300" },
+    ],
+  },
+  {
+    num: 10,
+    type: "code",
+    tokens: [{ text: "}", className: "text-zinc-400" }],
+  },
+  { num: 11, type: "empty", text: "" },
 ];
 
 export interface CodeExplanationItem {
@@ -67,30 +88,33 @@ const PROOF_EXPLANATIONS: Record<number, CodeExplanationItem> = {
     shortLabel: "Worker Dispatcher",
     title: "func DispatchJobs",
     type: "Architecture",
-    explanation: "Detects your asynchronous dispatcher. Proves you designed system architecture rather than superficial glue code.",
-    bullet: "Architected asynchronous worker pool in Go using Redis streams, processing 1,500 jobs/sec with sub-10ms dispatch latency."
+    explanation:
+      "Detects your asynchronous dispatcher. Proves you designed system architecture rather than superficial glue code.",
+    bullet:
+      "Architected asynchronous worker pool in Go using Redis streams, processing 1,500 jobs/sec with sub-10ms dispatch latency.",
   },
   5: {
     line: 5,
     shortLabel: "Redis Streams",
     title: "redis.XReadGroup",
     type: "Stream Consumer",
-    explanation: "Extracts consumer groups and stream offsets. Proves you handled concurrent worker locking and prevented database bottlenecks during traffic spikes.",
-    bullet: "Integrated Redis Streams consumer groups to distribute worker payloads without database lock contention."
+    explanation:
+      "Extracts consumer groups and stream offsets. Proves you handled concurrent worker locking and prevented database bottlenecks during traffic spikes.",
+    bullet:
+      "Integrated Redis Streams consumer groups to distribute worker payloads without database lock contention.",
   },
   9: {
     line: 9,
     shortLabel: "Goroutine Pool",
     title: "workerPool.Submit",
     type: "Goroutine Pool",
-    explanation: "Validates bounded worker dispatch with idempotent task execution. Defends your latency numbers against senior interviewer scrutiny.",
-    bullet: "Implemented bounded goroutine worker pool with idempotent charge retry semantics."
-  }
+    explanation:
+      "Validates bounded worker dispatch with idempotent task execution. Defends your latency numbers against senior interviewer scrutiny.",
+    bullet:
+      "Implemented bounded goroutine worker pool with idempotent charge retry semantics.",
+  },
 };
 
-// ----------------------------------------------------------------------
-// 2. Interactive Code Walkthrough Section
-// ----------------------------------------------------------------------
 export interface InteractiveCodeHeroProps {
   badge?: React.ReactNode;
   headline?: React.ReactNode;
@@ -108,16 +132,10 @@ export interface InteractiveCodeHeroProps {
     onClick?: () => void;
   };
   trustNotes?: React.ReactNode;
-  techItems?: Array<{
-    icon: React.ReactNode;
-    title: string;
-  }>;
   fileName?: string;
   code?: CodeLine[];
   explanations?: Record<number, CodeExplanationItem>;
   activeLines?: number[];
-  onActionClick?: () => void;
-  actionLabel?: string;
   className?: string;
 }
 
@@ -140,7 +158,7 @@ export function InteractiveCodeHero({
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = () => {
-    const rawText = code.map(c => c.text ?? c.tokens?.map(t => t.text).join('') ?? '').join('\n');
+    const rawText = code.map((c) => c.text ?? c.tokens?.map((t) => t.text).join("") ?? "").join("\n");
     navigator.clipboard.writeText(rawText).catch(() => {});
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
@@ -149,7 +167,7 @@ export function InteractiveCodeHero({
   return (
     <section className={cn("py-6 sm:py-10", className)}>
       <div className="max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-        {/* Left Column: Focused Pure Narrative & CTAs (Anti-Slop) */}
+        {/* Left Column: Narrative & CTAs */}
         <div className="lg:col-span-6 space-y-6">
           <div className="space-y-4">
             {typeof badge === "string" ? (
@@ -161,17 +179,13 @@ export function InteractiveCodeHero({
               badge
             )}
 
-            {headline ? (
-              headline
-            ) : (
+            {headline ?? (
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-extrabold text-text tracking-tight leading-[1.12]">
                 {title}
               </h1>
             )}
 
-            {description ? (
-              description
-            ) : (
+            {description ?? (
               <p className="text-sm sm:text-base text-text-dim leading-relaxed max-w-xl font-sans">
                 {subtitle}
               </p>
@@ -208,7 +222,7 @@ export function InteractiveCodeHero({
           {trustNotes && <div className="pt-2">{trustNotes}</div>}
         </div>
 
-        {/* Right Column: Mechanical Code Terminal */}
+        {/* Right Column: Code Terminal */}
         <div className="lg:col-span-6">
           <div className="rounded-xl border border-border bg-[#07090d] shadow-2xl overflow-hidden glow-card">
             {/* Terminal Titlebar */}
@@ -257,25 +271,25 @@ export function InteractiveCodeHero({
                       {line.num}
                     </span>
                     <span className={cn(line.indent && "pl-4", "flex-1")}>
-                      {line.type === 'comment' && (
+                      {line.type === "comment" && (
                         <span className="text-zinc-400 italic">{line.text}</span>
                       )}
-                      {line.type === 'code' &&
+                      {line.type === "code" &&
                         line.tokens?.map((token, idx) => (
                           <span key={idx} className={token.className}>
                             {token.text}
                           </span>
                         ))}
-                      {line.type === 'empty' && <span>{'\n'}</span>}
+                      {line.type === "empty" && <span>{"\n"}</span>}
                     </span>
                   </div>
                 );
               })}
             </div>
 
-            {/* Integrated Plain-English Proof Drawer */}
+            {/* Proof Drawer */}
             <div className="border-t border-border/80 bg-surface/95 backdrop-blur-sm p-4 space-y-3">
-              {/* Clean Segment Tabs */}
+              {/* Segment Tabs */}
               <div className="flex items-center gap-1.5 p-1 bg-surface-2/80 rounded-lg border border-border/60">
                 {activeLines.map((lineNum) => {
                   const isSelected = activeLine === lineNum;
@@ -287,8 +301,8 @@ export function InteractiveCodeHero({
                       onClick={() => setActiveLine(lineNum)}
                       className={`flex-1 py-1.5 px-2 rounded-md text-xs font-mono transition cursor-pointer text-center ${
                         isSelected
-                          ? 'bg-bg text-accent font-semibold shadow-xs border border-border/80'
-                          : 'text-text-dim hover:text-text'
+                          ? "bg-bg text-accent font-semibold shadow-xs border border-border/80"
+                          : "text-text-dim hover:text-text"
                       }`}
                     >
                       {item?.shortLabel ?? `Line ${lineNum}`}
@@ -297,7 +311,7 @@ export function InteractiveCodeHero({
                 })}
               </div>
 
-              {/* Direct Code-to-Bullet Bridge */}
+              {/* Code-to-Bullet Bridge */}
               <AnimatePresence mode="wait">
                 {explanations[activeLine] && (
                   <motion.div

@@ -20,13 +20,11 @@ import {
   stripNumberPhrase,
   type BulletAuditReport,
 } from "~/lib/grounding";
+import { Button, Badge, Card } from "~/components/ui";
 import {
-  Button,
-  Badge,
-  Card,
   InteractiveCodeHero,
   InteractiveRealityCheckDemo,
-} from "~/components/ui";
+} from "~/components/landing";
 import { Navbar } from "~/components/Navbar";
 
 const PRESET_AUDIT_BULLETS = [

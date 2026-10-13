@@ -6,5 +6,6 @@ export * from "./Divider";
 export * from "./MotionView";
 export * from "./ExportDropdown";
 export * from "./Tooltip";
-export * from "./dev-tool-landing-page";
-export * from "./InteractiveRealityCheckDemo";
+
+// Landing components re-export for backwards compatibility
+export * from "../landing";
