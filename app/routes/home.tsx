@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   Check,
   X,
+  Layers,
+  LayoutGrid,
 } from "lucide-react";
 import { generateUUID } from "~/lib/utils";
 import {
@@ -20,7 +22,7 @@ import {
   stripNumberPhrase,
   type BulletAuditReport,
 } from "~/lib/grounding";
-import { Badge, Card, Dither } from "~/components/ui";
+import { Badge, Card, Dither, CardStack, type CardStackItem } from "~/components/ui";
 import {
   InteractiveCodeHero,
   InteractiveRealityCheckDemo,
@@ -62,8 +64,88 @@ const PRESET_AUDIT_BULLETS = [
   },
 ];
 
+interface PipelineStageItem extends CardStackItem {
+  stageNum: string;
+  bullet: string;
+  icon: typeof GitBranch;
+  borderTheme: string;
+  badgeTheme: string;
+  glowTheme: string;
+  accentColor: string;
+}
+
+const PIPELINE_STAGES: PipelineStageItem[] = [
+  {
+    id: "stage-01",
+    stageNum: "STAGE 01",
+    title: "Ingestion & Manifests",
+    tag: "CDN Manifest Ingestion",
+    description:
+      "Paste your README or link a public GitHub repo. Proof reads package manifests (package.json, go.mod, Cargo.toml) via raw CDN without cloning.",
+    bullet: "Zero auth needed for public repos",
+    imageSrc:
+      "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+    icon: GitBranch,
+    borderTheme: "border-cyan-500/40 hover:border-cyan-500/60",
+    badgeTheme: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
+    glowTheme: "shadow-[0_0_35px_-5px_rgba(6,182,212,0.3)]",
+    accentColor: "text-cyan-400",
+  },
+  {
+    id: "stage-02",
+    stageNum: "STAGE 02",
+    title: "Deterministic Parsing",
+    tag: "AST & Regex Pipelines",
+    description:
+      "Deterministic regex pipelines detect languages, frameworks, cache layers, databases, and message brokers with verifiable accuracy.",
+    bullet: "Footprint detection: Docker, CI, Migrations",
+    imageSrc:
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
+    icon: Cpu,
+    borderTheme: "border-cyan-500/40 hover:border-cyan-500/60",
+    badgeTheme: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
+    glowTheme: "shadow-[0_0_35px_-5px_rgba(6,182,212,0.3)]",
+    accentColor: "text-cyan-400",
+  },
+  {
+    id: "stage-03",
+    stageNum: "STAGE 03",
+    title: "Ground Truth Drill",
+    tag: "Socratic Interview Engine",
+    description:
+      "A Socratic interview drill asks 2–3 questions about your real trade-offs: failure recovery, rate limits, and unverified boilerplate.",
+    bullet: "1-click purge for template boilerplate",
+    imageSrc:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+    icon: HelpCircle,
+    borderTheme: "border-amber-500/40 hover:border-amber-500/60",
+    badgeTheme: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+    glowTheme: "shadow-[0_0_35px_-5px_rgba(245,158,11,0.3)]",
+    accentColor: "text-amber-400",
+  },
+  {
+    id: "stage-04",
+    stageNum: "STAGE 04",
+    title: "Grounded Synthesis",
+    tag: "Google X-Y-Z Receipts",
+    description:
+      "Synthesizes Google X-Y-Z bullets, complete with verbatim evidence lineage badges, code proof anchors, and spoken defense scripts.",
+    bullet: "Anti-Fabrication Net validates output",
+    imageSrc:
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
+    icon: ShieldCheck,
+    borderTheme: "border-emerald-500/50 hover:border-emerald-500/70",
+    badgeTheme: "bg-emerald-500/15 text-emerald-400 border-emerald-500/40",
+    glowTheme: "shadow-[0_0_40px_-5px_rgba(16,185,129,0.35)]",
+    accentColor: "text-emerald-400",
+  },
+];
+
 export default function HomePage() {
   const navigate = useNavigate();
+
+  // View state for 4-stage pipeline: 3D interactive stack or 4-col grid
+  const [pipelineView, setPipelineView] = useState<"stack" | "grid">("stack");
 
   // Mini Risk Auditor state
   const [auditInput, setAuditInput] = useState(PRESET_AUDIT_BULLETS[0].text);
@@ -186,7 +268,109 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 relative">
+          {/* Interactive Mode Toggle */}
+          <div className="flex items-center justify-center">
+            <div className="inline-flex items-center p-1 rounded-xl bg-surface-2/80 border border-border/60 backdrop-blur-sm shadow-xs">
+              <button
+                type="button"
+                onClick={() => setPipelineView("stack")}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition cursor-pointer ${
+                  pipelineView === "stack"
+                    ? "bg-accent/20 text-accent border border-accent/40 shadow-xs"
+                    : "text-zinc-400 hover:text-text hover:bg-white/5 border border-transparent"
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>3D Stack View</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPipelineView("grid")}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition cursor-pointer ${
+                  pipelineView === "grid"
+                    ? "bg-accent/20 text-accent border border-accent/40 shadow-xs"
+                    : "text-zinc-400 hover:text-text hover:bg-white/5 border border-transparent"
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>4-Stage Grid</span>
+              </button>
+            </div>
+          </div>
+
+          {pipelineView === "stack" ? (
+            <div className="w-full py-4">
+              <CardStack
+                items={PIPELINE_STAGES}
+                initialIndex={0}
+                cardWidth={560}
+                cardHeight={340}
+                overlap={0.45}
+                spreadDeg={32}
+                depthPx={130}
+                tiltXDeg={10}
+                autoAdvance={false}
+                pauseOnHover={true}
+                showDots={true}
+                renderCard={(item, { active }) => (
+                  <div
+                    className={`relative h-full w-full rounded-2xl overflow-hidden border ${item.borderTheme} ${
+                      active ? item.glowTheme : "opacity-90"
+                    } bg-[#090d14] flex flex-col justify-between transition-all duration-300`}
+                  >
+                    {/* Background photo & overlay */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      <img
+                        src={item.imageSrc}
+                        alt={item.title}
+                        className="h-full w-full object-cover opacity-20 filter contrast-125"
+                        draggable={false}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#070a10] via-[#070a10]/85 to-[#070a10]/40" />
+                    </div>
+
+                    {/* Card Body */}
+                    <div className="relative z-10 p-6 sm:p-7 flex flex-col justify-between h-full select-none">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                          <span
+                            className={`font-mono font-bold text-xs px-2.5 py-1 rounded border shadow-xs ${item.badgeTheme}`}
+                          >
+                            {item.stageNum}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                              {item.tag}
+                            </span>
+                            <item.icon className={`w-4 h-4 ${item.accentColor}`} />
+                          </div>
+                        </div>
+
+                        <h3 className="font-display font-bold text-lg sm:text-xl text-text tracking-tight">
+                          {item.title}
+                        </h3>
+
+                        <p className="text-xs sm:text-sm text-zinc-300 font-sans leading-relaxed">
+                          {item.description}
+                        </p>
+                      </div>
+
+                      <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
+                        <span className={`${item.accentColor} flex items-center gap-1.5 font-medium`}>
+                          <span className={`inline-block w-1.5 h-1.5 rounded-full ${item.badgeTheme.split(" ")[0]} animate-pulse`} />
+                          &bull; {item.bullet}
+                        </span>
+                        <span className="text-[11px] text-zinc-400 hidden sm:inline">
+                          Swipe / Arrow Keys
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 relative">
             {/* STAGE 01 */}
             <div className="relative group">
               <div className="h-full p-4 rounded-xl border border-cyan-500/20 bg-surface/60 hover:bg-surface/90 hover:border-cyan-500/40 transition-all duration-300 space-y-3 flex flex-col justify-between">
@@ -321,6 +505,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+          )}
         </section>
 
         <SectionDivider />
