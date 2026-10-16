@@ -65,13 +65,16 @@ body {
   width: 5px;
   height: 5px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--color-bg);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--color-border);
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-border-strong);
 }
@@ -88,6 +91,7 @@ body {
 .top-highlight {
   position: relative;
 }
+
 .top-highlight::before {
   content: "";
   position: absolute;
@@ -139,8 +143,8 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-

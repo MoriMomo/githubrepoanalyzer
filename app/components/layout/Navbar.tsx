@@ -26,8 +26,15 @@ export function Navbar({ mode = "home", projectMeta }: NavbarProps) {
   };
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 flex justify-center pointer-events-none px-4">
-      <div className="relative pointer-events-auto flex items-center justify-between gap-4 sm:gap-8 px-4 sm:px-6 py-2 bg-black text-white border-b border-x border-white/10 rounded-b-[20px] shadow-2xl backdrop-blur-2xl max-w-5xl w-full sm:w-auto">
+    <>
+      {/* Top gradient scrim behind navbar to mask scrolling code and prevent bleed */}
+      <div
+        className="fixed top-0 inset-x-0 h-24 bg-gradient-to-b from-black via-black/80 to-transparent pointer-events-none z-40"
+        aria-hidden="true"
+      />
+
+      <header className="fixed top-0 inset-x-0 z-50 flex justify-center pointer-events-none px-4">
+        <div className="relative pointer-events-auto flex items-center justify-between gap-4 sm:gap-8 px-4 sm:px-6 py-2 bg-black text-white border-b border-x border-white/10 rounded-b-[20px] shadow-2xl backdrop-blur-2xl max-w-5xl w-full sm:w-auto">
         {/* Left Concave Notch Ear Fillet */}
         <svg
           className="absolute -left-4 top-0 w-4 h-4 text-black fill-current pointer-events-none hidden sm:block"
@@ -213,5 +220,6 @@ export function Navbar({ mode = "home", projectMeta }: NavbarProps) {
         </div>
       </div>
     </header>
+    </>
   );
 }

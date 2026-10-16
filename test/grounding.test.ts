@@ -183,4 +183,17 @@ Configured Docker container and automated schema migrations.
     const audited = enforceGrounding(bullets, simpleStudentCorpus);
     expect(audited[0].flags.some((f) => f.includes("scope flag"))).toBe(true);
   });
+
+  it("tokenizes text into normal, fluff, and ungrounded metric tokens for inline linter view", async () => {
+    const { tokenizeForLinter } = await import("~/features/audit/linterUtils");
+    const text = "Spearheaded database optimization by 40% with Redis";
+    const tokens = tokenizeForLinter(text, ["spearheaded"], ["40%"]);
+    expect(tokens).toEqual([
+      { text: "Spearheaded", type: "fluff" },
+      { text: " database optimization by ", type: "normal" },
+      { text: "40%", type: "metric" },
+      { text: " with Redis", type: "normal" },
+    ]);
+  });
 });
+

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Terminal, Copy, Check, Sparkles } from "lucide-react";
-import { Button } from "~/components/ui";
+import { Button, Dither, type DitherProps } from "~/components/ui";
 import { cn } from "~/lib/utils";
 
 export interface CodeLine {
@@ -137,6 +137,8 @@ export interface InteractiveCodeHeroProps {
   explanations?: Record<number, CodeExplanationItem>;
   activeLines?: number[];
   className?: string;
+  ditherProps?: Partial<DitherProps>;
+  showDither?: boolean;
 }
 
 export function InteractiveCodeHero({
@@ -153,20 +155,52 @@ export function InteractiveCodeHero({
   explanations = PROOF_EXPLANATIONS,
   activeLines = [4, 5, 9],
   className,
+  ditherProps,
+  showDither = false,
 }: InteractiveCodeHeroProps) {
   const [activeLine, setActiveLine] = useState<number>(5);
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = () => {
     const rawText = code.map((c) => c.text ?? c.tokens?.map((t) => t.text).join("") ?? "").join("\n");
-    navigator.clipboard.writeText(rawText).catch(() => {});
+    navigator.clipboard.writeText(rawText).catch(() => { });
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
 
   return (
-    <section className={cn("py-6 sm:py-10", className)}>
-      <div className="max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+    <section
+      className={cn(
+        "relative rounded-3xl border border-white/[0.08] bg-[#07090d]/65 backdrop-blur-xl overflow-hidden p-6 sm:p-8 lg:p-10 shadow-2xl glow-card",
+        className
+      )}
+    >
+      {/* Background WebGL2 Dither Canvas */}
+      {showDither && (
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <Dither
+            waveColor="#10b981"
+            backgroundColor="transparent"
+            ditherMode="bayer"
+            colorNum={4}
+            pixelSize={2}
+            waveSpeed={0.035}
+            waveFrequency={2.5}
+            waveAmplitude={0.2}
+            contrast={1.0}
+            brightness={-0.15}
+            mouseEffect="reveal"
+            mouseRadius={0.35}
+            mouseStrength={1.2}
+            trail={0.35}
+            clickRipple={true}
+            intro={false}
+            {...ditherProps}
+          />
+        </div>
+      )}
+
+      <div className="relative z-10 max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
         {/* Left Column: Narrative & CTAs */}
         <div className="lg:col-span-6 space-y-6">
           <div className="space-y-4">
@@ -299,11 +333,10 @@ export function InteractiveCodeHero({
                       key={lineNum}
                       type="button"
                       onClick={() => setActiveLine(lineNum)}
-                      className={`flex-1 py-1.5 px-2 rounded-md text-xs font-mono transition cursor-pointer text-center ${
-                        isSelected
+                      className={`flex-1 py-1.5 px-2 rounded-md text-xs font-mono transition cursor-pointer text-center ${isSelected
                           ? "bg-bg text-accent font-semibold shadow-xs border border-border/80"
                           : "text-text-dim hover:text-text"
-                      }`}
+                        }`}
                     >
                       {item?.shortLabel ?? `Line ${lineNum}`}
                     </button>
