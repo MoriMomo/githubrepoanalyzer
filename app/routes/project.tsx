@@ -36,6 +36,15 @@ import type {
   Bullet,
   SessionPhase,
 } from "~/types";
+function triggerDownload(content: string, filename: string, type: string) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function ProjectPage() {
   const params = useParams();
@@ -311,13 +320,7 @@ export default function ProjectPage() {
       .map((b) => `• [${b.category.toUpperCase()}] ${b.text}`)
       .join("\n\n");
 
-    const blob = new Blob([textOutput], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `proof-${projectId}-bullets.txt`;
-    link.click();
-    URL.revokeObjectURL(url);
+    triggerDownload(textOutput, `proof-${projectId}-bullets.txt`, "text/plain;charset=utf-8");
   };
 
   const handleExportLatex = () => {
@@ -331,13 +334,7 @@ export default function ProjectPage() {
       "\\resumeItemListEnd",
     ].join("\n");
 
-    const blob = new Blob([latexLines], { type: "text/x-tex;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `proof-${projectId}-bullets.tex`;
-    link.click();
-    URL.revokeObjectURL(url);
+    triggerDownload(latexLines, `proof-${projectId}-bullets.tex`, "text/x-tex;charset=utf-8");
   };
 
   const handleExportMarkdown = () => {
@@ -357,13 +354,7 @@ export default function ProjectPage() {
       ),
     ].join("\n\n");
 
-    const blob = new Blob([mdLines], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `proof-${projectId}-bullets.md`;
-    link.click();
-    URL.revokeObjectURL(url);
+    triggerDownload(mdLines, `proof-${projectId}-bullets.md`, "text/markdown;charset=utf-8");
   };
 
   const handleExportJson = () => {
@@ -378,15 +369,11 @@ export default function ProjectPage() {
       exportedAt: new Date().toISOString(),
     };
 
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {
-      type: "application/json;charset=utf-8",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `proof-${projectId}-export.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+    triggerDownload(
+      JSON.stringify(payload, null, 2),
+      `proof-${projectId}-export.json`,
+      "application/json;charset=utf-8",
+    );
   };
 
   return (

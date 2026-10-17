@@ -6,7 +6,7 @@ import type { Bullet } from "~/types";
  * while deliberately excluding bare integers (e.g. release year "2024", "Node 20", "React 19")
  * and alphanumeric version identifiers (e.g. "ES2022").
  */
-export const METRIC_PATTERN =
+const METRIC_PATTERN =
   /(?<![a-zA-Z0-9_])(?:\d+(?:\.\d+)?\s*(?:k|m|b|million|billion|thousand)?\s*(?:%|x|ms|milliseconds?|seconds?|secs?|gb|mb|tb|kb|requests?(?:\/(?:sec|s))?|rps|qps|users?|rows?|records?)|(?:\d+(?:\.\d+)?\s*(?:k|m|b|million|billion|thousand))\b)(?![a-zA-Z0-9_])/gi;
 
 /**
@@ -14,7 +14,7 @@ export const METRIC_PATTERN =
  * ARCHITECTURE.md §8 & BUILD_HANDOFF.md §5:
  * Banned: spearheaded, leveraged, utilized, participated in, responsible for.
  */
-export const BANNED_FLUFF_WORDS = [
+const BANNED_FLUFF_WORDS = [
   "spearheaded",
   "leveraged",
   "utilized",
@@ -26,7 +26,7 @@ export const BANNED_FLUFF_WORDS = [
  * Enterprise architecture buzzwords that trigger senior interviewer skepticism
  * when claimed on a junior project without backing infrastructure in source corpus.
  */
-export const INFLATED_ENTERPRISE_WORDS = [
+const INFLATED_ENTERPRISE_WORDS = [
   "high-availability",
   "fault-tolerant",
   "consensus algorithm",
@@ -52,7 +52,7 @@ export function detectFluffWords(text: string): string[] {
 /**
  * Detects ungrounded enterprise architecture claims that lack evidence in source corpus.
  */
-export function detectEnterpriseInflation(
+function detectEnterpriseInflation(
   text: string,
   groundedCorpus: string,
 ): string[] {

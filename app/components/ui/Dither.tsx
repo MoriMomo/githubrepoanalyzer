@@ -760,5 +760,3 @@ export const Dither: React.FC<DitherProps> = ({
     </div>
   );
 };
-
-export default Dither;

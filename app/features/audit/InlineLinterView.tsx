@@ -2,8 +2,6 @@ import * as React from "react";
 import { Search, AlertTriangle, Flame } from "lucide-react";
 import { tokenizeForLinter, type LinterToken } from "./linterUtils";
 
-export type { LinterToken };
-
 
 interface InlineLinterViewProps {
   text: string;

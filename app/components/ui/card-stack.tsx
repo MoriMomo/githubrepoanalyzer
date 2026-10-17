@@ -388,7 +388,7 @@ export function CardStack<T extends CardStackItem>({
   );
 }
 
-export function DefaultFanCard({ item }: { item: CardStackItem; active: boolean }) {
+function DefaultFanCard({ item }: { item: CardStackItem; active: boolean }) {
   return (
     <div className="relative h-full w-full bg-[#0d1117]">
       {/* image */}
@@ -430,5 +430,3 @@ export function DefaultFanCard({ item }: { item: CardStackItem; active: boolean 
     </div>
   );
 }
-
-export default CardStack;
