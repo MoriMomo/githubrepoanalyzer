@@ -13,14 +13,13 @@ import {
   CheckCircle2,
   Check,
   X,
-  Layers,
-  LayoutGrid,
 } from "lucide-react";
 import { generateUUID } from "~/lib/utils";
-import { Badge, Card, Dither, CardStack, TerminalBootLoader, type CardStackItem } from "~/components/ui";
+import { Badge, Card, Dither, TerminalBootLoader } from "~/components/ui";
 import {
   InteractiveCodeHero,
   InteractiveRealityCheckDemo,
+  ScrollPipelineDemo,
 } from "~/features/landing";
 import { Navbar, Footer } from "~/components/layout";
 
@@ -34,86 +33,9 @@ function SectionDivider() {
   );
 }
 
-interface PipelineStageItem extends CardStackItem {
-  stageNum: string;
-  bullet: string;
-  icon: typeof GitBranch;
-  borderTheme: string;
-  badgeTheme: string;
-  glowTheme: string;
-  accentColor: string;
-  codeSnippet: string;
-}
-
-const PIPELINE_STAGES: PipelineStageItem[] = [
-  {
-    id: "stage-01",
-    stageNum: "STAGE 01",
-    title: "Ingestion & Manifests",
-    tag: "CDN Manifest Ingestion",
-    description:
-      "Paste your README or link a public GitHub repo. Proof reads package manifests (package.json, go.mod, Cargo.toml) via raw CDN without cloning.",
-    bullet: "Zero auth needed for public repos",
-    codeSnippet: "GET /repos/{owner}/{repo}/contents/package.json",
-    icon: GitBranch,
-    borderTheme: "border-cyan-500/30 hover:border-cyan-500/50",
-    badgeTheme: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
-    glowTheme: "shadow-[0_0_20px_-5px_rgba(6,182,212,0.15)]",
-    accentColor: "text-cyan-400",
-  },
-  {
-    id: "stage-02",
-    stageNum: "STAGE 02",
-    title: "Deterministic Parsing",
-    tag: "AST & Dependency Signatures",
-    description:
-      "Deterministic AST parsers extract real architectural signals: databases, worker pools, cache layers, and message brokers.",
-    bullet: "Discovers Docker, Redis, Prisma, Kafka",
-    codeSnippet: "SIGNALS: redis/v9 · pgx/v5 · docker-compose.yml",
-    icon: Cpu,
-    borderTheme: "border-cyan-500/30 hover:border-cyan-500/50",
-    badgeTheme: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
-    glowTheme: "shadow-[0_0_20px_-5px_rgba(6,182,212,0.15)]",
-    accentColor: "text-cyan-400",
-  },
-  {
-    id: "stage-03",
-    stageNum: "STAGE 03",
-    title: "Ground Truth Drill",
-    tag: "Socratic Interview Engine",
-    description:
-      "A Socratic drill prompts you on the real trade-offs: failure modes, rate limits, concurrency bounds, and boilerplate purges.",
-    bullet: "Prepares spoken defense rationale",
-    codeSnippet: 'DRILL: "Why Redis Streams over Kafka for this service?"',
-    icon: HelpCircle,
-    borderTheme: "border-amber-500/30 hover:border-amber-500/50",
-    badgeTheme: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-    glowTheme: "shadow-[0_0_20px_-5px_rgba(245,158,11,0.15)]",
-    accentColor: "text-amber-400",
-  },
-  {
-    id: "stage-04",
-    stageNum: "STAGE 04",
-    title: "Grounded Synthesis",
-    tag: "Defensible Engineering Bullets",
-    description:
-      "Synthesizes defensible engineering bullets with exact source line citations, verifiable proof anchors, and spoken defense scripts.",
-    bullet: "Deterministic AST validation",
-    codeSnippet: "RECEIPT: pkg/worker/pool.go#L4-L10 [verified]",
-    icon: ShieldCheck,
-    borderTheme: "border-emerald-500/30 hover:border-emerald-500/50",
-    badgeTheme: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-    glowTheme: "shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)]",
-    accentColor: "text-emerald-400",
-  },
-];
-
 export default function HomePage() {
   const navigate = useNavigate();
   const [booted, setBooted] = useState(false);
-
-  // View state for 4-stage pipeline: 3D interactive stack or 4-col grid
-  const [pipelineView, setPipelineView] = useState<"stack" | "grid">("grid");
 
   const handleLaunchSample = () => {
     const newId = generateUUID();
@@ -220,7 +142,7 @@ export default function HomePage() {
 
         <SectionDivider />
 
-        {/* HOW IT WORKS / 4-STAGE PIPELINE */}
+        {/* HOW IT WORKS / 4-STAGE PIPELINE POWERED BY GSAP SCRUBBER */}
         <section id="pipeline" className="space-y-8">
           <div className="text-center space-y-2 max-w-xl mx-auto">
             <Badge variant="accent" size="sm">
@@ -230,266 +152,11 @@ export default function HomePage() {
               From Raw Manifests to Interview Receipts
             </h2>
             <p className="text-xs text-zinc-400">
-              Grounded, defensible resume points generated in under 60 seconds with zero hallucination.
+              Scroll to simulate the live transformation from raw repository manifests to defensible interview receipts.
             </p>
           </div>
 
-          {/* Interactive Mode Toggle */}
-          <div className="flex items-center justify-center">
-            <div className="inline-flex items-center p-1 rounded-xl bg-surface-2/80 border border-border/60 backdrop-blur-sm shadow-xs">
-              <button
-                type="button"
-                onClick={() => setPipelineView("stack")}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition cursor-pointer ${
-                  pipelineView === "stack"
-                    ? "bg-accent/20 text-accent border border-accent/40 shadow-xs"
-                    : "text-zinc-400 hover:text-text hover:bg-white/5 border border-transparent"
-                }`}
-              >
-                <Layers className="w-3.5 h-3.5" />
-                <span>3D Stack View</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPipelineView("grid")}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition cursor-pointer ${
-                  pipelineView === "grid"
-                    ? "bg-accent/20 text-accent border border-accent/40 shadow-xs"
-                    : "text-zinc-400 hover:text-text hover:bg-white/5 border border-transparent"
-                }`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span>4-Stage Grid</span>
-              </button>
-            </div>
-          </div>
-
-          {pipelineView === "stack" ? (
-            <div className="w-full py-4">
-              <CardStack
-                items={PIPELINE_STAGES}
-                initialIndex={0}
-                cardWidth={560}
-                cardHeight={340}
-                overlap={0.45}
-                spreadDeg={32}
-                depthPx={130}
-                tiltXDeg={10}
-                autoAdvance={false}
-                pauseOnHover={true}
-                showDots={true}
-                renderCard={(item, { active }) => (
-                  <div
-                    className={`relative h-full w-full rounded-2xl overflow-hidden border ${item.borderTheme} ${
-                      active ? item.glowTheme : "opacity-90"
-                    } bg-[#090d14] flex flex-col justify-between transition-all duration-300`}
-                  >
-                    {/* Subtle code pattern backdrop instead of stock photo */}
-                    <div className="absolute inset-0 pointer-events-none p-5 opacity-10 font-mono text-[11px] text-zinc-400 select-none overflow-hidden leading-relaxed">
-                      <div className="text-accent/60 mb-1">// STAGE EVIDENCE LINEAGE</div>
-                      <div>{`import { StreamGroup } from "@redis/client";`}</div>
-                      <div>{`// ${item.codeSnippet}`}</div>
-                      <div>{`const stream = redis.xReadGroup("workers");`}</div>
-                    </div>
-
-                    {/* Card Body */}
-                    <div className="relative z-10 p-6 sm:p-7 flex flex-col justify-between h-full select-none">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                          <span
-                            className={`font-mono font-bold text-xs px-2.5 py-1 rounded border shadow-xs ${item.badgeTheme}`}
-                          >
-                            {item.stageNum}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
-                              {item.tag}
-                            </span>
-                            <item.icon className={`w-4 h-4 ${item.accentColor}`} />
-                          </div>
-                        </div>
-
-                        <h3 className="font-display font-bold text-lg sm:text-xl text-text tracking-tight">
-                          {item.title}
-                        </h3>
-
-                        <p className="text-xs sm:text-sm text-zinc-300 font-sans leading-relaxed">
-                          {item.description}
-                        </p>
-
-                        <div className="p-2.5 rounded-lg bg-black/60 border border-white/5 font-mono text-[11px] text-zinc-300 flex items-center justify-between gap-2">
-                          <span className="truncate text-zinc-400 font-mono text-[10px]">
-                            {item.codeSnippet}
-                          </span>
-                          <span className="text-[9px] font-mono uppercase tracking-wider text-accent shrink-0">
-                            [evidence]
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
-                        <span className={`${item.accentColor} flex items-center gap-1.5 font-medium`}>
-                          <span className={`inline-block w-1.5 h-1.5 rounded-full ${item.badgeTheme.split(" ")[0]} animate-pulse`} />
-                          &bull; {item.bullet}
-                        </span>
-                        <span className="text-[11px] text-zinc-400 hidden sm:inline">
-                          Swipe / Arrow Keys
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 relative">
-            {/* STAGE 01 */}
-            <div className="relative group">
-              <div className="h-full p-4 rounded-xl border border-cyan-500/20 bg-surface/60 hover:bg-surface/90 hover:border-cyan-500/40 transition-all duration-300 space-y-3 flex flex-col justify-between">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                    <span className="font-mono text-cyan-400 font-bold text-xs bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/25">
-                      STAGE 01
-                    </span>
-                    <GitBranch className="w-4 h-4 text-cyan-400/80 group-hover:text-cyan-300 transition" />
-                  </div>
-                  <h3 className="font-display font-semibold text-sm text-text">
-                    Ingestion &amp; Manifests
-                  </h3>
-                  <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-                    Paste your README or link a public GitHub repo. Proof reads package manifests via raw CDN without cloning.
-                  </p>
-                  <div className="p-2 rounded bg-black/60 border border-white/5 font-mono text-[10px] text-zinc-400 truncate">
-                    GET /contents/package.json
-                  </div>
-                </div>
-                <div className="pt-2 text-[10px] font-mono text-cyan-400/80 border-t border-white/5">
-                  &bull; Zero auth needed for public repos
-                </div>
-              </div>
-
-              {/* Directional Connector Arrow */}
-              <div
-                className="hidden lg:flex absolute -right-3.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-[#111116] border border-cyan-500/30 items-center justify-center text-cyan-400 text-xs shadow-md font-mono pointer-events-none"
-                aria-hidden="true"
-              >
-                →
-              </div>
-              <div
-                className="flex lg:hidden justify-center py-1 text-cyan-400/60 text-xs font-mono pointer-events-none"
-                aria-hidden="true"
-              >
-                ↓
-              </div>
-            </div>
-
-            {/* STAGE 02 */}
-            <div className="relative group">
-              <div className="h-full p-4 rounded-xl border border-cyan-500/20 bg-surface/60 hover:bg-surface/90 hover:border-cyan-500/40 transition-all duration-300 space-y-3 flex flex-col justify-between">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                    <span className="font-mono text-cyan-400 font-bold text-xs bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/25">
-                      STAGE 02
-                    </span>
-                    <Cpu className="w-4 h-4 text-cyan-400/80 group-hover:text-cyan-300 transition" />
-                  </div>
-                  <h3 className="font-display font-semibold text-sm text-text">
-                    Deterministic Parsing
-                  </h3>
-                  <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-                    Deterministic AST parsers extract real architectural signals: databases, worker pools, cache layers, and message brokers.
-                  </p>
-                  <div className="p-2 rounded bg-black/60 border border-white/5 font-mono text-[10px] text-zinc-400 truncate">
-                    redis/v9 · pgx/v5 · docker
-                  </div>
-                </div>
-                <div className="pt-2 text-[10px] font-mono text-cyan-400/80 border-t border-white/5">
-                  &bull; Footprint detection: Docker, CI, Migrations
-                </div>
-              </div>
-
-              {/* Directional Connector Arrow */}
-              <div
-                className="hidden lg:flex absolute -right-3.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-[#111116] border border-amber-500/30 items-center justify-center text-amber-400 text-xs shadow-md font-mono pointer-events-none"
-                aria-hidden="true"
-              >
-                →
-              </div>
-              <div
-                className="flex lg:hidden justify-center py-1 text-amber-400/60 text-xs font-mono pointer-events-none"
-                aria-hidden="true"
-              >
-                ↓
-              </div>
-            </div>
-
-            {/* STAGE 03 */}
-            <div className="relative group">
-              <div className="h-full p-4 rounded-xl border border-amber-500/30 bg-amber-500/[0.02] hover:bg-amber-500/[0.05] hover:border-amber-500/50 transition-all duration-300 space-y-3 flex flex-col justify-between">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                    <span className="font-mono text-amber-400 font-bold text-xs bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30 shadow-[0_0_10px_-2px_rgba(245,158,11,0.2)]">
-                      STAGE 03
-                    </span>
-                    <HelpCircle className="w-4 h-4 text-amber-400/80 group-hover:text-amber-300 transition" />
-                  </div>
-                  <h3 className="font-display font-semibold text-sm text-text">
-                    Ground Truth Drill
-                  </h3>
-                  <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-                    A Socratic drill prompts you on the real trade-offs: failure modes, rate limits, concurrency bounds, and boilerplate purges.
-                  </p>
-                  <div className="p-2 rounded bg-black/60 border border-white/5 font-mono text-[10px] text-amber-400/90 truncate">
-                    Why Redis Streams over Kafka?
-                  </div>
-                </div>
-                <div className="pt-2 text-[10px] font-mono text-amber-400/80 border-t border-white/5">
-                  &bull; Prepares spoken defense rationale
-                </div>
-              </div>
-
-              {/* Directional Connector Arrow */}
-              <div
-                className="hidden lg:flex absolute -right-3.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-[#111116] border border-emerald-500/40 items-center justify-center text-emerald-400 text-xs shadow-md font-mono pointer-events-none"
-                aria-hidden="true"
-              >
-                →
-              </div>
-              <div
-                className="flex lg:hidden justify-center py-1 text-emerald-400/60 text-xs font-mono pointer-events-none"
-                aria-hidden="true"
-              >
-                ↓
-              </div>
-            </div>
-
-            {/* STAGE 04 */}
-            <div className="relative group">
-              <div className="h-full p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/[0.03] hover:bg-emerald-500/[0.06] hover:border-emerald-500/60 shadow-[0_0_20px_-10px_rgba(16,185,129,0.15)] transition-all duration-300 space-y-3 flex flex-col justify-between">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                    <span className="font-mono text-emerald-400 font-bold text-xs bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/40 shadow-[0_0_12px_-2px_rgba(16,185,129,0.2)]">
-                      STAGE 04
-                    </span>
-                    <ShieldCheck className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-                  </div>
-                  <h3 className="font-display font-semibold text-sm text-text">
-                    Grounded Synthesis
-                  </h3>
-                  <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-                    Synthesizes defensible engineering bullets with exact source line citations, verifiable proof anchors, and spoken defense scripts.
-                  </p>
-                  <div className="p-2 rounded bg-black/60 border border-white/5 font-mono text-[10px] text-emerald-400/90 truncate">
-                    RECEIPT: pkg/worker/pool.go#L4-L10
-                  </div>
-                </div>
-                <div className="pt-2 text-[10px] font-mono text-emerald-400 border-t border-white/5">
-                  &bull; Deterministic AST validation
-                </div>
-              </div>
-            </div>
-          </div>
-          )}
+          <ScrollPipelineDemo />
         </section>
 
         <SectionDivider />

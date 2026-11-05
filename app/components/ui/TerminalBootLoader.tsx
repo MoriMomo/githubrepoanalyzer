@@ -90,3 +90,4 @@ export function TerminalBootLoader({ onComplete }: { onComplete?: () => void }) 
     </AnimatePresence>
   );
 }
+
