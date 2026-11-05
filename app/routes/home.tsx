@@ -42,6 +42,7 @@ interface PipelineStageItem extends CardStackItem {
   badgeTheme: string;
   glowTheme: string;
   accentColor: string;
+  codeSnippet: string;
 }
 
 const PIPELINE_STAGES: PipelineStageItem[] = [
@@ -53,28 +54,26 @@ const PIPELINE_STAGES: PipelineStageItem[] = [
     description:
       "Paste your README or link a public GitHub repo. Proof reads package manifests (package.json, go.mod, Cargo.toml) via raw CDN without cloning.",
     bullet: "Zero auth needed for public repos",
-    imageSrc:
-      "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+    codeSnippet: "GET /repos/{owner}/{repo}/contents/package.json",
     icon: GitBranch,
-    borderTheme: "border-cyan-500/40 hover:border-cyan-500/60",
+    borderTheme: "border-cyan-500/30 hover:border-cyan-500/50",
     badgeTheme: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
-    glowTheme: "shadow-[0_0_35px_-5px_rgba(6,182,212,0.3)]",
+    glowTheme: "shadow-[0_0_20px_-5px_rgba(6,182,212,0.15)]",
     accentColor: "text-cyan-400",
   },
   {
     id: "stage-02",
     stageNum: "STAGE 02",
     title: "Deterministic Parsing",
-    tag: "AST & Regex Pipelines",
+    tag: "AST & Dependency Signatures",
     description:
-      "Deterministic regex pipelines detect languages, frameworks, cache layers, databases, and message brokers with verifiable accuracy.",
-    bullet: "Footprint detection: Docker, CI, Migrations",
-    imageSrc:
-      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
+      "Deterministic AST parsers extract real architectural signals: databases, worker pools, cache layers, and message brokers.",
+    bullet: "Discovers Docker, Redis, Prisma, Kafka",
+    codeSnippet: "SIGNALS: redis/v9 · pgx/v5 · docker-compose.yml",
     icon: Cpu,
-    borderTheme: "border-cyan-500/40 hover:border-cyan-500/60",
+    borderTheme: "border-cyan-500/30 hover:border-cyan-500/50",
     badgeTheme: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
-    glowTheme: "shadow-[0_0_35px_-5px_rgba(6,182,212,0.3)]",
+    glowTheme: "shadow-[0_0_20px_-5px_rgba(6,182,212,0.15)]",
     accentColor: "text-cyan-400",
   },
   {
@@ -83,30 +82,28 @@ const PIPELINE_STAGES: PipelineStageItem[] = [
     title: "Ground Truth Drill",
     tag: "Socratic Interview Engine",
     description:
-      "A Socratic interview drill asks 2–3 questions about your real trade-offs: failure recovery, rate limits, and unverified boilerplate.",
-    bullet: "1-click purge for template boilerplate",
-    imageSrc:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+      "A Socratic drill prompts you on the real trade-offs: failure modes, rate limits, concurrency bounds, and boilerplate purges.",
+    bullet: "Prepares spoken defense rationale",
+    codeSnippet: 'DRILL: "Why Redis Streams over Kafka for this service?"',
     icon: HelpCircle,
-    borderTheme: "border-amber-500/40 hover:border-amber-500/60",
+    borderTheme: "border-amber-500/30 hover:border-amber-500/50",
     badgeTheme: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-    glowTheme: "shadow-[0_0_35px_-5px_rgba(245,158,11,0.3)]",
+    glowTheme: "shadow-[0_0_20px_-5px_rgba(245,158,11,0.15)]",
     accentColor: "text-amber-400",
   },
   {
     id: "stage-04",
     stageNum: "STAGE 04",
     title: "Grounded Synthesis",
-    tag: "Google X-Y-Z Receipts",
+    tag: "Defensible Engineering Bullets",
     description:
-      "Synthesizes Google X-Y-Z bullets, complete with verbatim evidence lineage badges, code proof anchors, and spoken defense scripts.",
-    bullet: "Anti-Fabrication Net validates output",
-    imageSrc:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
+      "Synthesizes defensible engineering bullets with exact source line citations, verifiable proof anchors, and spoken defense scripts.",
+    bullet: "Deterministic AST validation",
+    codeSnippet: "RECEIPT: pkg/worker/pool.go#L4-L10 [verified]",
     icon: ShieldCheck,
-    borderTheme: "border-emerald-500/50 hover:border-emerald-500/70",
-    badgeTheme: "bg-emerald-500/15 text-emerald-400 border-emerald-500/40",
-    glowTheme: "shadow-[0_0_40px_-5px_rgba(16,185,129,0.35)]",
+    borderTheme: "border-emerald-500/30 hover:border-emerald-500/50",
+    badgeTheme: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    glowTheme: "shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)]",
     accentColor: "text-emerald-400",
   },
 ];
@@ -115,7 +112,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   // View state for 4-stage pipeline: 3D interactive stack or 4-col grid
-  const [pipelineView, setPipelineView] = useState<"stack" | "grid">("stack");
+  const [pipelineView, setPipelineView] = useState<"stack" | "grid">("grid");
 
   const handleLaunchSample = () => {
     const newId = generateUUID();
@@ -197,7 +194,7 @@ export default function HomePage() {
             <div className="flex flex-wrap items-center gap-2.5 text-xs font-mono text-text-dim">
               <span className="flex items-center gap-1.5 text-accent font-medium">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                100% Client-Side Privacy
+                Zero Code Stored · Raw CDN Ingestion
               </span>
               <span>&bull;</span>
               <span>No Account Required</span>
@@ -277,15 +274,12 @@ export default function HomePage() {
                       active ? item.glowTheme : "opacity-90"
                     } bg-[#090d14] flex flex-col justify-between transition-all duration-300`}
                   >
-                    {/* Background photo & overlay */}
-                    <div className="absolute inset-0 pointer-events-none">
-                      <img
-                        src={item.imageSrc}
-                        alt={item.title}
-                        className="h-full w-full object-cover opacity-20 filter contrast-125"
-                        draggable={false}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#070a10] via-[#070a10]/85 to-[#070a10]/40" />
+                    {/* Subtle code pattern backdrop instead of stock photo */}
+                    <div className="absolute inset-0 pointer-events-none p-5 opacity-10 font-mono text-[11px] text-zinc-400 select-none overflow-hidden leading-relaxed">
+                      <div className="text-accent/60 mb-1">// STAGE EVIDENCE LINEAGE</div>
+                      <div>{`import { StreamGroup } from "@redis/client";`}</div>
+                      <div>{`// ${item.codeSnippet}`}</div>
+                      <div>{`const stream = redis.xReadGroup("workers");`}</div>
                     </div>
 
                     {/* Card Body */}
@@ -312,6 +306,15 @@ export default function HomePage() {
                         <p className="text-xs sm:text-sm text-zinc-300 font-sans leading-relaxed">
                           {item.description}
                         </p>
+
+                        <div className="p-2.5 rounded-lg bg-black/60 border border-white/5 font-mono text-[11px] text-zinc-300 flex items-center justify-between gap-2">
+                          <span className="truncate text-zinc-400 font-mono text-[10px]">
+                            {item.codeSnippet}
+                          </span>
+                          <span className="text-[9px] font-mono uppercase tracking-wider text-accent shrink-0">
+                            [evidence]
+                          </span>
+                        </div>
                       </div>
 
                       <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
@@ -344,8 +347,11 @@ export default function HomePage() {
                     Ingestion &amp; Manifests
                   </h3>
                   <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-                    Paste your README or link a public GitHub repo. Proof reads package manifests (package.json, go.mod, Cargo.toml) via raw CDN without cloning.
+                    Paste your README or link a public GitHub repo. Proof reads package manifests via raw CDN without cloning.
                   </p>
+                  <div className="p-2 rounded bg-black/60 border border-white/5 font-mono text-[10px] text-zinc-400 truncate">
+                    GET /contents/package.json
+                  </div>
                 </div>
                 <div className="pt-2 text-[10px] font-mono text-cyan-400/80 border-t border-white/5">
                   &bull; Zero auth needed for public repos
@@ -381,8 +387,11 @@ export default function HomePage() {
                     Deterministic Parsing
                   </h3>
                   <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-                    Deterministic regex pipelines detect languages, frameworks, cache layers, databases, and message brokers with verifiable accuracy.
+                    Deterministic AST parsers extract real architectural signals: databases, worker pools, cache layers, and message brokers.
                   </p>
+                  <div className="p-2 rounded bg-black/60 border border-white/5 font-mono text-[10px] text-zinc-400 truncate">
+                    redis/v9 · pgx/v5 · docker
+                  </div>
                 </div>
                 <div className="pt-2 text-[10px] font-mono text-cyan-400/80 border-t border-white/5">
                   &bull; Footprint detection: Docker, CI, Migrations
@@ -418,11 +427,14 @@ export default function HomePage() {
                     Ground Truth Drill
                   </h3>
                   <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-                    A Socratic interview drill asks 2–3 questions about your real trade-offs: failure recovery, rate limits, and unverified boilerplate.
+                    A Socratic drill prompts you on the real trade-offs: failure modes, rate limits, concurrency bounds, and boilerplate purges.
                   </p>
+                  <div className="p-2 rounded bg-black/60 border border-white/5 font-mono text-[10px] text-amber-400/90 truncate">
+                    Why Redis Streams over Kafka?
+                  </div>
                 </div>
                 <div className="pt-2 text-[10px] font-mono text-amber-400/80 border-t border-white/5">
-                  &bull; 1-click purge for template boilerplate
+                  &bull; Prepares spoken defense rationale
                 </div>
               </div>
 
@@ -443,10 +455,10 @@ export default function HomePage() {
 
             {/* STAGE 04 */}
             <div className="relative group">
-              <div className="h-full p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/[0.03] hover:bg-emerald-500/[0.06] hover:border-emerald-500/60 shadow-[0_0_30px_-10px_rgba(16,185,129,0.2)] transition-all duration-300 space-y-3 flex flex-col justify-between">
+              <div className="h-full p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/[0.03] hover:bg-emerald-500/[0.06] hover:border-emerald-500/60 shadow-[0_0_20px_-10px_rgba(16,185,129,0.15)] transition-all duration-300 space-y-3 flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                    <span className="font-mono text-emerald-400 font-bold text-xs bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/40 shadow-[0_0_12px_-2px_rgba(16,185,129,0.3)]">
+                    <span className="font-mono text-emerald-400 font-bold text-xs bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/40 shadow-[0_0_12px_-2px_rgba(16,185,129,0.2)]">
                       STAGE 04
                     </span>
                     <ShieldCheck className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
@@ -455,11 +467,14 @@ export default function HomePage() {
                     Grounded Synthesis
                   </h3>
                   <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-                    Synthesizes Google X-Y-Z bullets, complete with verbatim evidence lineage badges, code proof anchors, and spoken defense scripts.
+                    Synthesizes defensible engineering bullets with exact source line citations, verifiable proof anchors, and spoken defense scripts.
                   </p>
+                  <div className="p-2 rounded bg-black/60 border border-white/5 font-mono text-[10px] text-emerald-400/90 truncate">
+                    RECEIPT: pkg/worker/pool.go#L4-L10
+                  </div>
                 </div>
                 <div className="pt-2 text-[10px] font-mono text-emerald-400 border-t border-white/5">
-                  &bull; Anti-Fabrication Net validates output
+                  &bull; Deterministic AST validation
                 </div>
               </div>
             </div>
@@ -491,7 +506,7 @@ export default function HomePage() {
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <h3 className="font-semibold text-sm text-text font-display">
-                  Anti-Fabrication Engine
+                  Deterministic AST Engine
                 </h3>
                 <p className="text-xs text-zinc-400 leading-relaxed font-sans">
                   Every generated metric and claim is tested against your source code corpus. Unsubstantiated claims are immediately stripped or flagged.
@@ -503,7 +518,7 @@ export default function HomePage() {
                 <div className="flex items-center justify-between text-zinc-400 border-b border-white/5 pb-1.5">
                   <span className="flex items-center gap-1.5 text-zinc-300">
                     <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>AST Manifest Grounding Net</span>
+                    <span>AST Manifest Verifier</span>
                   </span>
                   <span className="text-[10px] text-zinc-500 font-mono">Deterministic Verifier</span>
                 </div>
