@@ -7,8 +7,6 @@ import {
   ArrowRight,
   FolderGit2,
   Loader2,
-  ShieldCheck,
-  FileText,
   Sparkles,
   HelpCircle,
   Calendar,
@@ -22,24 +20,6 @@ import { SessionStorageAdapter } from "~/lib/storage";
 import { Button, Badge, Card, MotionView, Tooltip } from "~/components/ui";
 import { Navbar } from "~/components/layout";
 import type { ProjectSession } from "~/types";
-
-const SAMPLE_PROJECTS = [
-  {
-    title: "TaskFlow Worker",
-    subtitle: "Express + Redis + Postgres",
-    desc: "Distributed asynchronous worker pool with atomic Redis locks & dead-letter queue.",
-  },
-  {
-    title: "Go Event Broker",
-    subtitle: "Go + PostgreSQL + Docker",
-    desc: "High-throughput event streaming with Redis consumer groups and benchmark suites.",
-  },
-  {
-    title: "Next.js SaaS Platform",
-    subtitle: "Next.js + Prisma + Stripe",
-    desc: "Subscription billing portal with webhook idempotency ledger and optimistic UI.",
-  },
-];
 
 export default function DashboardPage() {
   const { auth, kv } = usePuterStore();
@@ -130,161 +110,59 @@ export default function DashboardPage() {
     return sessions.reduce((acc, s) => acc + (s.bullets?.length || 0), 0);
   }, [sessions]);
 
-  const totalGroundAnswers = useMemo(() => {
-    return sessions.reduce(
-      (acc, s) => acc + (s.drillAnswers ? Object.keys(s.drillAnswers).length : 0),
-      0,
-    );
-  }, [sessions]);
-
   return (
     <div className="min-h-screen flex flex-col bg-bg text-text">
       {/* Top Floating Pure Notch Navbar */}
       <Navbar mode="app" />
 
       {/* Main Content */}
-      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-24 pb-8 space-y-7 flex-1">
-        {/* Guest Mode Warning if not logged in */}
+      <main className="max-w-5xl w-full mx-auto px-4 sm:px-6 pt-24 pb-12 space-y-6 flex-1">
+        {/* Guest Mode Notice */}
         {!auth.isAuthenticated && (
-          <Card
-            variant="surface2"
-            padding="md"
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-accent/20 bg-accent/[0.04] top-highlight"
-          >
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs font-semibold text-accent font-display">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Running in Local Guest Mode</span>
-              </div>
-              <p className="text-xs text-text-dim font-sans leading-relaxed">
-                Your scanned repositories and bullets are stored in browser localStorage. To enable cloud synchronization across devices and permanent private backup, sign in with Puter.
-              </p>
+          <div className="flex items-center justify-between gap-3 px-3.5 py-2 rounded-lg border border-border bg-surface text-xs">
+            <div className="flex items-center gap-2 text-text-dim">
+              <Sparkles className="w-3.5 h-3.5 text-accent shrink-0" />
+              <span>Guest mode: projects are saved locally in this browser.</span>
             </div>
-            <Link to="/login?next=/app" className="shrink-0">
-              <Button variant="primary" size="sm">
-                Sign In to Puter
-              </Button>
+            <Link
+              to="/login?next=/app"
+              className="text-accent hover:underline font-medium shrink-0 font-mono text-[11px]"
+            >
+              Sign in to sync &rarr;
             </Link>
-          </Card>
+          </div>
         )}
 
-        {/* Top Telemetry Metric Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-          <Card variant="surface2" padding="md" className="space-y-1.5 top-highlight">
-            <div className="flex items-center justify-between text-xs text-text-dim font-sans font-medium">
-              <span className="flex items-center gap-1.5">
-                <FolderGit2 className="w-3.5 h-3.5 text-accent" />
-                Projects
-              </span>
-              <span className="text-[11px] text-accent/90 font-mono">
-                {auth.isAuthenticated ? "Cloud KV" : "Local"}
-              </span>
-            </div>
-            <p className="text-2xl sm:text-3xl font-extrabold font-mono text-text tracking-tight">
-              {sessions.length}
-            </p>
-            <p className="text-[11px] text-text-dim font-sans">
-              Active audit sessions
-            </p>
-          </Card>
-
-          <Card variant="surface2" padding="md" className="space-y-1.5 top-highlight">
-            <div className="flex items-center justify-between text-xs text-text-dim font-sans font-medium">
-              <span className="flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-ok" />
-                Defensible Bullets
-              </span>
-              <span className="text-[11px] text-ok/90 font-mono">Verified</span>
-            </div>
-            <p className="text-2xl sm:text-3xl font-extrabold font-mono text-text tracking-tight">
-              {totalBullets}
-            </p>
-            <p className="text-[11px] text-text-dim font-sans">
-              Interview-ready claims
-            </p>
-          </Card>
-
-          <Card variant="surface2" padding="md" className="space-y-1.5 top-highlight">
-            <div className="flex items-center justify-between text-xs text-text-dim font-sans font-medium">
-              <span className="flex items-center gap-1.5">
-                <HelpCircle className="w-3.5 h-3.5 text-warn" />
-                Truth Drills
-              </span>
-              <span className="text-[11px] text-warn/90 font-mono">Grounded</span>
-            </div>
-            <p className="text-2xl sm:text-3xl font-extrabold font-mono text-text tracking-tight">
-              {totalGroundAnswers}
-            </p>
-            <p className="text-[11px] text-text-dim font-sans">
-              Trade-off answers
-            </p>
-          </Card>
-
-          <Card variant="surface2" padding="md" className="space-y-1.5 top-highlight">
-            <div className="flex items-center justify-between text-xs text-text-dim font-sans font-medium">
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-accent" />
-                Grounding Net
-              </span>
-              <span className="text-[11px] text-accent/90 font-mono">Grounding Active</span>
-            </div>
-            <p className="text-2xl sm:text-3xl font-extrabold font-mono text-accent tracking-tight">
-              100%
-            </p>
-            <p className="text-[11px] text-text-dim font-sans">
-              Anti-hallucination pass
-            </p>
-          </Card>
-        </div>
-
-        {/* Quick Launch & Ingestion Command Banner */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 rounded-xl bg-gradient-to-r from-surface to-surface-2 border border-border glow-card top-highlight">
-          <div className="max-w-xl space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge variant="accent" size="sm">
-                Fast Ingestion
-              </Badge>
-              <span className="text-xs font-mono text-text-dim">
-                Public GitHub URLs or Pasted Specs
-              </span>
-            </div>
-            <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-text">
-              Scan a Repository for Defensible Claims
+        {/* Dashboard Header */}
+        <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold font-display text-text tracking-tight">
+              Projects
             </h1>
-            <p className="text-xs text-text-dim leading-relaxed font-sans">
-              Extract raw architectural signals, parse concrete dependencies, and generate Google X-Y-Z resume bullets with verbatim evidence lineage.
+            <p className="text-xs text-text-dim mt-0.5">
+              {sessions.length === 0
+                ? "Scan repositories to extract signals and generate defensible bullets."
+                : `${sessions.length} ${sessions.length === 1 ? "project" : "projects"} · ${totalBullets} verified ${totalBullets === 1 ? "bullet" : "bullets"}`}
             </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-2.5">
-            <Button
-              type="button"
-              variant="primary"
-              size="lg"
-              onClick={handleCreateNewProject}
-              className="shadow-sm shadow-accent/20"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Start New Scan</span>
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
+            onClick={handleCreateNewProject}
+            className="shadow-sm shadow-accent/20 shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Scan</span>
+          </Button>
         </div>
 
         {/* Project Library Section */}
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold font-sans text-text tracking-tight">
-                Your Projects
-              </h2>
-              <span className="text-xs text-text-dim font-mono">
-                ({filteredSessions.length} of {sessions.length})
-              </span>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2.5">
+          {sessions.length > 0 && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               {/* Search Bar */}
-              <div className="relative w-full sm:w-60">
+              <div className="relative w-full sm:w-64">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" />
                 <input
                   type="text"
@@ -295,91 +173,65 @@ export default function DashboardPage() {
                 />
               </div>
 
-              {/* Sort Selector */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as "recent" | "bullets" | "name")}
-                className="bg-surface border border-border text-xs font-mono text-text-dim rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-accent cursor-pointer"
-              >
-                <option value="recent">Sort: Most Recent</option>
-                <option value="bullets">Sort: Most Bullets</option>
-                <option value="name">Sort: Project Name</option>
-              </select>
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                {/* Sort Selector */}
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as "recent" | "bullets" | "name")}
+                  className="bg-surface border border-border text-xs font-mono text-text-dim rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-accent cursor-pointer"
+                >
+                  <option value="recent">Sort: Most Recent</option>
+                  <option value="bullets">Sort: Most Bullets</option>
+                  <option value="name">Sort: Project Name</option>
+                </select>
 
-              {/* View Mode Toggle */}
-              <div className="hidden sm:flex items-center rounded-md bg-surface border border-border p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("grid")}
-                  className={`p-1 rounded transition cursor-pointer ${
-                    viewMode === "grid" ? "bg-surface-2 text-accent" : "text-text-dim hover:text-text"
-                  }`}
-                  title="Grid view"
-                >
-                  <Grid className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("list")}
-                  className={`p-1 rounded transition cursor-pointer ${
-                    viewMode === "list" ? "bg-surface-2 text-accent" : "text-text-dim hover:text-text"
-                  }`}
-                  title="List view"
-                >
-                  <ListIcon className="w-3.5 h-3.5" />
-                </button>
+                {/* View Mode Toggle */}
+                <div className="flex items-center rounded-md bg-surface border border-border p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("grid")}
+                    className={`p-1 rounded transition cursor-pointer ${
+                      viewMode === "grid" ? "bg-surface-2 text-accent" : "text-text-dim hover:text-text"
+                    }`}
+                    title="Grid view"
+                  >
+                    <Grid className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("list")}
+                    className={`p-1 rounded transition cursor-pointer ${
+                      viewMode === "list" ? "bg-surface-2 text-accent" : "text-text-dim hover:text-text"
+                    }`}
+                    title="List view"
+                  >
+                    <ListIcon className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {isLoading ? (
             <div className="p-16 text-center text-text-dim text-xs font-mono flex flex-col items-center justify-center gap-3">
               <Loader2 className="w-5 h-5 animate-spin text-accent" />
-              <span>Loading project library from Puter KV...</span>
+              <span>Loading projects...</span>
             </div>
           ) : sessions.length === 0 ? (
-            /* Rich Empty State with 1-click sample loaders */
-            <div className="rounded-xl bg-surface/50 border border-border border-dashed p-8 sm:p-12 text-center space-y-6">
-              <div className="w-12 h-12 mx-auto rounded-lg bg-surface-2 border border-border flex items-center justify-center text-accent">
-                <FolderGit2 className="w-6 h-6" />
+            /* Clean Minimal Empty State */
+            <div className="rounded-xl bg-surface/30 border border-border border-dashed p-10 sm:p-14 text-center space-y-4 max-w-md mx-auto my-8">
+              <div className="w-10 h-10 mx-auto rounded-lg bg-surface-2 border border-border flex items-center justify-center text-accent">
+                <FolderGit2 className="w-5 h-5" />
               </div>
-              <div className="space-y-1.5 max-w-md mx-auto">
-                <h3 className="text-base font-semibold text-text font-display">
-                  No projects scanned yet
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold text-text font-display">
+                  No projects yet
                 </h3>
                 <p className="text-xs text-text-dim leading-relaxed font-sans">
-                  Paste your project README, architecture notes, or link a GitHub repository to begin your first grounded analysis.
+                  Paste a README, architecture notes, or a GitHub repository to extract signals and generate grounded resume bullets.
                 </p>
               </div>
-
-              {/* 1-Click Sample Ingestion Cards */}
-              <div className="space-y-2 max-w-xl mx-auto pt-2">
-                <span className="text-xs font-medium text-text-dim font-sans">
-                  Or test immediately with a sample architecture:
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-left">
-                  {SAMPLE_PROJECTS.map((sample) => (
-                    <button
-                      key={sample.title}
-                      type="button"
-                      onClick={handleCreateNewProject}
-                      className="p-3 rounded-lg bg-surface border border-border hover:border-accent/50 hover:bg-surface-2 transition text-left cursor-pointer group space-y-1"
-                    >
-                      <span className="text-xs font-semibold text-text group-hover:text-accent transition block">
-                        {sample.title}
-                      </span>
-                      <span className="text-[10px] font-mono text-accent block">
-                        {sample.subtitle}
-                      </span>
-                      <span className="text-[10px] text-text-dim line-clamp-2 block font-sans">
-                        {sample.desc}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-2">
+              <div className="pt-1">
                 <Button
                   type="button"
                   variant="primary"
@@ -387,7 +239,7 @@ export default function DashboardPage() {
                   onClick={handleCreateNewProject}
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Scan First Repository</span>
+                  <span>Start First Scan</span>
                 </Button>
               </div>
             </div>

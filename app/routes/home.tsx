@@ -17,17 +17,11 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { generateUUID } from "~/lib/utils";
-import {
-  auditBulletRisk,
-  stripNumberPhrase,
-  type BulletAuditReport,
-} from "~/lib/grounding";
 import { Badge, Card, Dither, CardStack, type CardStackItem } from "~/components/ui";
 import {
   InteractiveCodeHero,
   InteractiveRealityCheckDemo,
 } from "~/features/landing";
-import { InlineLinterView } from "~/features/audit";
 import { Navbar, Footer } from "~/components/layout";
 
 
@@ -39,30 +33,6 @@ function SectionDivider() {
     />
   );
 }
-
-const PRESET_AUDIT_BULLETS = [
-  {
-    label: "Generic AI Fluff",
-    riskDot: "bg-red-400",
-    text: "Spearheaded database optimization with Redis caching, increasing query speeds by 40% and handling 10k requests/sec.",
-    rewrite: "Configured Redis session caching layer with sliding key TTL expiration, eliminating redundant PostgreSQL queries for authenticated endpoints.",
-    script: "When asked about query speeds, explain that session lookups were redirected from Postgres to Redis in-memory key-value lookups, bounding round-trip latency to network hop overhead.",
-  },
-  {
-    label: "Vague Action",
-    riskDot: "bg-amber-400",
-    text: "Leveraged cutting-edge microservices architecture to streamline cross-functional cloud workflows.",
-    rewrite: "Decoupled user authentication and payment webhook domains into modular service boundaries with explicit REST contracts and isolated Prisma schemas.",
-    script: "Explain the domain boundary: why user auth was isolated from billing to allow independent schema migrations without coordinated deployment lock-steps.",
-  },
-  {
-    label: "Defensible Grounded",
-    riskDot: "bg-emerald-400",
-    text: "Implemented transactional outbox pattern using Postgres CDC and Debezium, ensuring reliable event dispatch across distributed services.",
-    rewrite: "Implemented transactional outbox pattern using Postgres CDC and Debezium, ensuring reliable event dispatch across distributed services.",
-    script: "Walk through the outbox schema: mutations write to the business table and outbox ledger in the same database transaction, guaranteeing at-least-once message relay.",
-  },
-];
 
 interface PipelineStageItem extends CardStackItem {
   stageNum: string;
@@ -147,20 +117,9 @@ export default function HomePage() {
   // View state for 4-stage pipeline: 3D interactive stack or 4-col grid
   const [pipelineView, setPipelineView] = useState<"stack" | "grid">("stack");
 
-  // Mini Risk Auditor state
-  const [auditInput, setAuditInput] = useState(PRESET_AUDIT_BULLETS[0].text);
-  const [auditResult, setAuditResult] = useState<BulletAuditReport>(() =>
-    auditBulletRisk(PRESET_AUDIT_BULLETS[0].text, ""),
-  );
-
   const handleLaunchSample = () => {
     const newId = generateUUID();
     navigate(`/project/${newId}`);
-  };
-
-  const handleRunAudit = (text: string) => {
-    setAuditInput(text);
-    setAuditResult(auditBulletRisk(text, ""));
   };
 
   return (
@@ -506,170 +465,6 @@ export default function HomePage() {
             </div>
           </div>
           )}
-        </section>
-
-        <SectionDivider />
-
-        {/* INTERACTIVE MINI RISK AUDITOR (LIVE UTILITY TEST-BENCH) */}
-        <section id="auditor" className="space-y-6">
-          <div className="text-center space-y-2 max-w-xl mx-auto">
-            <Badge variant="warn" size="sm">
-              Live Test Bench
-            </Badge>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-text">
-              Test Your Existing Resume Bullets for Interview Risk
-            </h2>
-            <p className="text-xs text-zinc-400">
-              See how senior technical interviewers evaluate typical ChatGPT claims in real-time.
-            </p>
-          </div>
-
-          <div className="relative w-full max-w-4xl lg:max-w-5xl mx-auto">
-            {/* Dynamic ambient radial background glow shifting on risk state */}
-            <div
-              className={`absolute -inset-2 sm:-inset-4 rounded-3xl ${auditResult.riskLevel === "CRITICAL"
-                  ? "bg-red-500/10 shadow-[0_0_60px_-15px_rgba(239,68,68,0.25)]"
-                  : auditResult.riskLevel === "MODERATE"
-                    ? "bg-amber-500/10 shadow-[0_0_60px_-15px_rgba(245,158,11,0.25)]"
-                    : "bg-emerald-500/10 shadow-[0_0_60px_-15px_rgba(16,185,129,0.25)]"
-                } blur-2xl opacity-60 pointer-events-none transition-all duration-500`}
-              aria-hidden="true"
-            />
-
-            <Card
-              variant="default"
-              padding="lg"
-              className="relative space-y-5 rounded-xl border border-white/10 bg-surface/95 shadow-2xl backdrop-blur-xl"
-            >
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <label className="text-xs font-semibold text-text font-sans">
-                    Test a candidate bullet point:
-                  </label>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[11px] text-zinc-400 font-mono">Quick Presets:</span>
-                    {PRESET_AUDIT_BULLETS.map((p) => {
-                      const isActive = auditInput.trim() === p.text.trim();
-                      return (
-                        <button
-                          key={p.label}
-                          type="button"
-                          onClick={() => handleRunAudit(p.text)}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-mono transition cursor-pointer ${isActive
-                              ? "border border-white/30 bg-white/10 text-white shadow-sm font-semibold"
-                              : "border border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.06]"
-                            }`}
-                        >
-                          <span className={`w-1.5 h-1.5 rounded-full ${p.riskDot}`} />
-                          <span>{p.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <textarea
-                  value={auditInput}
-                  onChange={(e) => handleRunAudit(e.target.value)}
-                  rows={3}
-                  className="w-full bg-bg/90 border border-border rounded-lg p-3.5 text-xs font-mono text-text placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-accent leading-relaxed transition"
-                  placeholder="Paste any bullet point to test for ungrounded metrics and interview risks..."
-                />
-
-                {/* Inline Linter View with Token Highlights & Legend */}
-                <InlineLinterView
-                  text={auditInput}
-                  fluffHits={auditResult.fluffHits}
-                  ungroundedHits={auditResult.ungroundedHits}
-                />
-              </div>
-
-              {/* Audit Verdict Banner */}
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg bg-surface-2 border border-border">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-zinc-400 font-mono">Interview Risk Score:</span>
-                    <Badge
-                      variant={
-                        auditResult.riskLevel === "CRITICAL"
-                          ? "flag"
-                          : auditResult.riskLevel === "MODERATE"
-                            ? "warn"
-                            : "ok"
-                      }
-                      size="sm"
-                    >
-                      {auditResult.riskLevel} RISK
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-400">
-                    <span>
-                      Fluff Buzzwords:{" "}
-                      <span className="text-amber-400 font-semibold">
-                        {auditResult.fluffHits.length}
-                      </span>
-                    </span>
-                    <span>
-                      Ungrounded Metrics:{" "}
-                      <span className="text-red-400 font-semibold">
-                        {auditResult.ungroundedHits.length}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-xs text-zinc-300 bg-bg/80 p-3.5 rounded-lg border border-border leading-relaxed font-sans">
-                  {auditResult.diagnosis}
-                </p>
-
-                {/* LIVE DEFENSIBLE GROUNDED REWRITE */}
-                {(() => {
-                  const activePreset = PRESET_AUDIT_BULLETS.find(
-                    (p) => p.text.trim() === auditInput.trim(),
-                  );
-                  const dynamicCleaned = auditResult.ungroundedHits
-                    .reduce(
-                      (acc, token) => stripNumberPhrase(acc, token),
-                      auditInput,
-                    )
-                    .replace(
-                      /\b(spearheaded|leveraged|utilized|participated in|responsible for)\b/gi,
-                      "engineered",
-                    );
-
-                  return (
-                    <div className="p-4 rounded-lg bg-accent/[0.04] border border-accent/30 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 text-accent font-semibold font-mono text-xs">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>How Proof Rewrites This Defensibly:</span>
-                        </div>
-                        <span className="text-[10px] font-mono text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20">
-                          Zero Hallucination
-                        </span>
-                      </div>
-                      <p className="font-mono text-xs text-text leading-relaxed">
-                        &ldquo;{activePreset?.rewrite ?? dynamicCleaned}&rdquo;
-                      </p>
-                      {activePreset?.script ? (
-                        <div className="pt-2 border-t border-accent/20 text-xs text-zinc-400 font-sans leading-relaxed">
-                          <span className="text-accent font-mono text-[11px] font-semibold">
-                            Spoken Interview Defense:{" "}
-                          </span>
-                          {activePreset.script}
-                        </div>
-                      ) : (
-                        <div className="pt-2 border-t border-accent/20 text-[11px] text-zinc-400 font-sans leading-relaxed">
-                          ↳ Strips unmeasured metrics and buzzwords, shifting focus to verifiable implementation mechanisms.
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-              </div>
-            </Card>
-          </div>
         </section>
 
         <SectionDivider />

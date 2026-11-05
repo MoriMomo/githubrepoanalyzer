@@ -88,12 +88,6 @@ export function Navbar({ mode = "home", projectMeta }: NavbarProps) {
               How It Works
             </a>
             <a
-              href="#auditor"
-              className="hover:text-white transition-colors duration-150"
-            >
-              Risk Auditor
-            </a>
-            <a
               href="#capabilities"
               className="hover:text-white transition-colors duration-150"
             >

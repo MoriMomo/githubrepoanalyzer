@@ -175,14 +175,6 @@ export function Footer({ onLaunchSample, className = "" }: FooterProps) {
                   </li>
                   <li>
                     <a
-                      href="#auditor"
-                      className="hover:text-accent transition"
-                    >
-                      Risk Auditor
-                    </a>
-                  </li>
-                  <li>
-                    <a
                       href="#capabilities"
                       className="hover:text-accent transition"
                     >
