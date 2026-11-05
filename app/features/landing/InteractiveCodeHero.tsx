@@ -75,43 +75,59 @@ const PROOF_DEMO_CODE: CodeLine[] = [
 
 export interface CodeExplanationItem {
   line: number;
+  stepNumber: string;
+  stepName: string;
   shortLabel: string;
   title: string;
   type: string;
   explanation: string;
   bullet: string;
+  statusBadge: string;
+  statusType: "info" | "flag" | "ok";
 }
 
 const PROOF_EXPLANATIONS: Record<number, CodeExplanationItem> = {
   4: {
     line: 4,
-    shortLabel: "Worker Dispatcher",
-    title: "func DispatchJobs",
-    type: "Architecture",
+    stepNumber: "STAGE 1",
+    stepName: "Ingest Repository",
+    shortLabel: "1. Ingest Repo",
+    title: "Raw GitHub CDN Parse",
+    type: "Ingestion",
+    statusBadge: "Scanned: Go 1.22 · Redis v9 (Streams) · Concurrency Dispatcher",
+    statusType: "info",
     explanation:
-      "Detects your asynchronous dispatcher. Proves you designed system architecture rather than superficial glue code.",
+      "Proof reads your repository manifests and Go source code via raw GitHub CDN without cloning. Detects your real asynchronous worker architecture rather than superficial boilerplate.",
     bullet:
-      "Architected asynchronous worker pool in Go using Redis streams, processing 1,500 jobs/sec with sub-10ms dispatch latency.",
+      "Detected true concurrency implementation: asynchronous worker pool consuming Redis stream 'jobs:stream'.",
   },
   5: {
     line: 5,
-    shortLabel: "Redis Streams",
-    title: "redis.XReadGroup",
-    type: "Stream Consumer",
+    stepNumber: "STAGE 2",
+    stepName: "Strip AI Fluff",
+    shortLabel: "2. Strip AI Fluff",
+    title: "Deterministic AST Audit",
+    type: "Anti-Hallucination",
+    statusBadge: "❌ STRIPPED: 'improved query speed by 40%' (No benchmark harness in repo)",
+    statusType: "flag",
     explanation:
-      "Extracts consumer groups and stream offsets. Proves you handled concurrent worker locking and prevented database bottlenecks during traffic spikes.",
+      "Generic ChatGPT bullets hallucinate fake 40% performance boosts that get junior and mid devs trapped in technical interviews. Proof strips unmeasured claims and anchors to verifiable Redis Streams offsets.",
     bullet:
-      "Integrated Redis Streams consumer groups to distribute worker payloads without database lock contention.",
+      "AI fluff removed. Bounded claim to verifiable Redis stream consumer group offsets without database lock contention.",
   },
   9: {
     line: 9,
-    shortLabel: "Goroutine Pool",
-    title: "workerPool.Submit",
-    type: "Goroutine Pool",
+    stepNumber: "STAGE 3",
+    stepName: "Defend in Interview",
+    shortLabel: "3. Defend in Interview",
+    title: "Spoken Defense Script",
+    type: "Interview Receipt",
+    statusBadge: "✓ GROUNDED: 1,500 jobs/sec bounded worker pool (pool.go:L9)",
+    statusType: "ok",
     explanation:
-      "Validates bounded worker dispatch with idempotent task execution. Defends your latency numbers against senior interviewer scrutiny.",
+      "When the interviewer asks 'Why Redis streams over Kafka?': Explain that Redis Streams provided atomic consumer group offsets with sub-10ms in-memory lookups without Kafka JVM cluster overhead.",
     bullet:
-      "Implemented bounded goroutine worker pool with idempotent charge retry semantics.",
+      "Architected asynchronous worker pool in Go using Redis streams, processing 1,500 jobs/sec with sub-10ms dispatch latency.",
   },
 };
 
@@ -321,9 +337,9 @@ export function InteractiveCodeHero({
               })}
             </div>
 
-            {/* Proof Drawer */}
+            {/* Proof Drawer: Step-by-Step Workflow Explainer */}
             <div className="border-t border-border/80 bg-surface/95 backdrop-blur-sm p-4 space-y-3">
-              {/* Segment Tabs */}
+              {/* Workflow Step Tabs */}
               <div className="flex items-center gap-1.5 p-1 bg-surface-2/80 rounded-lg border border-border/60">
                 {activeLines.map((lineNum) => {
                   const isSelected = activeLine === lineNum;
@@ -338,7 +354,7 @@ export function InteractiveCodeHero({
                           : "text-text-dim hover:text-text"
                         }`}
                     >
-                      {item?.shortLabel ?? `Line ${lineNum}`}
+                      {item?.shortLabel ?? `Step ${lineNum}`}
                     </button>
                   );
                 })}
@@ -356,17 +372,39 @@ export function InteractiveCodeHero({
                     className="space-y-2.5 rounded-lg bg-bg/90 border border-border p-3.5"
                   >
                     <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-accent font-medium">
-                        pkg/worker/pool.go:L{activeLine}
-                      </span>
-                      <span className="text-text-dim text-[11px]">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20">
+                          {explanations[activeLine].stepNumber ?? "STEP"}
+                        </span>
+                        <span className="text-accent font-medium">
+                          {explanations[activeLine].stepName ?? `Line ${activeLine}`}
+                        </span>
+                      </div>
+                      <span className="text-text-dim text-[11px] hidden sm:inline">
                         {explanations[activeLine].title}
                       </span>
                     </div>
 
+                    {/* Status Pill */}
+                    {explanations[activeLine].statusBadge && (
+                      <div
+                        className={cn(
+                          "px-2.5 py-1.5 rounded text-[11px] font-mono leading-relaxed border",
+                          explanations[activeLine].statusType === "flag" &&
+                            "bg-red-500/10 text-red-300 border-red-500/25",
+                          explanations[activeLine].statusType === "info" &&
+                            "bg-cyan-500/10 text-cyan-300 border-cyan-500/25",
+                          explanations[activeLine].statusType === "ok" &&
+                            "bg-emerald-500/10 text-emerald-300 border-emerald-500/25"
+                        )}
+                      >
+                        {explanations[activeLine].statusBadge}
+                      </div>
+                    )}
+
                     <div className="space-y-1">
-                      <div className="text-[11px] font-mono text-text-dim uppercase tracking-wider">
-                        ↳ Synthesized Resume Bullet:
+                      <div className="text-[10px] font-mono text-text-dim uppercase tracking-wider">
+                        ↳ Output:
                       </div>
                       <p className="text-xs text-text font-medium leading-relaxed font-sans">
                         &ldquo;{explanations[activeLine].bullet}&rdquo;
@@ -374,7 +412,9 @@ export function InteractiveCodeHero({
                     </div>
 
                     <div className="pt-2 border-t border-border/60 text-xs text-text-dim leading-relaxed font-sans">
-                      <span className="text-accent font-mono text-[11px] font-semibold">Defense Script: </span>
+                      <span className="text-accent font-mono text-[11px] font-semibold">
+                        {activeLine === 9 ? "Spoken Defense Script: " : "How Proof Works: "}
+                      </span>
                       {explanations[activeLine].explanation}
                     </div>
                   </motion.div>

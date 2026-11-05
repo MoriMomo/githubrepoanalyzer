@@ -17,7 +17,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { generateUUID } from "~/lib/utils";
-import { Badge, Card, Dither, CardStack, type CardStackItem } from "~/components/ui";
+import { Badge, Card, Dither, CardStack, TerminalBootLoader, type CardStackItem } from "~/components/ui";
 import {
   InteractiveCodeHero,
   InteractiveRealityCheckDemo,
@@ -110,6 +110,7 @@ const PIPELINE_STAGES: PipelineStageItem[] = [
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const [booted, setBooted] = useState(false);
 
   // View state for 4-stage pipeline: 3D interactive stack or 4-col grid
   const [pipelineView, setPipelineView] = useState<"stack" | "grid">("grid");
@@ -121,6 +122,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg text-text relative selection:bg-accent/20 selection:text-accent">
+      {/* INITIAL DEVELOPER BOOT SEQUENCE LOADER */}
+      {!booted && <TerminalBootLoader onComplete={() => setBooted(true)} />}
+
       {/* FULL-VIEWPORT FIXED BACKGROUND DITHER CANVAS */}
       <div
         className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
@@ -161,7 +165,7 @@ export default function HomePage() {
           badge={
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-mono shadow-xs">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Deterministic Resume Engineering &amp; Hotseat Defense</span>
+              <span>How Proof Works · 3-Stage Grounding Engine</span>
             </div>
           }
           headline={
@@ -174,13 +178,19 @@ export default function HomePage() {
             </h1>
           }
           description={
-            <p className="text-sm sm:text-base text-text-dim leading-relaxed font-sans">
-              Generic AI invents metrics like{" "}
-              <span className="text-flag font-mono font-medium bg-flag/10 px-1.5 py-0.5 rounded border border-flag/20">
-                &ldquo;improved query efficiency by 40%&rdquo;
-              </span>{" "}
-              that collapse at the first senior interview question. Proof extracts verifiable architecture signals directly from your code tree and executes a Truth Drill to ground every bullet with verbatim code proof.
-            </p>
+            <div className="space-y-3">
+              <p className="text-sm sm:text-base text-text-dim leading-relaxed font-sans">
+                Generic AI invents metrics like{" "}
+                <span className="text-flag font-mono font-medium bg-flag/10 px-1.5 py-0.5 rounded border border-flag/20">
+                  &ldquo;improved query efficiency by 40%&rdquo;
+                </span>{" "}
+                that collapse at the first senior interview question. Proof extracts verifiable architecture signals directly from your code tree and executes a Truth Drill to ground every bullet with verbatim code proof.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-mono text-accent">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
+                <span>Interact with the 3 stages on the right to see the live workflow:</span>
+              </div>
+            </div>
           }
           primaryAction={{
             label: "Audit a Public Repo (Free, No Sign-up) →",

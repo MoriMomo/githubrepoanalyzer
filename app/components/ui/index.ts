@@ -9,3 +9,4 @@ export * from "./Panel";
 export * from "./Tooltip";
 export * from "./Dither";
 export * from "./card-stack";
+export * from "./TerminalBootLoader";
