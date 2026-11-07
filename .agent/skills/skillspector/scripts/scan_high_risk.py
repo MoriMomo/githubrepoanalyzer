@@ -13,16 +13,6 @@ from pathlib import Path
 HIGH_RISK_SEVERITIES = {"HIGH", "CRITICAL"}
 
 
-def scan_single(path: str) -> dict:
-    cmd = ["skillspector", "scan", path, "--no-llm", "--format", "json"]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    try:
-        return json.loads(proc.stdout)
-    except Exception:
-        # Fallback if raw text returned
-        return {}
-
-
 def format_issue(issue: dict) -> str:
     sev = issue.get("severity", "UNKNOWN")
     rule_id = issue.get("id", "UNKNOWN")
@@ -37,62 +27,81 @@ def format_issue(issue: dict) -> str:
 def run_scan(target_dir: str, recursive: bool = True):
     target = Path(target_dir).resolve()
     if not target.exists():
-        print(f"Error: Target path '{target_dir}' does not exist.")
+        print(f"Error: Target path '{target_dir}' does not exist.", flush=True)
         sys.exit(1)
 
-    print(f"\n🔍 SkillSpector Security Scan: High & Extreme Risks Only")
-    print(f"   Target: {target}")
-    print(f"   Filter: Severity >= HIGH (CRITICAL, HIGH)\n")
+    print(f"\n🔍 SkillSpector Security Scan: High & Extreme Risks Only", flush=True)
+    print(f"   Target: {target}", flush=True)
+    print(f"   Filter: Severity in {{HIGH, CRITICAL}} (Risk Score >= 50)\n", flush=True)
 
-    # Discover skills
-    skill_dirs = []
-    if recursive:
-        for child in sorted(target.iterdir()):
-            if child.is_dir() and (child / "SKILL.md").exists():
-                skill_dirs.append(child)
+    cmd = ["skillspector", "scan", str(target), "--no-llm", "--format", "json"]
+    if recursive and target.is_dir() and not (target / "SKILL.md").exists():
+        cmd.insert(2, "--recursive")
+
+    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
     
-    if not skill_dirs:
-        # Single skill target
-        skill_dirs = [target]
+    stdout = proc.stdout.strip()
+    if not stdout:
+        if proc.stderr:
+            print(f"Error running SkillSpector:\n{proc.stderr}", flush=True)
+        sys.exit(proc.returncode if proc.returncode != 0 else 1)
+
+    try:
+        data = json.loads(stdout)
+    except json.JSONDecodeError:
+        # Fallback if mixed text before json
+        start_idx = stdout.find("{")
+        if start_idx != -1:
+            data = json.loads(stdout[start_idx:])
+        else:
+            print("Error parsing SkillSpector JSON output.", flush=True)
+            print(stdout[:500], flush=True)
+            sys.exit(1)
+
+    # Handle multi-skill vs single skill JSON
+    is_multi = data.get("multi_skill", False)
+    skills = data.get("skills", []) if is_multi else [data]
 
     high_risk_found = False
     results_summary = []
 
-    for sdir in skill_dirs:
-        data = scan_single(str(sdir))
-        issues = data.get("issues", [])
-        risk_assessment = data.get("risk_assessment", {})
-        score = risk_assessment.get("score", 0)
-        overall_sev = risk_assessment.get("severity", "LOW")
+    for s in skills:
+        name = s.get("name") or s.get("skill", {}).get("name") or "unknown"
+        score = s.get("risk_score") or s.get("risk_assessment", {}).get("score", 0)
+        overall_sev = str(s.get("risk_severity") or s.get("risk_assessment", {}).get("severity", "LOW")).upper()
+        issues = s.get("issues", [])
 
         # Filter strictly for HIGH and CRITICAL
         high_issues = [i for i in issues if str(i.get("severity", "")).upper() in HIGH_RISK_SEVERITIES]
 
-        status_icon = "❌" if high_issues or score >= 50 else "✅"
-        results_summary.append((sdir.name, score, overall_sev, len(high_issues), high_issues))
-
-        if high_issues or score >= 50:
+        is_high = len(high_issues) > 0 or score >= 50 or overall_sev in HIGH_RISK_SEVERITIES
+        if is_high:
             high_risk_found = True
 
+        results_summary.append((name, score, overall_sev, len(high_issues), high_issues, is_high))
+
     # Output Clean Table
-    print(f"  {'Skill':<25} {'Score':<8} {'Severity':<12} {'High/Extreme Issues'}")
-    print(f"  {'-'*25} {'-'*8} {'-'*12} {'-'*20}")
-    for name, score, sev, count, _ in results_summary:
-        indicator = "⚠️ ALERT" if count > 0 or score >= 50 else "✓ PASS"
-        print(f"  {name:<25} {score:<8} {sev:<12} {count} ({indicator})")
+    print(f"  {'Skill':<25} {'Score':<8} {'Severity':<12} {'High/Extreme Issues'}", flush=True)
+    print(f"  {'-'*25} {'-'*8} {'-'*12} {'-'*20}", flush=True)
+    for name, score, sev, count, _, is_high in results_summary:
+        indicator = "⚠️ ALERT" if is_high else "✓ PASS"
+        print(f"  {name:<25} {score:<8} {sev:<12} {count} ({indicator})", flush=True)
 
     # Detailed High/Extreme issues
     if high_risk_found:
-        print("\n🚨 High & Extreme Risk Findings Breakdown:")
-        for name, score, sev, count, high_issues in results_summary:
-            if high_issues:
-                print(f"\n• Skill: {name} (Score: {score}/100, Severity: {sev})")
-                for issue in high_issues:
-                    print(format_issue(issue))
-        print("\n❌ FAILED: High or Extreme security vulnerabilities detected.")
+        print("\n🚨 High & Extreme Risk Findings Breakdown:", flush=True)
+        for name, score, sev, count, high_issues, is_high in results_summary:
+            if is_high:
+                print(f"\n• Skill: {name} (Score: {score}/100, Severity: {sev})", flush=True)
+                if high_issues:
+                    for issue in high_issues:
+                        print(format_issue(issue), flush=True)
+                else:
+                    print(f"  Overall skill risk level is {sev} (score {score}/100)", flush=True)
+        print("\n❌ FAILED: High or Extreme security vulnerabilities detected.", flush=True)
         sys.exit(1)
     else:
-        print("\n✅ PASSED: Zero High or Extreme (Critical) vulnerabilities detected across scanned skills.")
+        print("\n✅ PASSED: Zero High or Extreme (Critical) vulnerabilities detected across scanned skills.", flush=True)
         sys.exit(0)
 
 
