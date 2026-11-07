@@ -44,10 +44,11 @@ export function InlineLinterView({
 
       <div className="p-3 rounded-md bg-bg border border-border font-mono text-xs leading-relaxed text-text select-text">
         {tokens.map((token, idx) => {
+          const tokenKey = `${token.type}-${idx}-${token.text}`;
           if (token.type === "fluff") {
             return (
               <mark
-                key={idx}
+                key={tokenKey}
                 className="bg-amber-500/15 text-amber-300 border-b-2 border-amber-400/80 px-1 py-0.5 rounded-xs not-italic font-mono font-medium mx-0.5"
                 title="Banned AI fluff verb"
               >
@@ -58,7 +59,7 @@ export function InlineLinterView({
           if (token.type === "metric") {
             return (
               <mark
-                key={idx}
+                key={tokenKey}
                 className="bg-red-500/15 text-red-300 border-b-2 border-dashed border-red-400 px-1 py-0.5 rounded-xs not-italic font-mono font-medium mx-0.5"
                 title="Ungrounded metric without source proof"
               >
@@ -66,7 +67,7 @@ export function InlineLinterView({
               </mark>
             );
           }
-          return <span key={idx}>{token.text}</span>;
+          return <span key={tokenKey}>{token.text}</span>;
         })}
       </div>
 

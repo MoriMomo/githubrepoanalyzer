@@ -32,26 +32,37 @@ export default function DashboardPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
+    let isCancelled = false;
+
     async function loadSessions() {
       try {
         const loaded = await SessionStorageAdapter.listSessions(
           kv,
           auth.isAuthenticated,
         );
-        setSessions(loaded);
+        if (!isCancelled) {
+          setSessions(loaded);
+        }
 
         // Auto-sync local projects to Puter cloud if user is signed in
-        if (auth.isAuthenticated && kv) {
+        if (auth.isAuthenticated && kv && !isCancelled) {
           SessionStorageAdapter.syncLocalToCloud(kv).catch(() => {});
         }
       } catch (err) {
-        console.error("Failed to load sessions from storage", err);
+        if (!isCancelled) {
+          console.error("Failed to load sessions from storage", err);
+        }
       } finally {
-        setIsLoading(false);
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadSessions();
+    return () => {
+      isCancelled = true;
+    };
   }, [auth.isAuthenticated, kv]);
 
   const handleCreateNewProject = () => {
@@ -314,7 +325,7 @@ export default function DashboardPage() {
                       {/* Stack Badges */}
                       <div className="flex flex-wrap gap-1 pt-0.5">
                         {stackBadges.slice(0, 4).map((badge, idx) => (
-                          <Badge key={idx} variant="neutral" size="sm">
+                          <Badge key={`${badge}-${idx}`} variant="neutral" size="sm">
                             {badge}
                           </Badge>
                         ))}
@@ -402,7 +413,7 @@ export default function DashboardPage() {
                           </span>
                           <div className="hidden sm:flex items-center gap-1">
                             {stackBadges.slice(0, 3).map((b, i) => (
-                              <Badge key={i} variant="neutral" size="sm">
+                              <Badge key={`${b}-${i}`} variant="neutral" size="sm">
                                 {b}
                               </Badge>
                             ))}

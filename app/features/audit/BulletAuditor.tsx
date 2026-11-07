@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Scale,
   AlertOctagon,
   CheckCircle2,
 } from "lucide-react";
-import { auditBulletRisk, type BulletAuditReport } from "~/lib/grounding";
+import { auditBulletRisk } from "~/lib/grounding";
 import type { Bullet } from "~/types";
 import { Badge, Card } from "~/components/ui";
 import { InlineLinterView } from "./InlineLinterView";
@@ -23,20 +23,16 @@ export function BulletAuditor({
   const [candidateBullet, setCandidateBullet] = useState(
     "Spearheaded database optimization with Redis caching, increasing query speeds by 40% and handling 10k requests/sec.",
   );
-  const [report, setReport] = useState<BulletAuditReport | null>(() =>
-    auditBulletRisk(
-      "Spearheaded database optimization with Redis caching, increasing query speeds by 40% and handling 10k requests/sec.",
-      groundedCorpus,
-    ),
-  );
+
+  // Derived state: re-evaluated automatically whenever candidateBullet or groundedCorpus updates
+  const report = useMemo(() => {
+    return candidateBullet.trim()
+      ? auditBulletRisk(candidateBullet, groundedCorpus)
+      : null;
+  }, [candidateBullet, groundedCorpus]);
 
   const handleAudit = (text: string) => {
     setCandidateBullet(text);
-    if (text.trim()) {
-      setReport(auditBulletRisk(text, groundedCorpus));
-    } else {
-      setReport(null);
-    }
   };
 
   const glowBg =

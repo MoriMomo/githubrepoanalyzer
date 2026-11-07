@@ -247,7 +247,7 @@ export function BulletCard({
                 <div className="flex items-center gap-1.5 text-[10px] font-mono text-text-dim">
                   <span className="text-text-muted">Evidence Lineage:</span>
                   {bullet.grounding.map((g, idx) => (
-                    <Badge key={idx} variant="neutral" size="sm">
+                    <Badge key={`${g}-${idx}`} variant="neutral" size="sm">
                       {g}
                     </Badge>
                   ))}
@@ -257,7 +257,7 @@ export function BulletCard({
               {bullet.flags && bullet.flags.length > 0 && (
                 <div className="flex items-center gap-1.5">
                   {bullet.flags.map((flag, idx) => (
-                    <Badge key={idx} variant="flag" size="sm">
+                    <Badge key={`${flag}-${idx}`} variant="flag" size="sm">
                       <AlertTriangle className="w-2.5 h-2.5" />
                       <span>{flag}</span>
                     </Badge>

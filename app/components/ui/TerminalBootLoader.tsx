@@ -4,8 +4,10 @@ import { Terminal } from "lucide-react";
 
 export function TerminalBootLoader({ onComplete }: { onComplete?: () => void }) {
   const [progress, setProgress] = useState(0);
-  const [logIndex, setLogIndex] = useState(0);
   const [isDone, setIsDone] = useState(false);
+
+  // Derived state: computed synchronously during render from progress
+  const logIndex = progress < 30 ? 0 : progress < 65 ? 1 : progress < 90 ? 2 : 3;
 
   const BOOT_LOGS = [
     "connecting to raw github cdn...",
@@ -17,27 +19,26 @@ export function TerminalBootLoader({ onComplete }: { onComplete?: () => void }) 
   useEffect(() => {
     const startTime = Date.now();
     const duration = 1200;
+    let doneTimer: ReturnType<typeof setTimeout> | undefined;
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const pct = Math.min(100, Math.round((elapsed / duration) * 100));
       setProgress(pct);
 
-      if (pct < 30) setLogIndex(0);
-      else if (pct < 65) setLogIndex(1);
-      else if (pct < 90) setLogIndex(2);
-      else setLogIndex(3);
-
       if (elapsed >= duration) {
         clearInterval(interval);
-        setTimeout(() => {
+        doneTimer = setTimeout(() => {
           setIsDone(true);
           onComplete?.();
         }, 150);
       }
     }, 40);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (doneTimer) clearTimeout(doneTimer);
+    };
   }, [onComplete]);
 
   return (

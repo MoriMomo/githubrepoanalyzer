@@ -13,24 +13,33 @@ export default function WipePage() {
   const [wipeReport, setWipeReport] = useState<string | null>(null);
 
   useEffect(() => {
+    let isCancelled = false;
+
     async function fetchKeys() {
       if (!puterReady || !auth.isAuthenticated) {
-        setIsLoading(false);
+        if (!isCancelled) setIsLoading(false);
         return;
       }
       try {
         const items = await kv.list("proof:session:*", false);
-        if (Array.isArray(items)) {
+        if (Array.isArray(items) && !isCancelled) {
           setSessionKeys(items as string[]);
         }
       } catch (err) {
-        console.error("Failed to list keys", err);
+        if (!isCancelled) {
+          console.error("Failed to list keys", err);
+        }
       } finally {
-        setIsLoading(false);
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchKeys();
+    return () => {
+      isCancelled = true;
+    };
   }, [puterReady, auth.isAuthenticated, kv]);
 
   const handleWipe = async () => {

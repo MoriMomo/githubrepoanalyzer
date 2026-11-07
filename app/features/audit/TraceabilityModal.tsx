@@ -125,7 +125,7 @@ export function TraceabilityModal({
             {bullet.flags && bullet.flags.length > 0 && (
               <div className="pt-1 flex flex-wrap gap-1">
                 {bullet.flags.map((flag, idx) => (
-                  <Badge key={idx} variant="flag" size="sm">
+                  <Badge key={`${flag}-${idx}`} variant="flag" size="sm">
                     {flag}
                   </Badge>
                 ))}

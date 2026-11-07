@@ -326,7 +326,7 @@ export function InteractiveCodeHero({
                       )}
                       {line.type === "code" &&
                         line.tokens?.map((token, idx) => (
-                          <span key={idx} className={token.className}>
+                          <span key={`${idx}-${token.text}`} className={token.className}>
                             {token.text}
                           </span>
                         ))}

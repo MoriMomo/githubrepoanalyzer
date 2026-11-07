@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Play,
@@ -39,12 +39,13 @@ function HighlightedFluffBullet({
       &ldquo;
       {parts.map((part, i) => {
         const isMatch = highlights.some((w) => w.toLowerCase() === part.toLowerCase());
-        if (!isMatch) return <span key={i}>{part}</span>;
+        const spanKey = `${i}-${part}`;
+        if (!isMatch) return <span key={spanKey}>{part}</span>;
 
         if (!isWarning) {
           return (
             <span
-              key={i}
+              key={spanKey}
               className="text-flag bg-flag/15 px-1 py-0.5 rounded border border-flag/30 font-semibold underline decoration-wavy"
             >
               {part}
@@ -54,7 +55,7 @@ function HighlightedFluffBullet({
 
         return (
           <span
-            key={i}
+            key={spanKey}
             className="bg-flag/20 text-flag px-1 py-0.5 rounded border border-flag/40 font-bold inline-flex items-center gap-1 mx-0.5"
           >
             <span className="line-through decoration-flag opacity-70">{part}</span>
@@ -136,14 +137,15 @@ export function InteractiveRealityCheckDemo() {
     setIsPlaying(false);
   };
 
-  const getRiskScore = useCallback(() => {
-    if (currentStage === 0) return scenario.genericRiskScore;
-    if (currentStage === 1) return Math.min(98, scenario.genericRiskScore + 5);
-    if (currentStage === 2) return Math.round(scenario.genericRiskScore * 0.45);
-    return 0;
-  }, [currentStage, scenario.genericRiskScore]);
-
-  const riskScore = getRiskScore();
+  // Derived state: computed synchronously during render without premature useCallback
+  const riskScore =
+    currentStage === 0
+      ? scenario.genericRiskScore
+      : currentStage === 1
+      ? Math.min(98, scenario.genericRiskScore + 5)
+      : currentStage === 2
+      ? Math.round(scenario.genericRiskScore * 0.45)
+      : 0;
 
   return (
     <section id="reality-check" className="space-y-6">
@@ -277,7 +279,7 @@ export function InteractiveRealityCheckDemo() {
               const isPassed = currentStage > stg.index;
               return (
                 <button
-                  key={stg.index}
+                  key={`${stg.index}-${stg.label}`}
                   type="button"
                   onClick={() => handleSetStage(stg.index)}
                   className={`relative p-2 rounded-lg text-left transition cursor-pointer border ${isActive

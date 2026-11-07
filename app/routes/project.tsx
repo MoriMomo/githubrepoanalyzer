@@ -77,6 +77,8 @@ export default function ProjectPage() {
 
   // Restore session from local-first storage (localStorage + Puter KV)
   useEffect(() => {
+    let isCancelled = false;
+
     async function loadSavedSession() {
       if (projectId === "new") return;
 
@@ -86,7 +88,7 @@ export default function ProjectPage() {
           kv,
           auth.isAuthenticated,
         );
-        if (session) {
+        if (session && !isCancelled) {
           if (session.createdAt) createdAtRef.current = session.createdAt;
           if (session.version) versionRef.current = session.version;
           setPhase(session.phase);
@@ -100,11 +102,16 @@ export default function ProjectPage() {
           if (session.modelUsed) setSelectedModel(session.modelUsed);
         }
       } catch (err) {
-        console.error("Failed to restore session from storage", err);
+        if (!isCancelled) {
+          console.error("Failed to restore session from storage", err);
+        }
       }
     }
 
     loadSavedSession();
+    return () => {
+      isCancelled = true;
+    };
   }, [projectId, auth.isAuthenticated, kv]);
 
   // Persist current session state (always saves to localStorage; syncs to Puter KV if authenticated)
@@ -527,7 +534,7 @@ export default function ProjectPage() {
                 <Panel title="Extracted Capabilities">
                   <ul className="space-y-2 text-xs text-text font-sans">
                     {signals.declaredFeatures.map((feat, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
+                      <li key={`${feat.slice(0, 24)}-${idx}`} className="flex items-start gap-2">
                         <span className="text-accent font-bold mr-1">&bull;</span>
                         <span className="leading-relaxed">{feat}</span>
                       </li>
@@ -667,7 +674,7 @@ export default function ProjectPage() {
 
               <div className="space-y-4">
                 {bullets.map((bullet, idx) => (
-                  <div key={idx} className="bullet-card-item">
+                  <div key={`${bullet.category}-${bullet.text.slice(0, 32)}-${idx}`} className="bullet-card-item">
                     <BulletCard
                       bullet={bullet}
                       claims={claims}
