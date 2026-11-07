@@ -11,13 +11,23 @@ It combines fast parallel static analysis (and optional LLM-assisted semantic au
 
 ## Usage & Commands
 
-### 1. Scan a Single Skill
+### 1. High & Extreme Risk Filter (Recommended Default)
+Run the high-risk filter script to alert **only on HIGH and CRITICAL (Extreme)** severity risks, suppressing low and medium informational notices:
+```bash
+python .agent/skills/skillspector/scripts/scan_high_risk.py .agent/skills/
+```
+To scan a single skill for high/extreme risks:
+```bash
+python .agent/skills/skillspector/scripts/scan_high_risk.py .agent/skills/<skill-name>/ --no-recursive
+```
+
+### 2. Standard Raw Scan (Single Skill)
 Scan a specific skill directory using static analysis (fast, deterministic, zero API keys required):
 ```bash
 skillspector scan .agent/skills/<skill-name>/ --no-llm
 ```
 
-### 2. Scan All Skills Recursively
+### 3. Scan All Skills Recursively (Raw)
 Scan the entire workspace skill registry:
 ```bash
 skillspector scan .agent/skills/ --recursive --no-llm
@@ -45,3 +55,4 @@ uv tool update skillspector
 - **Data Exfiltration:** Network requests leaking local files, environment variables, or API keys.
 - **Privilege Escalation:** Arbitrary shell execution, dangerous destructive commands (`rm -rf`, disk wipes, credential tampering).
 - **Supply Chain Risks:** Suspicious dependencies, unpinned scripts, or untrusted remote downloads.
+
