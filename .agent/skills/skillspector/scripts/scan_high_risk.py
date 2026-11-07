@@ -106,8 +106,9 @@ def run_scan(target_dir: str, recursive: bool = True):
 
 
 if __name__ == "__main__":
+    default_target = ".agent/skills" if Path(".agent/skills").exists() else "."
     parser = argparse.ArgumentParser(description="SkillSpector High & Extreme Risk Scanner")
-    parser.add_argument("target", nargs="?", default=".agent/skills", help="Directory or skill to scan")
+    parser.add_argument("target", nargs="?", default=default_target, help="Directory, skill, or repo to scan (default: .agent/skills or .)")
     parser.add_argument("--no-recursive", action="store_true", help="Scan only the target folder itself")
     args = parser.parse_args()
 
